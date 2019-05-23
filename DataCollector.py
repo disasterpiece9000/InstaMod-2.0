@@ -163,12 +163,6 @@ def is_expired(comment, target_sub):
     current_time = int(time.time())
     day_diff = int((current_time - last_seen) / 86400)
     
-    print("\nExpired Info:")
-    print(str(last_seen))
-    print(str(current_time))
-    print(str(day_diff) + "\n")
-    print(target_sub.flair_config["flair expiration"])
-    
     if day_diff >= int(target_sub.flair_config["flair expiration"]):
         return True
     else:

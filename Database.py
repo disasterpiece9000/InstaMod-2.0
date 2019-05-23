@@ -167,7 +167,7 @@ class Database:
     
     # Generic getter method for Account History table
     def fetch_hist_table(self, username, sub_list, key):
-        select_key = self.find_key(key)
+        select_key = self.find_key(key, self.TABLE_ACCNT_HISTORY)
         cur = self.conn.cursor()
         
         # Sum all rows belonging to the user
