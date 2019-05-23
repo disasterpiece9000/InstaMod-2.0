@@ -2,6 +2,7 @@ import sqlite3
 
 
 class Database:
+    # Account Info Table
     TABLE_ACCNT_INFO = "accnt_info"
     KEY1_USERNAME = "username"
     KEY1_DATE_CREATED = "date_created"
@@ -18,6 +19,7 @@ class Database:
                          KEY1_FLAIR_TEXT + " TEXT, " + KEY1_LAST_SCRAPED + " INTEGER" +
                          ")")
     
+    # Account History Table
     TABLE_ACCNT_HISTORY = "accnt_history"
     KEY2_USERNAME = "username"
     KEY2_SUB_NAME = "sub_name"
@@ -37,6 +39,7 @@ class Database:
                             KEY2_POST_KARMA + " INTEGER, " + KEY2_COMMENT_KARMA + " INTEGER" +
                             ")")
     
+    # Create tables if needed
     def __init__(self, sub_name):
         self.conn = sqlite3.connect(sub_name + "/master_databank.db", isolation_level=None)
         cur = self.conn.cursor()
@@ -44,6 +47,7 @@ class Database:
         cur.execute(self.CREATE_ACCNT_HISTORY)
         cur.close()
     
+    # Check if a user exists in the database
     def exists_in_db(self, username):
         cur = self.conn.cursor()
         select_str = ("SELECT " + self.KEY1_USERNAME + " FROM " + self.TABLE_ACCNT_INFO
@@ -53,18 +57,12 @@ class Database:
         for _ in cur.execute(select_str, (username,)):
             exists = True
             break
-        
         cur.close()
         return exists
     
+    # Insert user data into Account Info table
     def insert_info(self, username, created, ratelimit_start, ratelimit_count, total_post_karma,
                     total_comment_karma, flair_txt, last_scraped):
-        
-        if flair_txt is not None:
-            print("Flair Text: " + flair_txt)
-        else:
-            print("Flair Text: n/a")
-        print("Last Scraped: " + str(last_scraped) + "\n")
         
         cur = self.conn.cursor()
         insert_str = ("INSERT INTO " + self.TABLE_ACCNT_INFO + "(" + self.KEY1_USERNAME + ", "
@@ -79,6 +77,7 @@ class Database:
         cur.close()
         print("Done inserting into accnt_info\n")
     
+    # Update existing user's data in Account Info table
     def update_info(self, username, ratelimit_start, ratelimit_count, total_post_karma,
                     total_comment_karma, flair_txt, last_scraped):
         
@@ -93,7 +92,8 @@ class Database:
                                  total_comment_karma, flair_txt, last_scraped, username))
         cur.close()
         print("Done updating accnt_info\n")
-    
+
+    # Insert user data into Account History table
     def insert_activity(self, username, sub_comment_karma, sub_pos_comments, sub_neg_comments, sub_pos_qc, sub_neg_qc,
                         sub_post_karma, sub_pos_posts, sub_neg_posts):
         
@@ -116,7 +116,8 @@ class Database:
         
         cur.close()
         print("Done inserting into accnt_activity\n")
-    
+
+    # Update existing user's data in Account History table
     def update_activity(self, username, sub_comment_karma, sub_pos_comments, sub_neg_comments, sub_pos_qc, sub_neg_qc,
                         sub_post_karma, sub_pos_posts, sub_neg_posts):
         
@@ -138,10 +139,11 @@ class Database:
             cur.execute(update_str, (sub_comment_karma[sub], sub_pos_comments[sub], sub_neg_comments[sub],
                                      sub_pos_qc[sub], sub_neg_qc[sub], sub_post_karma[sub],
                                      sub_pos_posts[sub], sub_neg_posts[sub], username))
-        
+            
         cur.close()
         print("Done updating accnt_activity\n")
     
+    # Get the time that the user's data was last updated by the bot
     def get_last_scraped(self, username):
         cur = self.conn.cursor()
         select_str = ("SELECT " + self.KEY1_LAST_SCRAPED + " FROM " + self.TABLE_ACCNT_INFO
@@ -151,6 +153,7 @@ class Database:
         cur.close()
         return scrape_time
     
+    # Generic getter method for Account Info table
     def fetch_info_table(self, username, key):
         select_key = self.find_key(key, self.TABLE_ACCNT_INFO)
         cur = self.conn.cursor()
@@ -162,20 +165,12 @@ class Database:
         cur.close()
         return value
     
-    def get_total_post_karma(self, username):
-        cur = self.conn.cursor()
-        select_str = ("SELECT " + self.KEY1_POST_KARMA + " FROM " + self.TABLE_ACCNT_INFO
-                      + " WHERE " + self.KEY1_USERNAME + " = ?")
-        
-        cur.execute(select_str, (username,))
-        value = cur.fetchone()[0]
-        cur.close()
-        return value
-    
+    # Generic getter method for Account History table
     def fetch_hist_table(self, username, sub_list, key):
         select_key = self.find_key(key)
         cur = self.conn.cursor()
         
+        # Sum all rows belonging to the user
         if sub_list == "ALL":
             select_str = ("SELECT SUM(" + select_key + ") FROM " + self.TABLE_ACCNT_HISTORY
                           + " WHERE " + self.KEY2_USERNAME + " = ?")
@@ -184,7 +179,10 @@ class Database:
             data = cur.fetchone()
             if data is not None:
                 return data[0]
-            
+            else:
+                return None
+
+        # Sum only the specified rows (subreddits)
         else:
             select_str = ("SELECT " + self.KEY2_COMMENT_KARMA + " FROM " + self.TABLE_ACCNT_HISTORY
                           + " WHERE " + self.KEY2_USERNAME + " = ? AND "
@@ -197,9 +195,9 @@ class Database:
                 data = cur.fetchone()
                 if data is not None:
                     value += data[0]
-            print(str(value))
             return value
     
+    # Turn string from INI file into a key
     def find_key(self, key, table):
         key = key.lower()
         if table == self.TABLE_ACCNT_INFO:
@@ -238,6 +236,7 @@ class Database:
             if key == "comment karma":
                 return self.KEY2_COMMENT_KARMA
     
+    # Test method pls ignore
     def print_all_users(self, username, subname):
         cur = self.conn.cursor()
         select_str = ("SELECT " + self.KEY2_COMMENT_KARMA + " FROM " + self.TABLE_ACCNT_HISTORY

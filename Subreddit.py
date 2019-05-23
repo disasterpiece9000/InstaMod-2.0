@@ -4,6 +4,7 @@ from Database import Database
 
 
 class Subreddit:
+    # Load settings from wiki page
     def __init__(self, sub_name, r):
         self.r = r
         self.sub_name = sub_name
@@ -23,7 +24,9 @@ class Subreddit:
     
     def make_db(self):
         self.db = Database(self.sub_name)
-        
+    
+    # Process config options with multiple tiers
+    # Tiers increment in number and each tier can have one sub-tier (AND or OR)
     @staticmethod
     def load_nested_config(main_name, config):
         hold_config = {}
@@ -36,13 +39,13 @@ class Subreddit:
             if tier_name in config:
                 hold_config[tier_name] = config[tier_name]
                 
-                # Check for and/or rules
+                # Check for either and/or rule
                 tier_name_and = tier_name + " - AND"
+                tier_name_or = tier_name + " - OR"
+                
                 if tier_name_and in config:
                     hold_config[tier_name_and] = config[tier_name_and]
-                
-                tier_name_or = tier_name + " - OR"
-                if tier_name_or in config:
+                elif tier_name_or in config:
                     hold_config[tier_name_or] = config[tier_name_or]
             
             # Last tier was discovered
