@@ -11,12 +11,14 @@ def get_data(comment, sub):
     user = comment.author
     username = str(user)
     update_flair = False
-    
     user_in_db = sub.db.exists_in_db(username)
+    
+    # If user has not been seen before, pull all their data
     if not user_in_db:
         print("Getting all data for " + username + "...")
         load_data(False, comment, sub)
         update_flair = True
+    # If user is expired, pull all data from after the last scrape
     elif is_expired(comment, sub):
         print("Updating data for " + username + "...")
         load_data(True, comment, sub)
@@ -80,8 +82,8 @@ def load_data(update, comment, sub):
             sub_neg_comments[subreddit] += 1
         
         # Quality Comments
-        # Positive QC
         
+        # Positive QC
         # Positive QC: Score
         if sub.qc_config["positive score"] != "None":
             pos_qc_score = score >= int(sub.qc_config["positive score"])
@@ -156,11 +158,6 @@ def load_data(update, comment, sub):
                                sub_pos_qc, sub_neg_qc, sub_post_karma, sub_pos_posts, sub_neg_posts)
 
 
-def count_words(body):
-    body_list = body.split()
-    return len(body_list)
-
-
 def is_expired(comment, target_sub):
     last_seen = target_sub.db.get_last_scraped(str(comment.author))
     current_time = int(time.time())
@@ -176,3 +173,9 @@ def is_expired(comment, target_sub):
         return True
     else:
         return False
+
+
+def count_words(body):
+    body_list = body.split()
+    return len(body_list)
+

@@ -12,7 +12,7 @@ sub_list = [Subreddit("CryptoCurrency", r)]
 comment_queue = Queue()
 # Lock for shared resources
 lock = threading.Lock()
-# Thread for processing comments
+# Child thread for processing comments
 process_thread = threading.Thread(target=ProcessComment.fetch_queue,
                                   args=(r, comment_queue, lock, sub_list))
 

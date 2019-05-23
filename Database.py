@@ -53,13 +53,13 @@ class Database:
         for _ in cur.execute(select_str, (username,)):
             exists = True
             break
-            
+        
         cur.close()
         return exists
     
     def insert_info(self, username, created, ratelimit_start, ratelimit_count, total_post_karma,
                     total_comment_karma, flair_txt, last_scraped):
-    
+        
         if flair_txt is not None:
             print("Flair Text: " + flair_txt)
         else:
@@ -75,10 +75,10 @@ class Database:
                       + "VALUES(?,?,?,?,?,?,?,?)")
         
         cur.execute(insert_str, (username, created, ratelimit_start, ratelimit_count, total_post_karma,
-                    total_comment_karma, flair_txt, last_scraped))
+                                 total_comment_karma, flair_txt, last_scraped))
         cur.close()
         print("Done inserting into accnt_info\n")
-        
+    
     def update_info(self, username, ratelimit_start, ratelimit_count, total_post_karma,
                     total_comment_karma, flair_txt, last_scraped):
         
@@ -93,7 +93,7 @@ class Database:
                                  total_comment_karma, flair_txt, last_scraped, username))
         cur.close()
         print("Done updating accnt_info\n")
-        
+    
     def insert_activity(self, username, sub_comment_karma, sub_pos_comments, sub_neg_comments, sub_pos_qc, sub_neg_qc,
                         sub_post_karma, sub_pos_posts, sub_neg_posts):
         
@@ -113,10 +113,10 @@ class Database:
                                      sub_pos_comments[sub], sub_neg_comments[sub],
                                      sub_pos_qc[sub], sub_neg_qc[sub],
                                      sub_post_karma[sub], sub_comment_karma[sub]))
-
+        
         cur.close()
         print("Done inserting into accnt_activity\n")
-        
+    
     def update_activity(self, username, sub_comment_karma, sub_pos_comments, sub_neg_comments, sub_pos_qc, sub_neg_qc,
                         sub_post_karma, sub_pos_posts, sub_neg_posts):
         
@@ -131,17 +131,17 @@ class Database:
                       + self.KEY2_POSITIVE_POSTS + " = " + self.KEY2_POSITIVE_POSTS + "+ ?, "
                       + self.KEY2_NEGATIVE_POSTS + " = " + self.KEY2_NEGATIVE_POSTS + "+ ? "
                       + "WHERE " + self.KEY2_USERNAME + " = ?")
-
+        
         # Union of all keys in both primary dictionaries
         all_subs = sub_comment_karma.keys() | sub_post_karma
         for sub in all_subs:
             cur.execute(update_str, (sub_comment_karma[sub], sub_pos_comments[sub], sub_neg_comments[sub],
                                      sub_pos_qc[sub], sub_neg_qc[sub], sub_post_karma[sub],
                                      sub_pos_posts[sub], sub_neg_posts[sub], username))
-
+        
         cur.close()
         print("Done updating accnt_activity\n")
-        
+    
     def get_last_scraped(self, username):
         cur = self.conn.cursor()
         select_str = ("SELECT " + self.KEY1_LAST_SCRAPED + " FROM " + self.TABLE_ACCNT_INFO
@@ -151,41 +151,92 @@ class Database:
         cur.close()
         return scrape_time
     
-    def get_total_comment_karma(self, username):
+    def fetch_info_table(self, username, key):
+        select_key = self.find_key(key, self.TABLE_ACCNT_INFO)
         cur = self.conn.cursor()
-        select_str = ("SELECT " + self.KEY1_COMMENT_KARMA + " FROM " + self.TABLE_ACCNT_INFO
+        select_str = ("SELECT " + select_key + " FROM " + self.TABLE_ACCNT_INFO
                       + " WHERE " + self.KEY1_USERNAME + " = ?")
         
         cur.execute(select_str, (username,))
         value = cur.fetchone()[0]
         cur.close()
         return value
-
+    
     def get_total_post_karma(self, username):
         cur = self.conn.cursor()
         select_str = ("SELECT " + self.KEY1_POST_KARMA + " FROM " + self.TABLE_ACCNT_INFO
                       + " WHERE " + self.KEY1_USERNAME + " = ?")
-    
+        
         cur.execute(select_str, (username,))
         value = cur.fetchone()[0]
         cur.close()
         return value
     
-    def get_comment_karma(self, username, sub_list):
+    def fetch_hist_table(self, username, sub_list, key):
+        select_key = self.find_key(key)
         cur = self.conn.cursor()
-        select_str = ("SELECT " + self.KEY2_COMMENT_KARMA + " FROM " + self.TABLE_ACCNT_HISTORY
-                      + " WHERE " + self.KEY2_USERNAME + " = ? AND "
-                      + self.KEY2_SUB_NAME + " = ?")
         
-        value = 0
-        for sub in sub_list:
-            sub = sub.lower()
-            cur.execute(select_str, (username, sub))
+        if sub_list == "ALL":
+            select_str = ("SELECT SUM(" + select_key + ") FROM " + self.TABLE_ACCNT_HISTORY
+                          + " WHERE " + self.KEY2_USERNAME + " = ?")
+
+            cur.execute(select_str, (username,))
             data = cur.fetchone()
             if data is not None:
-                value += data[0]
-        print(str(value))
-        return value
+                return data[0]
+            
+        else:
+            select_str = ("SELECT " + self.KEY2_COMMENT_KARMA + " FROM " + self.TABLE_ACCNT_HISTORY
+                          + " WHERE " + self.KEY2_USERNAME + " = ? AND "
+                          + self.KEY2_SUB_NAME + " = ?")
+            
+            value = 0
+            for sub in sub_list:
+                sub = sub.lower()
+                cur.execute(select_str, (username, sub))
+                data = cur.fetchone()
+                if data is not None:
+                    value += data[0]
+            print(str(value))
+            return value
+    
+    def find_key(self, key, table):
+        key = key.lower()
+        if table == self.TABLE_ACCNT_INFO:
+            if key == "date created":
+                return self.KEY1_DATE_CREATED
+            elif key == "ratelimit start":
+                return self.KEY1_RATELIMIT_START
+            elif key == "ratelimit count":
+                return self.KEY1_RATELIMIT_COUNT
+            elif key == "total post karma":
+                return self.KEY1_COMMENT_KARMA
+            elif key == "total comment karma":
+                return self.KEY1_POST_KARMA
+            elif key == "flair text":
+                return self.KEY1_FLAIR_TEXT
+            elif key == "last scraped":
+                return self.KEY1_LAST_SCRAPED
+        
+        elif table == self.TABLE_ACCNT_HISTORY:
+            if key == "sub name":
+                return self.KEY2_SUB_NAME
+            if key == "positive posts":
+                return self.KEY2_POSITIVE_POSTS
+            if key == "negative posts":
+                return self.KEY2_NEGATIVE_POSTS
+            if key == "positive comments":
+                return self.KEY2_POSITIVE_COMMENTS
+            if key == "negative comments":
+                return self.KEY2_NEGATIVE_COMMENTS
+            if key == "positive qc":
+                return self.KEY2_POSITIVE_QC
+            if key == "negative qc":
+                return self.KEY2_NEGATIVE_QC
+            if key == "post karma":
+                return self.KEY2_POST_KARMA
+            if key == "comment karma":
+                return self.KEY2_COMMENT_KARMA
     
     def print_all_users(self, username, subname):
         cur = self.conn.cursor()
