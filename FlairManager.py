@@ -1,11 +1,12 @@
 import time
 
+
 # Get new flair for all enabled options
 def update_flair(r, user, sub, prog_flair_enabled, new_accnt_flair_enabled, activity_flair_enabled):
     prog_flair = None
     new_accnt_flair = None
     activity_flair = None
-    css = None
+    css = ""
     permissions = []
     
     # Progression Flair
@@ -13,7 +14,7 @@ def update_flair(r, user, sub, prog_flair_enabled, new_accnt_flair_enabled, acti
         prog_data = make_prog_flair(user, sub)
         prog_flair = prog_data[0]
         css = prog_data[1]
-        if prog_data[2] is not None:
+        if prog_data[2] != "None":
             permissions.append(prog_data[2])
             
     # New Account Flair
@@ -23,10 +24,19 @@ def update_flair(r, user, sub, prog_flair_enabled, new_accnt_flair_enabled, acti
     # Activity Flair
     if activity_flair_enabled:
         activity_data = make_activity_flair(user, sub)
+        activity_flair_list = activity_data[0]
+        permissions.append(activity_data[1])
+        
+    full_flair_txt = concat_flair(prog_flair, new_accnt_flair, activity_flair)
+    print("User: " + str(user)
+          + "\nFlair: " + full_flair_txt
+          + "\nCSS: " + css)
         
 
 def make_activity_flair(user, sub):
     activity_options = sub.sub_activity
+    flair_text = []
+    permissions = []
     
     # Loop through options in order
     option_count = 1
@@ -36,21 +46,57 @@ def make_activity_flair(user, sub):
         
         if option_name in activity_options:
             main_option = activity_options[option_name]
-            sub_group = main_option["target subs"]
-            main_metric = main_option["metric"]
-            
-            sub_list = list(sub.sub_groups[sub_group].keys())
+            sub_group_name = main_option["target subs"]
+            sub_group = sub.sub_groups[sub_group_name]
+            sub_list = list(sub_group.keys())
             
             for target_sub in sub_list:
-                main_result = check_activity(user, sub, target_sub, main_option)
+                main_data = check_activity(user, sub, target_sub, main_option, sub_group)
+                main_result = main_data[0]
+                user_value = main_data[1]
                 
                 if not main_result:
                     continue
                 
+                # Check for AND/OR rules
                 and_result = True
                 or_result = True
+                option_name_and = option_name + " - AND"
+                option_name_or = option_name + " - OR"
                 
-        
+                if option_name_and in activity_options:
+                    and_option = activity_options[option_name_and]
+                    and_result = check_activity(user, sub, target_sub, and_option, sub_group)[0]
+                    
+                elif option_name_or in activity_options:
+                    or_option = activity_options[option_name_or]
+                    or_result = check_activity(user, sub, target_sub, or_option, sub_group)[0]
+                    
+                if main_result and and_result and or_result:
+                    pre_text = main_option["pre text"]
+                    post_text = main_option["post text"]
+                    sub_abbrev = sub_group[target_sub]
+                    display_value = main_option.getboolean("display value")
+                    
+                    full_text = ""
+                    if pre_text != "None":
+                        full_text += pre_text + " "
+                    full_text += sub_abbrev
+                    if post_text != "None":
+                        full_text += " " + post_text
+                    if display_value:
+                        full_text += " " + str(user_value)
+                        
+                    flair_text.append(full_text)
+                    new_permissions = main_option["permissions"]
+                    if new_permissions != "None":
+                        permissions.append(new_permissions)
+                    
+        else:
+            break
+            
+    return [flair_text, permissions]
+                        
 
 # Get progression tier flair
 def make_prog_flair(user, sub):
@@ -69,10 +115,9 @@ def make_prog_flair(user, sub):
             if not main_result:
                 continue
             
+            # Check for AND/OR rules
             and_result = True
             or_result = True
-            
-            # Check for AND/OR rules
             tier_name_and = tier_name + " - AND"
             tier_name_or = tier_name + " - OR"
             
@@ -100,19 +145,27 @@ def make_new_accnt_flair(user, sub):
     current_time = int(time.time())
     month_diff = int((current_time - user_created) / 2629746)
     
-    if month_diff >= min_accnt_age:
+    if month_diff <= min_accnt_age:
         return str(month_diff) + " months old"
     else:
         return None
 
 
-def check_activity(user, sub, target_sub, option):
+def check_activity(user, sub, target_sub, option, sub_group):
     target_value = int(option["value"])
     metric = option["metric"]
     comparison = option["comparison"]
-    user_value = get_user_value(metric, [target_sub], user, sub)
     
-    return check_value(user_value, comparison, target_value)
+    sub_list = []
+    target_abbrev = sub_group[target_sub]
+    for sub_name, abbrev in sub_group.items():
+        if abbrev == target_abbrev:
+            sub_list.append(sub_name)
+            
+    user_value = get_user_value(metric, sub_list, user, sub)
+    activity_result = check_value(user_value, comparison, target_value)
+    
+    return [activity_result, user_value]
 
 
 # Check if the user belongs in the given tier
@@ -151,8 +204,19 @@ def get_user_value(metric, sub_list, user, sub):
     elif metric == "net QC":
         user_value = sub.db.fetch_hist_table(username, sub_list, "positive QC") - \
                      sub.db.fetch_hist_table(username, sub_list, "negative QC")
-        
+    
     return user_value
+
+
+def concat_flair(prog_flair, new_accnt_flair, activity_flair):
+    flair_txt = ""
+    for flair in [prog_flair, new_accnt_flair, activity_flair]:
+        if flair is not None:
+            if flair_txt == "":
+                flair_txt += flair
+            else:
+                flair_txt += " | " + flair
+    return flair_txt
 
 
 def check_value(user_value, comparison, value):
@@ -164,3 +228,5 @@ def check_value(user_value, comparison, value):
         return user_value >= value
     if comparison == "<=":
         return user_value <= value
+    
+

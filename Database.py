@@ -19,8 +19,8 @@ class Database:
                          KEY1_FLAIR_TEXT + " TEXT, " + KEY1_LAST_SCRAPED + " INTEGER" +
                          ")")
     
-    # Account History Table
-    TABLE_ACCNT_HISTORY = "accnt_history"
+    # Account Activity Table
+    TABLE_ACCNT_ACTIVITY = "accnt_history"
     KEY2_USERNAME = "username"
     KEY2_SUB_NAME = "sub_name"
     KEY2_POSITIVE_POSTS = "positive_posts"
@@ -31,7 +31,7 @@ class Database:
     KEY2_NEGATIVE_QC = "negative_qc"
     KEY2_POST_KARMA = "post_karma"
     KEY2_COMMENT_KARMA = "comment_karma"
-    CREATE_ACCNT_HISTORY = ("CREATE TABLE IF NOT EXISTS " + TABLE_ACCNT_HISTORY + " (" +
+    CREATE_ACCNT_HISTORY = ("CREATE TABLE IF NOT EXISTS " + TABLE_ACCNT_ACTIVITY + " (" +
                             KEY2_USERNAME + " TEXT, " + KEY2_SUB_NAME + " TEXT, " +
                             KEY2_POSITIVE_POSTS + " INTEGER, " + KEY2_NEGATIVE_POSTS + " INTEGER, " +
                             KEY2_POSITIVE_COMMENTS + " INTEGER, " + KEY2_NEGATIVE_COMMENTS + " INTEGER, " +
@@ -98,7 +98,7 @@ class Database:
                         sub_post_karma, sub_pos_posts, sub_neg_posts):
         
         cur = self.conn.cursor()
-        insert_str = ("INSERT INTO " + self.TABLE_ACCNT_HISTORY + "("
+        insert_str = ("INSERT INTO " + self.TABLE_ACCNT_ACTIVITY + "("
                       + self.KEY2_USERNAME + ", " + self.KEY2_SUB_NAME + ", "
                       + self.KEY2_POSITIVE_POSTS + ", " + self.KEY2_NEGATIVE_POSTS + ", "
                       + self.KEY2_POSITIVE_COMMENTS + ", " + self.KEY2_NEGATIVE_COMMENTS + ", "
@@ -122,7 +122,7 @@ class Database:
                         sub_post_karma, sub_pos_posts, sub_neg_posts):
         
         cur = self.conn.cursor()
-        update_str = ("UPDATE " + self.TABLE_ACCNT_HISTORY + " SET "
+        update_str = ("UPDATE " + self.TABLE_ACCNT_ACTIVITY + " SET "
                       + self.KEY2_COMMENT_KARMA + " = " + self.KEY2_COMMENT_KARMA + "+ ?, "
                       + self.KEY2_POSITIVE_COMMENTS + " = " + self.KEY2_POSITIVE_COMMENTS + "+ ?, "
                       + self.KEY2_NEGATIVE_COMMENTS + " = " + self.KEY2_NEGATIVE_COMMENTS + "+ ?, "
@@ -167,12 +167,12 @@ class Database:
     
     # Generic getter method for Account History table
     def fetch_hist_table(self, username, sub_list, key):
-        select_key = self.find_key(key, self.TABLE_ACCNT_HISTORY)
+        select_key = self.find_key(key, self.TABLE_ACCNT_ACTIVITY)
         cur = self.conn.cursor()
         
         # Sum all rows belonging to the user
         if sub_list == "ALL":
-            select_str = ("SELECT SUM(" + select_key + ") FROM " + self.TABLE_ACCNT_HISTORY
+            select_str = ("SELECT SUM(" + select_key + ") FROM " + self.TABLE_ACCNT_ACTIVITY
                           + " WHERE " + self.KEY2_USERNAME + " = ?")
 
             cur.execute(select_str, (username,))
@@ -184,13 +184,12 @@ class Database:
 
         # Sum only the specified rows (subreddits)
         else:
-            select_str = ("SELECT " + self.KEY2_COMMENT_KARMA + " FROM " + self.TABLE_ACCNT_HISTORY
+            select_str = ("SELECT " + select_key + " FROM " + self.TABLE_ACCNT_ACTIVITY
                           + " WHERE " + self.KEY2_USERNAME + " = ? AND "
                           + self.KEY2_SUB_NAME + " = ?")
             
             value = 0
             for sub in sub_list:
-                sub = sub.lower()
                 cur.execute(select_str, (username, sub))
                 data = cur.fetchone()
                 if data is not None:
@@ -216,7 +215,7 @@ class Database:
             elif key == "last scraped":
                 return self.KEY1_LAST_SCRAPED
         
-        elif table == self.TABLE_ACCNT_HISTORY:
+        elif table == self.TABLE_ACCNT_ACTIVITY:
             if key == "sub name":
                 return self.KEY2_SUB_NAME
             if key == "positive posts":
@@ -239,7 +238,7 @@ class Database:
     # Test method pls ignore
     def print_all_users(self, username, subname):
         cur = self.conn.cursor()
-        select_str = ("SELECT " + self.KEY2_COMMENT_KARMA + " FROM " + self.TABLE_ACCNT_HISTORY
+        select_str = ("SELECT " + self.KEY2_COMMENT_KARMA + " FROM " + self.TABLE_ACCNT_ACTIVITY
                       + " WHERE " + self.KEY2_USERNAME + " = ? AND "
                       + self.KEY2_SUB_NAME + " = ?")
         
