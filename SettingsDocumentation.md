@@ -27,6 +27,11 @@ Lines can be commented out using a hashtag ( # )
 
 Keys and sections cannot contain duplicate names.
 
+**Example**
+'''
+[Section 1]
+'''
+
 ## MAIN CONFIG
 
 Turn main features on or off
