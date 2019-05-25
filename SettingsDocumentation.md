@@ -20,7 +20,7 @@ The settings for InstaMod uses the .ini format and is read from a wiki page on t
  
  **Sections**
  
-* Keys are grouped into sections. The section name appears on a line by itself, in square brackets (\[ ]). All keys after the section declaration are associated with that section. There is no explicit "end of section" delimiter; sections end at the next section declaration, or the end of the file. Sections may not be nested.
+* Keys are grouped into sections. The section name appears on a line by itself, in square brackets ( \[ ] ). All keys after the section declaration are associated with that section. There is no explicit "end of section" delimiter; sections end at the next section declaration, or the end of the file. Sections may not be nested.
 * All sections listed in the documentation and the sample settings file must be present, even if the section is disabled. This does not include AND/OR subsections for tier and activity sections. Each section must contain all it's coresponding keys.
 * Section cannot contain duplicate names
 
