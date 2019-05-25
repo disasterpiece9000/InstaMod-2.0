@@ -1,5 +1,8 @@
  # Settings File Documentation
  
+ ### [Intro](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/SettingsDocumentation.md#intro)
+ ### [MAIN CONFIG]()
+ 
  ## Intro
  
 The settings for InstaMod uses the .ini format and is read from a wiki page on the subreddit titled "instamodsettings". Here are some general rules of thumb for editing or adding to the settings file:
