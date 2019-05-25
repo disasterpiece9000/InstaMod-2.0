@@ -2,7 +2,7 @@
 
 ## Currently in development!
 
-InstaMod is a toolbox of features that moderators can implement and customize to tailor fit their needs. It is built with customization in mind to ensure that each subreddit can have it’s own unique configuration. InstaMod is currently running on a network of subreddits totaling over 1,000,000 subscribers!
+InstaMod is a toolbox of features that moderators can implement and customize to tailor fit their needs. It's built with customization in mind to ensure that each subreddit can have it’s own unique configuration. InstaMod is currently running on a network of subreddits totaling over 1,000,000 subscribers!
 
 Every subreddit is unique and it's important that the tools the subreddit uses can adapt to meet their needs. InstaMod's deep customization options allow for an it to fit seamlessly into any community. With a robust feature set and unlimited combinations of settings, InstaMod gives moderators an easy way to customize and moderate their community.
 
