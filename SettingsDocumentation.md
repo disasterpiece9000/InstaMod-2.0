@@ -15,7 +15,7 @@ The settings for InstaMod uses the .ini format and is read from a wiki page on t
  **Keys**
  
 * Every key has a name and a value, delimited by an equals sign (=). The name appears to the left of the equals sign. 
-* The key cannot contain the characters equal sign ( = ) or semicolon ( ; ) as these are reserved characters. The value can contain any character. 
+* The key cannot contain the characters equal sign ( = ), semicolon ( ; ), or hashtag ( # ) as these are reserved characters. The value can contain any character. 
 * Keys cannot contain duplicate names within the same section
  
  **Sections**
