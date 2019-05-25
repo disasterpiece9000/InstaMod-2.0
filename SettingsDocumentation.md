@@ -34,8 +34,8 @@ Sections cannot contain duplicate names and keys cannot contain duplicate names 
     key2 = value
     
     # Comment
-    [section 2]
-    key1= value
+    [Section 2]
+    key1= VALUE
     key2 =  value
 
 
