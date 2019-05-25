@@ -24,7 +24,7 @@ As a user participates more and more in the community, their flair can change to
 
 ### Activity Tags
 
-Moderators can configure InstaMod to append users' flair information about their account history. It could display a user's top 3 most used related communities, or it could be setup to display the subreddits where the user has been consistently downvoted. These are just a few examples of the endless combinations of settings at your disposal.
+Moderators can configure InstaMod to include information about user' account history in their flair . It could display a user's top 3 most used related communities, or it could be setup to display the subreddits where the user has been consistently downvoted. These are just a few examples of the endless combinations of settings at your disposal.
 
 ### Custom Ratelimiting
 
