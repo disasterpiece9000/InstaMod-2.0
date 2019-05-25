@@ -7,7 +7,7 @@
  
  ## Intro
  
-The settings for InstaMod uses the .ini format and is read from a wiki page on the subreddit titled "instamodsettings". Here are some general rules of thumb for editing or adding to the settings file:
+The settings for InstaMod uses the .ini format and is read from a wiki page on the subreddit titled "instamodsettings". Here's the cheat-sheet for working with .ini files:
  
  **Keys**
  
