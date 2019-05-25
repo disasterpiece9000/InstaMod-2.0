@@ -1,4 +1,4 @@
-# InstaMod v2.0 - Fully featured moderator bot and flair management system
+# InstaMod v2.0 - Fully featured moderator toolbox
 
 ## Currently in development!
 
