@@ -3,6 +3,7 @@
  * **[Intro](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/SettingsDocumentation.md#intro)**
  * **[MAIN CONFIG](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/SettingsDocumentation.md#main-config)**
  * **[FLAIR](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/SettingsDocumentation.md#flair)**
+ * **[QUALITY COMMENTS](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/SettingsDocumentation.md#quality-comments)**
  
  ## Intro
  
