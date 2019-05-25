@@ -1,11 +1,14 @@
  # Settings File Documentation
  
  * **[Intro](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/SettingsDocumentation.md#intro)**
+ * **[Editing the Settings](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/SettingsDocumentation.md#editing-the-settings)
  * **[MAIN CONFIG](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/SettingsDocumentation.md#main-config)**
  * **[FLAIR](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/SettingsDocumentation.md#flair)**
  * **[QUALITY COMMENTS](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/SettingsDocumentation.md#quality-comments)**
  
  ## Intro
+ 
+ ## Editing the Settings
  
 The settings for InstaMod uses the .ini format and is read from a wiki page on the subreddit titled "instamodsettings". Here's the cheat-sheet for working with .ini files:
  
