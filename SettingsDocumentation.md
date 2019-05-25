@@ -25,12 +25,19 @@ All text in the settings is case insensitive.
 
 Lines can be commented out using a hashtag ( # )
 
-Keys and sections cannot contain duplicate names.
+Sections cannot contain duplicate names and keys cannot contain duplicate names within the same section.
 
 **Example**
-'''
-[Section 1]
-'''
+
+    [Section 1]
+    key1=value
+    key2 = value
+    
+    # Comment
+    [section 2]
+    key1= value
+    key2 =  value
+
 
 ## MAIN CONFIG
 
