@@ -1,6 +1,6 @@
 # InstaMod v2.0 - Fully featured moderator toolbox
 
-## Currently in development!
+**Currently in development!**
 
     CHECKING PROGRESS...
     >> 30%	
