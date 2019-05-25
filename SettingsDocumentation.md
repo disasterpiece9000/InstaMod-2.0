@@ -1,7 +1,7 @@
  # Settings File Documentation
  
  * **[Intro](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/SettingsDocumentation.md#intro)**
- * **[Editing the Settings](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/SettingsDocumentation.md#editing-the-settings)
+ * **[Editing the Settings](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/SettingsDocumentation.md#editing-the-settings)**
  * **[MAIN CONFIG](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/SettingsDocumentation.md#main-config)**
  * **[FLAIR](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/SettingsDocumentation.md#flair)**
  * **[QUALITY COMMENTS](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/SettingsDocumentation.md#quality-comments)**
