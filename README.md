@@ -37,7 +37,7 @@ Reddit has a built in rate-limit system to prevent spam, but with InstaMod this 
 
 ### Advanced Thread Locking
 
-Traditional thread locking is inherantly all-or-nothing. With InstaMod, a post's comment section can be filtered to dissalow certain types of comments or users. This allows users to still have a conversation, while still containing the reason the thread was locked in the first place. It could be used to prevent brigades, block toxic comments, or restrict a thread to only long-time community members.
+Traditional thread locking is inherantly all-or-nothing. With InstaMod, a post's comment section can be filtered to dissalow certain types of comments or users. This allows users to have a conversation, while still containing the reason the thread was locked in the first place. It could be used to prevent brigades, block toxic comments, or restrict a thread to only long-time community members.
 
 If a user doesn't meet the requirements, then their comment can either be removed or marked spam. There is also an option to automatically notify the user of their comment's deletion. Moderators simply have to assign a post a specific flair for it to be locked.
 
