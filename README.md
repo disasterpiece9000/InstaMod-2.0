@@ -43,6 +43,6 @@ If a user doesn't meet the requirements, then their comment can either be remove
 
 _____
 
-InstaMod v2.0 is currently in active development so I am not currently looking for any new subreddits to run it on. The first version of the project is still running on multiple subreddits which will be migrated to the new version once it's complete. If you are interested in having InstaMod run on your community, please contact me (/u/shimmyjimmy97) and I will be more than happy to discuss it further.
+InstaMod v2.0 is currently in active development so I am not looking for any new subreddits to run it on. The first version of the project is still running on multiple subreddits which will be migrated to the new version once it's complete. If you are interested in having InstaMod run on your community, please contact me (/u/shimmyjimmy97) and I will be more than happy to discuss it further.
 
 Thanks for checking out InstaMod!
