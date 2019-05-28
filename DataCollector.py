@@ -91,7 +91,7 @@ def load_data(update, comment, sub):
             pos_qc_score = True
         
         # Positive QC: Word Count
-        if sub.qc_config["positive word count"] != "None":
+        if sub.qc_config["positive word count"] != "":
             pos_qc_words = count_words(body) >= int(sub.qc_config["positive word count"])
         else:
             pos_qc_words = True
@@ -106,13 +106,13 @@ def load_data(update, comment, sub):
         
         # Negative QC
         # Negative QC: Score
-        if sub.qc_config["negative score"] != "None":
+        if sub.qc_config["negative score"] != "":
             neg_qc_score = score <= int(sub.qc_config["negative score"])
         else:
             neg_qc_score = True
         
         # Negative QC: Word Count
-        if sub.qc_config["negative word count"] != "None":
+        if sub.qc_config["negative word count"] != "":
             neg_qc_words = count_words(body) >= int(sub.qc_config["negative word count"])
         else:
             neg_qc_words = True

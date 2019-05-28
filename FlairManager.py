@@ -24,15 +24,16 @@ def update_flair(r, user, sub, prog_flair_enabled, new_accnt_flair_enabled, acti
     # Activity Flair
     if activity_flair_enabled:
         activity_data = make_activity_flair(user, sub)
-        activity_flair_list = activity_data[0]
+        activity_flair = activity_data[0]
         permissions.append(activity_data[1])
         
     full_flair_txt = concat_flair(prog_flair, new_accnt_flair, activity_flair)
     print("User: " + str(user)
           + "\nFlair: " + full_flair_txt
           + "\nCSS: " + css)
-        
-
+     
+   
+# Activity flair main method
 def make_activity_flair(user, sub):
     activity_options = sub.sub_activity
     flair_text = []
@@ -49,12 +50,39 @@ def make_activity_flair(user, sub):
             sub_group_name = main_option["target subs"]
             sub_group = sub.sub_groups[sub_group_name]
             sub_list = list(sub_group.keys())
+            group_subs = main_option.getboolean("group subs")
             
+            # Subs are treated as a group
+            if group_subs:
+                # Get cumulative user value
+                user_value = get_user_value(main_option["metric"], sub_list, user, sub)
+                target_value = main_option.getint("value")
+                comparison = main_option["comparison"]
+                
+                if check_value(user_value, comparison, target_value):
+                    # Append flair
+                    pre_text = main_option["pre text"]
+                    post_text = main_option["post text"]
+                    display_value = main_option.getboolean("display value")
+                    full_text = pre_text + " " + post_text
+                    
+                    if display_value:
+                        full_text += " " + str(user_value)
+
+                    flair_text.append(full_text)
+                    new_permissions = main_option["permissions"]
+                    if new_permissions != "None":
+                        permissions.append(new_permissions)
+                        
+                continue
+            
+            # Subs are treated as individuals
             for target_sub in sub_list:
                 main_data = check_activity(user, sub, target_sub, main_option, sub_group)
                 main_result = main_data[0]
                 user_value = main_data[1]
                 
+                # If the first result is False then move to next tag
                 if not main_result:
                     continue
                 
@@ -73,25 +101,21 @@ def make_activity_flair(user, sub):
                     or_result = check_activity(user, sub, target_sub, or_option, sub_group)[0]
                     
                 if main_result and and_result and or_result:
+                    # Append flair
                     pre_text = main_option["pre text"]
                     post_text = main_option["post text"]
                     sub_abbrev = sub_group[target_sub]
                     display_value = main_option.getboolean("display value")
                     
-                    full_text = ""
-                    if pre_text != "None":
-                        full_text += pre_text + " "
-                    full_text += sub_abbrev
-                    if post_text != "None":
-                        full_text += " " + post_text
+                    full_text = pre_text + " " + sub_abbrev + " " + post_text
                     if display_value:
                         full_text += " " + str(user_value)
-                        
                     flair_text.append(full_text)
+                    
                     new_permissions = main_option["permissions"]
                     if new_permissions != "None":
                         permissions.append(new_permissions)
-                    
+        # Last tag discovered
         else:
             break
             
@@ -138,6 +162,7 @@ def make_prog_flair(user, sub):
             return [None, None, None]
 
 
+# Main method for new account flair
 def make_new_accnt_flair(user, sub):
     username = str(user)
     min_accnt_age = int(sub.flair_config["young account age"])
@@ -151,11 +176,13 @@ def make_new_accnt_flair(user, sub):
         return None
 
 
+# Get user value from a specific sub (and subs that share the same abbreviation)
 def check_activity(user, sub, target_sub, option, sub_group):
     target_value = int(option["value"])
     metric = option["metric"]
     comparison = option["comparison"]
     
+    # Get subreddits that have the same abbreviation
     sub_list = []
     target_abbrev = sub_group[target_sub]
     for sub_name, abbrev in sub_group.items():
@@ -208,17 +235,26 @@ def get_user_value(metric, sub_list, user, sub):
     return user_value
 
 
+# Concatenate flair text into a single formatted string
 def concat_flair(prog_flair, new_accnt_flair, activity_flair):
     flair_txt = ""
-    for flair in [prog_flair, new_accnt_flair, activity_flair]:
-        if flair is not None:
-            if flair_txt == "":
-                flair_txt += flair
-            else:
-                flair_txt += " | " + flair
+    if prog_flair is not None:
+        flair_txt += prog_flair
+    if new_accnt_flair is not None:
+        if flair_txt == "":
+            flair_txt += new_accnt_flair
+        else:
+            flair_txt += " | " + new_accnt_flair
+    
+    if flair_txt != "" and len(activity_flair) > 0:
+        flair_txt += " | "
+    for hold_flair in activity_flair:
+        flair_txt += hold_flair + " "
+    
     return flair_txt
 
 
+# Check if the users value meets the requirements (target value and comparison)
 def check_value(user_value, comparison, value):
     if comparison == ">":
         return user_value > value
@@ -228,5 +264,3 @@ def check_value(user_value, comparison, value):
         return user_value >= value
     if comparison == "<=":
         return user_value <= value
-    
-

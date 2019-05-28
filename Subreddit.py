@@ -13,8 +13,9 @@ class Subreddit:
         self.start_interval = datetime.now()
         
         # Read config file from wiki page
-        config = ConfigParser(allow_no_value=False)
-        config.read_string(self.sub.wiki["InstaModTest"].content_md)
+        config = ConfigParser(allow_no_value=True)
+        config.read(sub_name + "/config.ini")
+        #config.read_string(self.sub.wiki["InstaModTest"].content_md)
         self.main_config = config["MAIN CONFIG"]
         self.flair_config = config["FLAIR"]
         self.qc_config = config["QUALITY COMMENTS"]
