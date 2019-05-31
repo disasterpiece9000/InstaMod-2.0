@@ -10,8 +10,8 @@ ps = PushshiftAPI()
 def get_data(comment, sub):
     user = comment.author
     username = str(user)
-    update_flair = False
     user_in_db = sub.db.exists_in_db(username)
+    update_flair = False
     
     # If user has not been seen before, pull all their data
     if not user_in_db:
@@ -42,14 +42,17 @@ def load_data(update, comment, sub):
     ratelimit_start = int(time.time())
     
     if update:
-        after_time = sub.db.get_last_scraped(username)
+        # Get comments/posts that occurred after the last scrape
+        after_time = sub.db.fetch_info_table(username, "last scraped")
         sub.db.update_info(username, ratelimit_start, ratelimit_count, total_post_karma,
                            total_comment_karma, flair_txt, last_scraped)
     else:
+        # Get all available comments/posts (up to 1,000 each)
         after_time = int(datetime(2000, 1, 1).timestamp())
+        permissions = ""
         # Insert data into accnt_info table
         sub.db.insert_info(username, created, ratelimit_start, ratelimit_count, total_post_karma,
-                           total_comment_karma, flair_txt, last_scraped)
+                           total_comment_karma, flair_txt, last_scraped, permissions)
     
     # Account Activity Table
     # Comments
@@ -67,8 +70,8 @@ def load_data(update, comment, sub):
     for comment in comment_results:
         try:
             data = comment[6]
-        except IndexError:
-            print(comment)
+        except IndexError as e:
+            print("IndexError at comment_results:\n" + str(e))
             return
             
         score = data["score"]
@@ -137,8 +140,8 @@ def load_data(update, comment, sub):
     for post in post_results:
         try:
             data = post[5]
-        except IndexError:
-            print(post)
+        except IndexError as e:
+            print("IndexError at post_results:\n" + str(e))
             return
             
         score = data["score"]
@@ -159,7 +162,8 @@ def load_data(update, comment, sub):
 
 
 def is_expired(comment, target_sub):
-    last_seen = target_sub.db.get_last_scraped(str(comment.author))
+    username = str(comment.author)
+    last_seen = target_sub.db.fetch_info_table(username, "last scraped")
     current_time = int(time.time())
     day_diff = int((current_time - last_seen) / 86400)
     

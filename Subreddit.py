@@ -5,16 +5,18 @@ from Database import Database
 
 class Subreddit:
     # Load settings from wiki page
-    def __init__(self, sub_name, r):
+    def __init__(self, folder_name, r):
         self.r = r
-        self.sub_name = sub_name
-        self.sub = r.subreddit(sub_name)
+        self.folder_name = folder_name
+        self.sub_name = folder_name[2:]
+        self.sub = r.subreddit(self.sub_name)
         self.db = None
         self.start_interval = datetime.now()
+        self.mods = self.sub.moderator()
         
         # Read config file from wiki page
         config = ConfigParser(allow_no_value=True)
-        config.read(sub_name + "/config.ini")
+        config.read(self.folder_name + "/config.ini")
         #config.read_string(self.sub.wiki["InstaModTest"].content_md)
         self.main_config = config["MAIN CONFIG"]
         self.flair_config = config["FLAIR"]
@@ -24,7 +26,7 @@ class Subreddit:
         self.sub_groups = self.load_nested_config("SUB GROUP", config)
     
     def make_db(self):
-        self.db = Database(self.sub_name)
+        self.db = Database(self.folder_name)
     
     # Process config options with multiple tiers
     # Tiers increment in number and each tier can have one sub-tier (AND or OR)

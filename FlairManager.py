@@ -2,7 +2,9 @@ import time
 
 
 # Get new flair for all enabled options
-def update_flair(r, user, sub, prog_flair_enabled, new_accnt_flair_enabled, activity_flair_enabled):
+def update_flair(flair_queue, perm_queue, user, sub, prog_flair_enabled,
+                 new_accnt_flair_enabled, activity_flair_enabled):
+    username = str(user)
     prog_flair = None
     new_accnt_flair = None
     activity_flair = None
@@ -27,12 +29,27 @@ def update_flair(r, user, sub, prog_flair_enabled, new_accnt_flair_enabled, acti
         activity_flair = activity_data[0]
         permissions.append(activity_data[1])
         
-    full_flair_txt = concat_flair(prog_flair, new_accnt_flair, activity_flair)
-    print("User: " + str(user)
-          + "\nFlair: " + full_flair_txt
-          + "\nCSS: " + css)
+    # Check if the user's flair has been changed
+    new_flair_txt = concat_flair(prog_flair, new_accnt_flair, activity_flair)
+    old_flair_txt = sub.db.fetch_info_table(username, "flair text")
+    if new_flair_txt != old_flair_txt:
+        sub.db.update_flair(username, new_flair_txt)
+        flair_queue.put([username, new_flair_txt, css])
+
+    # Check if the user has earned any new permissions
+    old_permission = sub.db.fetch_info_table(username, "permissions")
+    new_permission = None
+    if len(permissions) > 0 and old_permission != "CUSTOM FLAIR":
+        if "CUSTOM FLAIR" in permissions:
+            new_permission = "CUSTOM FLAIR"
+        elif "FLAIR CSS" in permissions:
+            new_permission = "FLAIR CSS"
+    
+    if new_permission is not None and old_permission != new_permission:
+        sub.db.update_perm(username, new_permission)
+        perm_queue.put([username, new_permission])
      
-   
+
 # Activity flair main method
 def make_activity_flair(user, sub):
     activity_options = sub.sub_activity
@@ -56,7 +73,7 @@ def make_activity_flair(user, sub):
             if group_subs:
                 # Get cumulative user value
                 user_value = get_user_value(main_option["metric"], sub_list, user, sub)
-                target_value = main_option.getint("value")
+                target_value = main_option.getint("target value")
                 comparison = main_option["comparison"]
                 
                 if check_value(user_value, comparison, target_value):
@@ -178,7 +195,7 @@ def make_new_accnt_flair(user, sub):
 
 # Get user value from a specific sub (and subs that share the same abbreviation)
 def check_activity(user, sub, target_sub, option, sub_group):
-    target_value = int(option["value"])
+    target_value = int(option["target value"])
     metric = option["metric"]
     comparison = option["comparison"]
     
@@ -206,7 +223,7 @@ def user_in_tier(tier, user, sub):
         
     metric = tier["metric"]
     comparison = tier["comparison"]
-    value = int(tier["value"])
+    value = int(tier["target value"])
     user_value = get_user_value(metric, sub_list, user, sub)
     
     return check_value(user_value, comparison, value)

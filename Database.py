@@ -12,11 +12,13 @@ class Database:
     KEY1_COMMENT_KARMA = "total_comment_karma"
     KEY1_FLAIR_TEXT = "flair_text"
     KEY1_LAST_SCRAPED = "last_scraped"
+    KEY1_PERMISSIONS = "permissions"
     CREATE_ACCNT_INFO = ("CREATE TABLE IF NOT EXISTS " + TABLE_ACCNT_INFO + " (" +
                          KEY1_USERNAME + " TEXT PRIMARY KEY, " + KEY1_DATE_CREATED + " INTEGER, " +
                          KEY1_RATELIMIT_START + " INTEGER, " + KEY1_RATELIMIT_COUNT + " INTEGER, " +
                          KEY1_POST_KARMA + " INTEGER, " + KEY1_COMMENT_KARMA + " INTEGER, " +
-                         KEY1_FLAIR_TEXT + " TEXT, " + KEY1_LAST_SCRAPED + " INTEGER" +
+                         KEY1_FLAIR_TEXT + " TEXT, " + KEY1_LAST_SCRAPED + " INTEGER, " +
+                         KEY1_PERMISSIONS + " TEXT" +
                          ")")
     
     # Account Activity Table
@@ -40,8 +42,8 @@ class Database:
                             ")")
     
     # Create tables if needed
-    def __init__(self, sub_name):
-        self.conn = sqlite3.connect(sub_name + "/master_databank.db", isolation_level=None)
+    def __init__(self, folder_name):
+        self.conn = sqlite3.connect(folder_name + "/master_databank.db", isolation_level=None)
         cur = self.conn.cursor()
         cur.execute(self.CREATE_ACCNT_INFO)
         cur.execute(self.CREATE_ACCNT_HISTORY)
@@ -62,20 +64,19 @@ class Database:
     
     # Insert user data into Account Info table
     def insert_info(self, username, created, ratelimit_start, ratelimit_count, total_post_karma,
-                    total_comment_karma, flair_txt, last_scraped):
+                    total_comment_karma, flair_txt, last_scraped, permissions):
         
         cur = self.conn.cursor()
         insert_str = ("INSERT INTO " + self.TABLE_ACCNT_INFO + "(" + self.KEY1_USERNAME + ", "
                       + self.KEY1_DATE_CREATED + ", " + self.KEY1_RATELIMIT_START + ", "
                       + self.KEY1_RATELIMIT_COUNT + ", " + self.KEY1_POST_KARMA + ", "
                       + self.KEY1_COMMENT_KARMA + ", " + self.KEY1_FLAIR_TEXT + ", "
-                      + self.KEY1_LAST_SCRAPED + ") "
-                      + "VALUES(?,?,?,?,?,?,?,?)")
+                      + self.KEY1_LAST_SCRAPED + ", " + self.KEY1_PERMISSIONS + ") "
+                      + "VALUES(?,?,?,?,?,?,?,?,?)")
         
         cur.execute(insert_str, (username, created, ratelimit_start, ratelimit_count, total_post_karma,
-                                 total_comment_karma, flair_txt, last_scraped))
+                                 total_comment_karma, flair_txt, last_scraped, permissions))
         cur.close()
-        print("Done inserting into accnt_info\n")
     
     # Update existing user's data in Account Info table
     def update_info(self, username, ratelimit_start, ratelimit_count, total_post_karma,
@@ -91,7 +92,6 @@ class Database:
         cur.execute(update_str, (ratelimit_start, ratelimit_count, total_post_karma,
                                  total_comment_karma, flair_txt, last_scraped, username))
         cur.close()
-        print("Done updating accnt_info\n")
 
     # Insert user data into Account History table
     def insert_activity(self, username, sub_comment_karma, sub_pos_comments, sub_neg_comments, sub_pos_qc, sub_neg_qc,
@@ -115,7 +115,6 @@ class Database:
                                      sub_post_karma[sub], sub_comment_karma[sub]))
         
         cur.close()
-        print("Done inserting into accnt_activity\n")
 
     # Update existing user's data in Account History table
     def update_activity(self, username, sub_comment_karma, sub_pos_comments, sub_neg_comments, sub_pos_qc, sub_neg_qc,
@@ -141,17 +140,6 @@ class Database:
                                      sub_pos_posts[sub], sub_neg_posts[sub], username))
             
         cur.close()
-        print("Done updating accnt_activity\n")
-    
-    # Get the time that the user's data was last updated by the bot
-    def get_last_scraped(self, username):
-        cur = self.conn.cursor()
-        select_str = ("SELECT " + self.KEY1_LAST_SCRAPED + " FROM " + self.TABLE_ACCNT_INFO
-                      + " WHERE " + self.KEY1_USERNAME + "=?")
-        
-        scrape_time = cur.execute(select_str, (username,)).fetchone()[0]
-        cur.close()
-        return scrape_time
     
     # Generic getter method for Account Info table
     def fetch_info_table(self, username, key):
@@ -195,6 +183,24 @@ class Database:
                 if data is not None:
                     value += data[0]
             return value
+        
+    # Update a user's permissions
+    def update_perm(self, username, permission):
+        cur = self.conn.cursor()
+        update_str = ("UPDATE " + self.TABLE_ACCNT_INFO + " SET " + self.KEY1_PERMISSIONS
+                      + " = ? WHERE " + self.KEY1_USERNAME + " = ?")
+        
+        cur.execute(update_str, (permission, username))
+        cur.close()
+        
+    # Update a user's flair txt
+    def update_flair(self, username, flair):
+        cur = self.conn.cursor()
+        update_str = ("UPDATE " + self.TABLE_ACCNT_INFO + " SET " + self.KEY1_FLAIR_TEXT
+                      + " = ? WHERE " + self.KEY1_USERNAME + " = ?")
+    
+        cur.execute(update_str, (flair, username))
+        cur.close()
     
     # Turn string from INI file into a key
     def find_key(self, key, table):
@@ -214,6 +220,8 @@ class Database:
                 return self.KEY1_FLAIR_TEXT
             elif key == "last scraped":
                 return self.KEY1_LAST_SCRAPED
+            elif key == "permissions":
+                return self.KEY1_PERMISSIONS
         
         elif table == self.TABLE_ACCNT_ACTIVITY:
             if key == "sub name":
