@@ -1,9 +1,12 @@
 import praw
 from queue import Queue
 import threading
+import os
+import time
+
 from Subreddit import Subreddit
 import ProcessComment
-import os
+import MessageManager
 
 # PRAW Instance
 r = praw.Reddit("InstaMod")
@@ -17,6 +20,12 @@ flair_queue = Queue()
 perm_queue = Queue()
 # Lock for shared resources
 lock = threading.Lock()
+
+
+def read_pms():
+    for message in r.inbox.messages():
+        if not message.was_comment:
+            MessageManager.process_pm(message, sub_list)
 
 
 # Create all subreddit objects and return multisub for comment stream
@@ -71,9 +80,14 @@ process_thread.setDaemon(True)
 process_thread.start()
 
 while True:
-    for comment in all_subs.stream.comments(pause_after=1, skip_existing=False):
-        if comment is None:
-            flair_users()
-            notify_permission_change()
-            continue
-        comment_queue.put(comment)
+    try:
+        for comment in all_subs.stream.comments(pause_after=1, skip_existing=False):
+            if comment is None:
+                flair_users()
+                notify_permission_change()
+                read_pms()
+                continue
+            comment_queue.put(comment)
+    except Exception as e:
+        print("Error: " + str(e) + "\nSleeping for 1 min")
+        time.sleep(60)

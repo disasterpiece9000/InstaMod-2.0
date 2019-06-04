@@ -84,11 +84,11 @@ def make_activity_flair(user, sub):
                     full_text = pre_text + " " + post_text
                     
                     if display_value:
-                        full_text += " " + str(user_value)
+                        full_text += " " + str(user_value) + main_option["metric"]
 
                     flair_text.append(full_text)
                     new_permissions = main_option["permissions"]
-                    if new_permissions != "None":
+                    if new_permissions != "":
                         permissions.append(new_permissions)
                         
                 continue
@@ -97,7 +97,7 @@ def make_activity_flair(user, sub):
             for target_sub in sub_list:
                 main_data = check_activity(user, sub, target_sub, main_option, sub_group)
                 main_result = main_data[0]
-                user_value = main_data[1]
+                main_value = main_data[1]
                 
                 # If the first result is False then move to next tag
                 if not main_result:
@@ -111,11 +111,15 @@ def make_activity_flair(user, sub):
                 
                 if option_name_and in activity_options:
                     and_option = activity_options[option_name_and]
-                    and_result = check_activity(user, sub, target_sub, and_option, sub_group)[0]
+                    and_data = check_activity(user, sub, target_sub, and_option, sub_group)[0]
+                    and_result = and_data[0]
+                    and_value = and_data[1]
                     
                 elif option_name_or in activity_options:
                     or_option = activity_options[option_name_or]
-                    or_result = check_activity(user, sub, target_sub, or_option, sub_group)[0]
+                    or_data = check_activity(user, sub, target_sub, or_option, sub_group)[0]
+                    or_result = or_data[0]
+                    or_value = or_data[1]
                     
                 if main_result and and_result and or_result:
                     # Append flair
@@ -126,7 +130,7 @@ def make_activity_flair(user, sub):
                     
                     full_text = pre_text + " " + sub_abbrev + " " + post_text
                     if display_value:
-                        full_text += " " + str(user_value)
+                        full_text += " " + str(main_value)
                     flair_text.append(full_text)
                     
                     new_permissions = main_option["permissions"]

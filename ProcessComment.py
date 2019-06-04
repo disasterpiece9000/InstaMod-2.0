@@ -5,10 +5,6 @@ import prawcore
 
 # Get new comments as they are added to the queue by the producer thread
 def fetch_queue(comment_queue, flair_queue, perm_queue, sub_list):
-    # Load databases
-    for sub in sub_list:
-        sub.make_db()
-        
     # Loop continuously checking for new comments
     while True:
         comment = comment_queue.get()

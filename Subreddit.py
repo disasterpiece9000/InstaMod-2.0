@@ -8,8 +8,8 @@ class Subreddit:
     def __init__(self, folder_name, r):
         self.r = r
         self.folder_name = folder_name
-        self.sub_name = folder_name[2:]
-        self.sub = r.subreddit(self.sub_name)
+        self.name = folder_name[2:]
+        self.sub = r.subreddit(self.name)
         self.db = None
         self.start_interval = datetime.now()
         self.mods = self.sub.moderator()
@@ -24,8 +24,6 @@ class Subreddit:
         self.progression_tiers = self.load_nested_config("PROGRESSION TIER", config)
         self.sub_activity = self.load_nested_config("SUB ACTIVITY", config)
         self.sub_groups = self.load_nested_config("SUB GROUP", config)
-    
-    def make_db(self):
         self.db = Database(self.folder_name)
     
     # Process config options with multiple tiers

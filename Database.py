@@ -43,7 +43,7 @@ class Database:
     
     # Create tables if needed
     def __init__(self, folder_name):
-        self.conn = sqlite3.connect(folder_name + "/master_databank.db", isolation_level=None)
+        self.conn = sqlite3.connect(folder_name + "/master_databank.db", isolation_level=None, check_same_thread=False)
         cur = self.conn.cursor()
         cur.execute(self.CREATE_ACCNT_INFO)
         cur.execute(self.CREATE_ACCNT_HISTORY)
