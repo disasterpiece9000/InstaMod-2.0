@@ -17,22 +17,22 @@ The settings for InstaMod uses the .ini format and is read from a wiki page on t
  
  **Keys**
  
-* Every key has a name and a value, delimited by an equals sign (=). The name appears to the left of the equals sign. 
-* The key cannot contain the characters equal sign ( = ), semicolon ( ; ), or hashtag ( # ) as these are reserved characters. The value can contain any character. 
-* Keys cannot contain duplicate names within the same section
+* Every key has a name and a value, delimited by an equals sign (=). The name appears to the left of the equals sign and the value appears to the right. 
+* The key cannot contain the characters equal sign ( = ), semicolon ( ; ), or hashtag ( # ) as these are reserved characters. However, he value can contain any character. 
+* Keys cannot contain duplicate names within the same section.
  
  **Sections**
  
 * Keys are grouped into sections. The section name appears on a line by itself, in square brackets ( \[ ] ). All keys after the section declaration are associated with that section. There is no explicit "end of section" delimiter; sections end at the next section declaration, or the end of the file. Sections may not be nested.
 * All sections listed in the documentation and the sample settings file must be present, even if the section is disabled. This does not include AND/OR subsections for tier and activity sections. Each section must contain all it's coresponding keys.
-* Sections cannot contain duplicate names
 
 **Other**
 
 * All text in the settings is case insensitive.
 * Lines can be commented out using a hashbang ( # )
+* Leading or trailing spaces do not matter
 
-**Example**
+**Example:**
 
     [Section 1]
     key1=value
@@ -179,11 +179,9 @@ The settings for InstaMod uses the .ini format and is read from a wiki page on t
 **Section Name:** [SUB GROUP 1]
 * **Note:** Each subsequent group must increment the number at the end. If a number is skipped then the group will not be seen.
 
-**Description:** Groupings of subreddits and their corresponding abbreviations. 
+**Description:** Groupings of subreddits and their corresponding abbreviations. Each key is a subreddit name and the value is it's abbreviation.
 
-Each key is a subreddit name and the value is it's abbreviation. Subreddits with the same abbreviation will have their values combined (regardless of the group subs setting).
-
-Ex: 
+**Example:**
      
     [SUB GROUP 1]
     CryptoCurrency = CC
@@ -194,4 +192,3 @@ Ex:
 For a given activity tag where group subs is set to false, Bitcoin and BitcoinMarkets will have their user value combined. If group subs is set to true, then all subreddits will be combined regardless of their abbreviation.
 
 For a given progression tier where target subs is set to SUB GROUP 1 - BTC, only Bitcoin and BitcoinMarkets will be selected and combined. If target subs is set to just SUB GROUP 1, then all subreddits will be combined regardless of their abbreviation.
-
