@@ -18,7 +18,7 @@ The settings for InstaMod uses the .ini format and is read from a wiki page on t
  **Keys**
  
 * Every key has a name and a value, delimited by an equals sign (=). The name appears to the left of the equals sign and the value appears to the right. 
-* The key cannot contain the characters equal sign ( = ), semicolon ( ; ), or hashtag ( # ) as these are reserved characters. However, he value can contain any character. 
+* The key cannot contain the characters equal sign ( = ), semicolon ( ; ), or hashtag ( # ) as these are reserved characters. However, the value can contain any character. 
 * Keys cannot contain duplicate names within the same section.
  
  **Sections**
@@ -67,8 +67,8 @@ The settings for InstaMod uses the .ini format and is read from a wiki page on t
 
 | Key | Description | Values |
 | ----------- | ----------- | ----------- |
-| flair expiration | The number of until user's flair is reevaluated | Any integer > 0 |
-| new account age | The number of months an account must be younger than to be considerd new | Any integer > 0 |
+| flair expiration | The number of days until a user's flair is reevaluated | Any integer > 0 |
+| new account age | The number of months an account must be younger than to be considerd new | Any integer >= 0 |
 | approved icons | A list of icons available to users with the "FLAIR CSS" permission |  A comma delimited list of icon ids |
 
 ## Quality Comments
@@ -80,14 +80,14 @@ The settings for InstaMod uses the .ini format and is read from a wiki page on t
 | Key | Description | Values |
 | ----------- | ----------- | ----------- |
 | positive score | Comments with a score >= this meet the score criteria | Any integer |
-| positive word count | Comments with a word count >= this meet the word count criteria | Any integer > 0 or None to disable |
-| positive toxicity low | Low threshold of the acceptable toxicity score range | Any integer from 0 - 99 |
-| positive toxicity high | High threshold of the acceptable toxicity score range | Any integer from 0 - 99 |
+| positive word count | Comments with a word count >= this meet the word count criteria | Any integer > 0 or leave blank to disable |
+| positive toxicity low | Low threshold of the acceptable toxicity score range | Any integer from 0 - 99 or leave blank to disable |
+| positive toxicity high | High threshold of the acceptable toxicity score range | Any integer from 0 - 99 or leave blank to disable |
 | positive criteria type | Combination of criteria required to earn 1 positive QC | AND (all of them) or OR (at least one of them) |
 | negative score | Comments with a score <= this meet the score criteria | Any integer |
-| negative word count | Comments with a word count <= this meet the word count criteria | Any integer > 0 or None to disable |
-| negative toxicity low | Low threshold of the unacceptable toxicity score range | Any integer from 0 - 99 |
-| negative toxicity high | High threshold of the unacceptable toxicity score range | Any integer from 0 - 99 |
+| negative word count | Comments with a word count <= this meet the word count criteria | Any integer > 0 or leave blank to disable |
+| negative toxicity low | Low threshold of the unacceptable toxicity score range | Any integer from 0 - 99 or leave blank to disable |
+| negative toxicity high | High threshold of the unacceptable toxicity score range | Any integer from 0 - 99 or leave blank to disable |
 | negative criteria type | Combination of criteria required to earn 1 negative QC | AND (all of them) or OR (at least one of them) |
 
 ## Progression Tiers
