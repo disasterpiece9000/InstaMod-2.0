@@ -110,7 +110,7 @@ The settings for InstaMod uses the .ini format and is read from a wiki page on t
 ### Secondary Progression Tier Criteria
 
 **Section Name:** [PROGRESSION TIER 1 - AND] or [PROGRESSION TIER 1 - OR]
-* **Note:** Secondary progression tiers must match up with an existing progression tier of the same number.
+* **Note:** This section type is **not** required. Secondary progression tiers must match up with an existing progression tier of the same number.
 
 **Description:** Each progression tier can have a secondary criteria specified. The second criteria is denoted by appending " - AND" or " - OR" to the parent section's name (Ex: "PROGRESSION TIER 1 - AND"). If AND is used then the user must meet both criteria. If OR is used then the user must meet at least one of the criteria.
 
@@ -146,7 +146,7 @@ The settings for InstaMod uses the .ini format and is read from a wiki page on t
 ### Secondary Activity Tag Criteria
 
 **Section Name:** [ACTIVITY TAG 1 - AND] or [ACTIVITY TAG 1 - OR]
-* **Note:** Secondary activity tags must match up with an existing activity tag of the same number.
+* **Note:** This section type is **not** required. Secondary activity tags must match up with an existing activity tag of the same number.
  
 **Description:** Each activity tag can have a secondary criteria specified. The second criteria is denoted by appending " - AND" or " - OR" to the parent section's name (Ex: "ACTIVITY TAG 1 - AND"). If AND is used then the user must meet both criteria. If OR is used then the user must meet at least one of the criteria.
 
