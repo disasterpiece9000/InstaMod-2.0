@@ -59,83 +59,95 @@ def make_activity_flair(user, sub):
     # Loop through options in order
     option_count = 1
     while True:
-        option_name = "SUB ACTIVITY " + str(option_count)
+        option_name = "ACTIVITY TAG " + str(option_count)
         option_count += 1
         
         if option_name in activity_options:
             main_option = activity_options[option_name]
             sub_group_name = main_option["target subs"]
-            sub_group = sub.sub_groups[sub_group_name]
-            sub_list = list(sub_group.keys())
             group_subs = main_option.getboolean("group subs")
-            
+
+            # TODO: Rework method so that AND/OR is always checked
+            if "-" in sub_group_name:
+                # Get abbreviation from string
+                dash_index = sub_group_name.find("-")
+                target_abbrev = sub_group_name[dash_index + 1:].strip()
+                sub_group = sub.sub_groups[sub_group_name[:dash_index].strip()]
+                sub_list = [name for name, abbrev in sub_group.itema() if abbrev == target_abbrev]
+                
             # Subs are treated as a group
             if group_subs:
+                sub_group = sub.sub_groups[sub_group_name]
+                sub_list = list(sub_group.keys())
                 # Get cumulative user value
                 user_value = get_user_value(main_option["metric"], sub_list, user, sub)
                 target_value = main_option.getint("target value")
                 comparison = main_option["comparison"]
                 
-                if check_value(user_value, comparison, target_value):
-                    # Append flair
-                    pre_text = main_option["pre text"]
-                    post_text = main_option["post text"]
-                    display_value = main_option.getboolean("display value")
-                    full_text = pre_text + " " + post_text
-                    
-                    if display_value:
-                        full_text += " " + str(user_value) + main_option["metric"]
+                if not check_value(user_value, comparison, target_value):
+                    continue
 
-                    flair_text.append(full_text)
-                    new_permissions = main_option["permissions"]
-                    if new_permissions != "":
-                        permissions.append(new_permissions)
-                        
-                continue
+                # TODO: Rework method so that AND/OR is always checked
+                
+                # Append flair
+                pre_text = main_option["pre text"]
+                post_text = main_option["post text"]
+                display_value = main_option.getboolean("display value")
+                full_text = pre_text + " " + post_text
+                
+                if display_value:
+                    full_text += " " + str(user_value)
+
+                flair_text.append(full_text)
+                new_permissions = main_option["permissions"]
+                if new_permissions != "":
+                    permissions.append(new_permissions)
             
             # Subs are treated as individuals
-            for target_sub in sub_list:
-                main_data = check_activity(user, sub, target_sub, main_option, sub_group)
-                main_result = main_data[0]
-                main_value = main_data[1]
-                
-                # If the first result is False then move to next tag
-                if not main_result:
-                    continue
-                
-                # Check for AND/OR rules
-                and_result = True
-                or_result = True
-                option_name_and = option_name + " - AND"
-                option_name_or = option_name + " - OR"
-                
-                if option_name_and in activity_options:
-                    and_option = activity_options[option_name_and]
-                    and_data = check_activity(user, sub, target_sub, and_option, sub_group)[0]
-                    and_result = and_data[0]
-                    and_value = and_data[1]
+            else:
+                sub_group = sub.sub_groups[sub_group_name]
+                abbrev_list = list(set(sub_group.values()))
+                for abbrev in abbrev_list:
+                    main_data = check_activity(user, sub, abbrev, main_option, sub_group)
+                    main_result = main_data[0]
+                    main_value = main_data[1]
                     
-                elif option_name_or in activity_options:
-                    or_option = activity_options[option_name_or]
-                    or_data = check_activity(user, sub, target_sub, or_option, sub_group)[0]
-                    or_result = or_data[0]
-                    or_value = or_data[1]
+                    # If the first result is False then move to next tag
+                    if not main_result:
+                        continue
                     
-                if main_result and and_result and or_result:
-                    # Append flair
-                    pre_text = main_option["pre text"]
-                    post_text = main_option["post text"]
-                    sub_abbrev = sub_group[target_sub]
-                    display_value = main_option.getboolean("display value")
+                    # Check for AND/OR rules
+                    and_result = True
+                    or_result = True
+                    option_name_and = option_name + " - AND"
+                    option_name_or = option_name + " - OR"
                     
-                    full_text = pre_text + " " + sub_abbrev + " " + post_text
-                    if display_value:
-                        full_text += " " + str(main_value)
-                    flair_text.append(full_text)
-                    
-                    new_permissions = main_option["permissions"]
-                    if new_permissions != "None":
-                        permissions.append(new_permissions)
+                    if option_name_and in activity_options:
+                        and_option = activity_options[option_name_and]
+                        and_data = check_activity(user, sub, abbrev, and_option, sub_group)[0]
+                        and_result = and_data[0]
+                        and_value = and_data[1]
+                        
+                    elif option_name_or in activity_options:
+                        or_option = activity_options[option_name_or]
+                        or_data = check_activity(user, sub, abbrev, or_option, sub_group)[0]
+                        or_result = or_data[0]
+                        or_value = or_data[1]
+                        
+                    if main_result and and_result and or_result:
+                        # Append flair
+                        pre_text = main_option["pre text"]
+                        post_text = main_option["post text"]
+                        display_value = main_option.getboolean("display value")
+                        
+                        full_text = pre_text + " " + abbrev + " " + post_text
+                        if display_value:
+                            full_text += " " + str(main_value)
+                        flair_text.append(full_text)
+                        
+                        new_permissions = main_option["permissions"]
+                        if new_permissions != "None":
+                            permissions.append(new_permissions)
         # Last tag discovered
         else:
             break
@@ -198,14 +210,13 @@ def make_new_accnt_flair(user, sub):
 
 
 # Get user value from a specific sub (and subs that share the same abbreviation)
-def check_activity(user, sub, target_sub, option, sub_group):
+def check_activity(user, sub, target_abbrev, option, sub_group):
     target_value = int(option["target value"])
     metric = option["metric"]
     comparison = option["comparison"]
     
     # Get subreddits that have the same abbreviation
     sub_list = []
-    target_abbrev = sub_group[target_sub]
     for sub_name, abbrev in sub_group.items():
         if abbrev == target_abbrev:
             sub_list.append(sub_name)
@@ -218,10 +229,21 @@ def check_activity(user, sub, target_sub, option, sub_group):
 
 # Check if the user belongs in the given tier
 def user_in_tier(tier, user, sub):
-    # Turn Sub Group into list if all subs option not selected
     target_subs = tier["target subs"]
-    if target_subs != "ALL":
+    # If an abbreviation is specified make a list of all subs with a matching abbreviation
+    if "-" in target_subs:
+        # Get abbreviation from string
+        target_abbrev = target_subs[target_subs.find("-") + 1:].strip()
+        sub_group = sub.sub_groups[target_subs[:target_subs.find("-")].strip()]
+        sub_list = []
+        for sub_name, abbrev in sub_group.items():
+            if abbrev == target_abbrev:
+                sub_list.append(sub_name)
+                
+    # Turn Sub Group into list if all subs option not selected
+    elif target_subs != "ALL":
         sub_list = list(sub.sub_groups[target_subs].keys())
+        
     else:
         sub_list = "ALL"
         
@@ -267,10 +289,11 @@ def concat_flair(prog_flair, new_accnt_flair, activity_flair):
         else:
             flair_txt += " | " + new_accnt_flair
     
-    if flair_txt != "" and len(activity_flair) > 0:
-        flair_txt += " | "
-    for hold_flair in activity_flair:
-        flair_txt += hold_flair + " "
+    if activity_flair is not None and len(activity_flair) > 0:
+        if flair_txt != "":
+            flair_txt += " | "
+        for hold_flair in activity_flair:
+            flair_txt += hold_flair + " "
     
     return flair_txt
 

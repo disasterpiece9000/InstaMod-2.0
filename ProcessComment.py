@@ -16,7 +16,7 @@ def fetch_queue(comment_queue, flair_queue, perm_queue, sub_list):
         target_sub = None
         comment_sub = str(comment.subreddit).lower()
         for sub in sub_list:
-            if sub.sub_name.lower() == comment_sub:
+            if sub.name.lower() == comment_sub:
                 target_sub = sub
                 break
         if target_sub is None:
@@ -37,9 +37,9 @@ def fetch_queue(comment_queue, flair_queue, perm_queue, sub_list):
         print("Done collecting data")
         
         # Read flair toggles from sub config
-        prog_flair_enabled = target_sub.main_config.getboolean("progression flair")
+        prog_flair_enabled = target_sub.main_config.getboolean("progression tier")
         new_accnt_flair_enabled = target_sub.main_config.getboolean("young account tag")
-        activity_flair_enabled = target_sub.main_config.getboolean("sub activity")
+        activity_flair_enabled = target_sub.main_config.getboolean("activity tag")
         
         # If user flair is expired and at least one toggle is enabled, update user flair
         if update_flair and (prog_flair_enabled

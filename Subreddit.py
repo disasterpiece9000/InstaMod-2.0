@@ -22,7 +22,7 @@ class Subreddit:
         self.flair_config = config["FLAIR"]
         self.qc_config = config["QUALITY COMMENTS"]
         self.progression_tiers = self.load_nested_config("PROGRESSION TIER", config)
-        self.sub_activity = self.load_nested_config("SUB ACTIVITY", config)
+        self.sub_activity = self.load_nested_config("ACTIVITY TAG", config)
         self.sub_groups = self.load_nested_config("SUB GROUP", config)
         self.db = Database(self.folder_name)
     
