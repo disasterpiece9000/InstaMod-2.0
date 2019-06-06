@@ -17,22 +17,23 @@ The settings for InstaMod uses the .ini format and is read from a wiki page on t
  
  **Keys**
  
-* Every key has a name and a value, delimited by an equals sign (=). The name appears to the left of the equals sign. 
-* The key cannot contain the characters equal sign ( = ), semicolon ( ; ), or hashtag ( # ) as these are reserved characters. The value can contain any character. 
-* Keys cannot contain duplicate names within the same section
+* Every key has a name and a value, delimited by an equals sign (=). The name appears to the left of the equals sign and the value appears to the right. 
+* The key cannot contain the characters equal sign ( = ), semicolon ( ; ), or hashtag ( # ) as these are reserved characters. However, the value can contain any character. 
+* Keys cannot contain duplicate names within the same section.
  
  **Sections**
  
 * Keys are grouped into sections. The section name appears on a line by itself, in square brackets ( \[ ] ). All keys after the section declaration are associated with that section. There is no explicit "end of section" delimiter; sections end at the next section declaration, or the end of the file. Sections may not be nested.
-* All sections listed in the documentation and the sample settings file must be present, even if the section is disabled. This does not include AND/OR subsections for tier and activity sections. Each section must contain all it's coresponding keys.
-* Sections cannot contain duplicate names
+* All sections listed in the documentation and the sample settings file must be present, even if the section is disabled. This does not include secondary criteria sections. 
+* Each section must contain all it's coresponding keys. A key's value can only be left blank if specified in the documentation.
 
 **Other**
 
 * All text in the settings is case insensitive.
 * Lines can be commented out using a hashbang ( # )
+* Leading or trailing spaces do not matter
 
-**Example**
+**Example:**
 
     [Section 1]
     key1=value
@@ -67,8 +68,8 @@ The settings for InstaMod uses the .ini format and is read from a wiki page on t
 
 | Key | Description | Values |
 | ----------- | ----------- | ----------- |
-| flair expiration | The number of until user's flair is reevaluated | Any integer > 0 |
-| new account age | The number of months an account must be younger than to be considerd new | Any integer > 0 |
+| flair expiration | The number of days until a user's flair is reevaluated | Any integer > 0 |
+| new account age | The number of months an account must be younger than to be considerd new | Any integer >= 0 |
 | approved icons | A list of icons available to users with the "FLAIR CSS" permission |  A comma delimited list of icon ids |
 
 ## Quality Comments
@@ -80,14 +81,14 @@ The settings for InstaMod uses the .ini format and is read from a wiki page on t
 | Key | Description | Values |
 | ----------- | ----------- | ----------- |
 | positive score | Comments with a score >= this meet the score criteria | Any integer |
-| positive word count | Comments with a word count >= this meet the word count criteria | Any integer > 0 or None to disable |
-| positive toxicity low | Low threshold of the acceptable toxicity score range | Any integer from 0 - 99 |
-| positive toxicity high | High threshold of the acceptable toxicity score range | Any integer from 0 - 99 |
+| positive word count | Comments with a word count >= this meet the word count criteria | Any integer > 0 or leave blank to disable |
+| positive toxicity low | Low threshold of the acceptable toxicity score range | Any integer from 0 - 99 or leave blank to disable |
+| positive toxicity high | High threshold of the acceptable toxicity score range | Any integer from 0 - 99 or leave blank to disable |
 | positive criteria type | Combination of criteria required to earn 1 positive QC | AND (all of them) or OR (at least one of them) |
 | negative score | Comments with a score <= this meet the score criteria | Any integer |
-| negative word count | Comments with a word count <= this meet the word count criteria | Any integer > 0 or None to disable |
-| negative toxicity low | Low threshold of the unacceptable toxicity score range | Any integer from 0 - 99 |
-| negative toxicity high | High threshold of the unacceptable toxicity score range | Any integer from 0 - 99 |
+| negative word count | Comments with a word count <= this meet the word count criteria | Any integer > 0 or leave blank to disable |
+| negative toxicity low | Low threshold of the unacceptable toxicity score range | Any integer from 0 - 99 or leave blank to disable |
+| negative toxicity high | High threshold of the unacceptable toxicity score range | Any integer from 0 - 99 or leave blank to disable |
 | negative criteria type | Combination of criteria required to earn 1 negative QC | AND (all of them) or OR (at least one of them) |
 
 ## Progression Tiers
@@ -110,7 +111,7 @@ The settings for InstaMod uses the .ini format and is read from a wiki page on t
 ### Secondary Progression Tier Criteria
 
 **Section Name:** [PROGRESSION TIER 1 - AND] or [PROGRESSION TIER 1 - OR]
-* **Note:** Secondary progression tiers must match up with an existing progression tier of the same number.
+* **Note:** This section type is **not** required. Secondary progression tiers must match up with an existing progression tier of the same number.
 
 **Description:** Each progression tier can have a secondary criteria specified. The second criteria is denoted by appending " - AND" or " - OR" to the parent section's name (Ex: "PROGRESSION TIER 1 - AND"). If AND is used then the user must meet both criteria. If OR is used then the user must meet at least one of the criteria.
 
@@ -146,7 +147,7 @@ The settings for InstaMod uses the .ini format and is read from a wiki page on t
 ### Secondary Activity Tag Criteria
 
 **Section Name:** [ACTIVITY TAG 1 - AND] or [ACTIVITY TAG 1 - OR]
-* **Note:** Secondary activity tags must match up with an existing activity tag of the same number.
+* **Note:** This section type is **not** required. Secondary activity tags must match up with an existing activity tag of the same number.
  
 **Description:** Each activity tag can have a secondary criteria specified. The second criteria is denoted by appending " - AND" or " - OR" to the parent section's name (Ex: "ACTIVITY TAG 1 - AND"). If AND is used then the user must meet both criteria. If OR is used then the user must meet at least one of the criteria.
 
@@ -179,11 +180,9 @@ The settings for InstaMod uses the .ini format and is read from a wiki page on t
 **Section Name:** [SUB GROUP 1]
 * **Note:** Each subsequent group must increment the number at the end. If a number is skipped then the group will not be seen.
 
-**Description:** Groupings of subreddits and their corresponding abbreviations. 
+**Description:** Groupings of subreddits and their corresponding abbreviations. Each key is a subreddit name and the value is it's abbreviation.
 
-Each key is a subreddit name and the value is it's abbreviation. Subreddits with the same abbreviation will have their values combined (regardless of the group subs setting).
-
-Ex: 
+**Example:**
      
     [SUB GROUP 1]
     CryptoCurrency = CC
@@ -194,4 +193,3 @@ Ex:
 For a given activity tag where group subs is set to false, Bitcoin and BitcoinMarkets will have their user value combined. If group subs is set to true, then all subreddits will be combined regardless of their abbreviation.
 
 For a given progression tier where target subs is set to SUB GROUP 1 - BTC, only Bitcoin and BitcoinMarkets will be selected and combined. If target subs is set to just SUB GROUP 1, then all subreddits will be combined regardless of their abbreviation.
-
