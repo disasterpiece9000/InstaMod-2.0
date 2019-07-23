@@ -113,7 +113,7 @@ The settings for InstaMod uses the .ini format and is read from a wiki page on t
 | Key | Description | Values |
 | ----------- | ----------- | ----------- |
 | metric | Data point used for criteria | total comment karma, total post karma, total karma, comment karma, post karma, positive comments, negative comments, positive posts, negative posts, positive QC, negative QC, or net QC |
-| target subs | Which subreddit(s) to pull the metric from. This data will be totaled to make the user value | A sub group name, a subgroup name appended with " - abbrev" to total all subreddits in the group with a matching abbreviation (Ex: SUB GROUP 1 - CC), or ALL to include data from every sub in the user's history. If total comment karma or total post karma are selected for metric then this section is ignored |
+| target subs | Which subreddit(s) to pull the metric from | <ul><li>Sub group name: SUB GROUP 1</li><li>Sub group name appended with " - abbrev": SUB GROUP 1 - CC</li><li>Subreddit name: CryptoCurrency</li><li>ALL to include data from every sub in the user's history</li></ul> If total comment karma or total post karma are selected for metric then this section is ignored|
 | comparison | Type of comparison to make between the user's value and the target value (Ex: user value >= target value) | \>, <, >=, <= |
 | target value | Value for the right side of the comparison | Any integer |
 
@@ -127,7 +127,7 @@ The settings for InstaMod uses the .ini format and is read from a wiki page on t
 | Key | Description | Values |
 | ----------- | ----------- | ----------- |
 | metric | Data point used for criteria | total comment karma, total post karma, total karma, comment karma, post karma, positive comments, negative comments, positive posts, negative posts, positive QC, negative QC, or net QC |
-| target subs | Which sub(s) to pull the metric from | A sub group name, a subgroup name appended with " - abbrev" to total all subreddits in the group with a matching abbreviation (Ex: SUB GROUP 1 - CC), or ALL to include data from every sub in the user's history. If total comment karma or total post karma are selected for metric then this section is ignored |
+| target subs | Which subreddit(s) to pull the metric from | <ul><li>Sub group name: SUB GROUP 1</li><li>Sub group name appended with " - abbrev": SUB GROUP 1 - CC</li><li>Subreddit name: CryptoCurrency</li><li>ALL to include data from every sub in the user's history</li></ul> If total comment karma or total post karma are selected for metric then this section is ignored|
 | group subs | Subreddits from the sub group can either be processed individually or as a group (all values are totaled) | True or False |
 | comparison | Type of comparison to make between the user's value and the target value (Ex: user value >= target value) | \>, <, >=, <= |
 | target value | Value for the right side of the comparison | Any integer |
@@ -149,7 +149,7 @@ The settings for InstaMod uses the .ini format and is read from a wiki page on t
 | Key | Description | Values |
 | ----------- | ----------- | ----------- |
 | metric | Data point used for criteria | total comment karma, total post karma, total karma, comment karma, post karma, positive comments, negative comments, positive posts, negative posts, positive QC, negative QC, or net QC |
-| target subs | Which sub(s) to pull the metric from | A sub group name, a subgroup name appended with " - abbrev" to total all subreddits in the group with a matching abbreviation (Ex: SUB GROUP 1 - CC), or ALL to include data from every sub in the user's history. If total comment karma or total post karma are selected for metric then this section is ignored|
+| target subs | Which subreddit(s) to pull the metric from | <ul><li>Sub group name: SUB GROUP 1</li><li>Sub group name appended with " - abbrev": SUB GROUP 1 - CC</li><li>Subreddit name: CryptoCurrency</li><li>ALL to include data from every sub in the user's history</li></ul> If total comment karma or total post karma are selected for metric then this section is ignored|
 | comparison | Type of comparison to make between the user's value and the target value (Ex: user value >= target value) | \>, <, >=, <= |
 | target value | Value for the right side of the comparison | Any integer |
 
