@@ -17,11 +17,7 @@ To get a better idea of the customization options available, please check out th
 * [/r/CryptoTechnology](https://www.reddit.com/r/CryptoTechnology)
 * [/r/CryptoMarkets](https://www.reddit.com/r/CryptoMarkets)
 
-## Features
-
-### Toxicity Report
-
-Using the [Perspective API](https://www.perspectiveapi.com/#/home), InstaMod can instantly identify toxic comments and take action before anyone even reads it. Depending on how confident the API is that the comment is toxic, it can either be reported, marked as spam, or outright removed. This is a powerful tool for improving the quality and civility of conversations in a community.
+## Launch Features
 
 ### User Tiers
 
@@ -30,6 +26,13 @@ As a user participates more and more in the community, their flair can change to
 ### Activity Tags
 
 Moderators can configure InstaMod to include information about user' account history in their flair . It could display a user's top 3 most used related communities, or it could be setup to display the subreddits where the user has been consistently downvoted. These are just a few examples of the endless combinations of settings at your disposal.
+
+## Post-Launch Features
+
+### Toxicity Report
+
+Using the [Perspective API](https://www.perspectiveapi.com/#/home), InstaMod can instantly identify toxic comments and take action before anyone even reads it. Depending on how confident the API is that the comment is toxic, it can either be reported, marked as spam, or outright removed. This is a powerful tool for improving the quality and civility of conversations in a community.
+
 
 ### Custom Ratelimiting
 
