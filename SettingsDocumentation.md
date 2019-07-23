@@ -8,7 +8,6 @@
     * [Secondary Progression Tier Criteria](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/SettingsDocumentation.md#secondary-progression-tier-criteria)
 * **[Subreddit Activity Tags](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/SettingsDocumentation.md#subreddit-activity-tags)**
     * [Secondary Activity Tag Criteria](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/SettingsDocumentation.md#secondary-activity-tag-criteria)
-* **[Thread Lock](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/SettingsDocumentation.md#thread-lock)**
 * **[Subreddit Groups](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/SettingsDocumentation.md#subreddit-groups)**
  
  ## Editing the Settings
@@ -82,13 +81,9 @@ The settings for InstaMod uses the .ini format and is read from a wiki page on t
 | ----------- | ----------- | ----------- |
 | positive score | Comments with a score >= this meet the score criteria | Any integer |
 | positive word count | Comments with a word count >= this meet the word count criteria | Any integer > 0 or leave blank to disable |
-| positive toxicity low | Low threshold of the acceptable toxicity score range | Any integer from 0 - 99 or leave blank to disable |
-| positive toxicity high | High threshold of the acceptable toxicity score range | Any integer from 0 - 99 or leave blank to disable |
 | positive criteria type | Combination of criteria required to earn 1 positive QC | AND (all of them) or OR (at least one of them) |
 | negative score | Comments with a score <= this meet the score criteria | Any integer |
 | negative word count | Comments with a word count <= this meet the word count criteria | Any integer > 0 or leave blank to disable |
-| negative toxicity low | Low threshold of the unacceptable toxicity score range | Any integer from 0 - 99 or leave blank to disable |
-| negative toxicity high | High threshold of the unacceptable toxicity score range | Any integer from 0 - 99 or leave blank to disable |
 | negative criteria type | Combination of criteria required to earn 1 negative QC | AND (all of them) or OR (at least one of them) |
 
 ## Progression Tiers
@@ -118,7 +113,7 @@ The settings for InstaMod uses the .ini format and is read from a wiki page on t
 | Key | Description | Values |
 | ----------- | ----------- | ----------- |
 | metric | Data point used for criteria | total comment karma, total post karma, total karma, comment karma, post karma, positive comments, negative comments, positive posts, negative posts, positive QC, negative QC, or net QC |
-| target subs | Which subreddit(s) to pull the metric from. This data will be totaled to make the user value | A sub group name or ALL to include data from every sub in the user's history. If total comment karma or total post karma are selected for metric then this section is ignored |
+| target subs | Which subreddit(s) to pull the metric from. This data will be totaled to make the user value | A sub group name, a subgroup name appended with " - abbrev" to total all subreddits in the group with a matching abbreviation (Ex: SUB GROUP 1 - CC), or ALL to include data from every sub in the user's history. If total comment karma or total post karma are selected for metric then this section is ignored |
 | comparison | Type of comparison to make between the user's value and the target value (Ex: user value >= target value) | \>, <, >=, <= |
 | target value | Value for the right side of the comparison | Any integer |
 
@@ -132,7 +127,7 @@ The settings for InstaMod uses the .ini format and is read from a wiki page on t
 | Key | Description | Values |
 | ----------- | ----------- | ----------- |
 | metric | Data point used for criteria | total comment karma, total post karma, total karma, comment karma, post karma, positive comments, negative comments, positive posts, negative posts, positive QC, negative QC, or net QC |
-| target subs | Which sub(s) to pull the metric from | A sub group name or ALL to include data from every sub in the user's history. If total comment karma or total post karma are selected for metric then this section is ignored |
+| target subs | Which sub(s) to pull the metric from | A sub group name, a subgroup name appended with " - abbrev" to total all subreddits in the group with a matching abbreviation (Ex: SUB GROUP 1 - CC), or ALL to include data from every sub in the user's history. If total comment karma or total post karma are selected for metric then this section is ignored |
 | group subs | Subreddits from the sub group can either be processed individually or as a group (all values are totaled) | True or False |
 | comparison | Type of comparison to make between the user's value and the target value (Ex: user value >= target value) | \>, <, >=, <= |
 | target value | Value for the right side of the comparison | Any integer |
@@ -154,26 +149,11 @@ The settings for InstaMod uses the .ini format and is read from a wiki page on t
 | Key | Description | Values |
 | ----------- | ----------- | ----------- |
 | metric | Data point used for criteria | total comment karma, total post karma, total karma, comment karma, post karma, positive comments, negative comments, positive posts, negative posts, positive QC, negative QC, or net QC |
-| target subs | Which sub(s) to pull the metric from | A sub group name or ALL to include data from every sub in the user's history. If total comment karma or total post karma are selected for metric then this section is ignored |
+| target subs | Which sub(s) to pull the metric from | A sub group name, a subgroup name appended with " - abbrev" to total all subreddits in the group with a matching abbreviation (Ex: SUB GROUP 1 - CC), or ALL to include data from every sub in the user's history. If total comment karma or total post karma are selected for metric then this section is ignored|
 | group subs | Subreddits from the sub group can either be processed individually or as a group (all values are totaled) | True or False |
 | comparison | Type of comparison to make between the user's value and the target value (Ex: user value >= target value) | \>, <, >=, <= |
 | target value | Value for the right side of the comparison | Any integer |
 
-## Thread Lock
-
-**Section Name:** [THREAD LOCK 1]
-* **Note:** Each subsequent thread lock must increment the number at the end. If a number is skipped then the thread lock will not be seen.
-
-**Description:** Criteria for a user to be able to post in a locked thread
-
-| Key | Description | Values |
-| ----------- | ----------- | ----------- |
-| metric | Data point used for criteria | total comment karma, total post karma, total karma, comment karma, post karma, positive comments, negative comments, positive posts, negative posts, positive QC, negative QC, or net QC |
-| target subs | Which subreddit(s) to pull the metric from. This data will be totaled to make the user value | A sub group name or ALL to include data from every sub in the user's history. If total comment karma or total post karma are selected for metric then this section is ignored |
-| comparison | Type of comparison to make between the user's value and the target value (Ex: user value >= target value) | \>, <, >=, <= |
-| target value | Value for the right side of the comparison | Any integer |
-| flair ID | Post's flair text that signifies a thread is locked by this criteria | Any text |
-| action | Moderator action taken against commenters that do not meet the criteria | REMOVE, REPORT, or SPAM |
 
 ## Subreddit Groups
 
