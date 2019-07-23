@@ -1,3 +1,7 @@
+# TODO: Split file into different types of flair modules
+# TODO: Secondary activity flair is automatically grouped
+# TODO: Restructure activity flair to match diagram
+
 import time
 
 
@@ -62,30 +66,57 @@ def make_activity_flair(user, sub):
         option_name = "ACTIVITY TAG " + str(option_count)
         option_count += 1
         
+        # Process main option
         if option_name in activity_options:
             main_option = activity_options[option_name]
             sub_group_name = main_option["target subs"]
             group_subs = main_option.getboolean("group subs")
+            sub_list = []
 
-            # TODO: Rework method so that AND/OR is always checked
+            # TODO: Handle specified abbrev w/ sub group
+            # TODO: Handle "ALL" option
+            
+            # Create list with sub names from sub group that match specified abbrev
             if "-" in sub_group_name:
-                # Get abbreviation from string
+                # Get abbrev from string
                 dash_index = sub_group_name.find("-")
                 target_abbrev = sub_group_name[dash_index + 1:].strip()
                 sub_group = sub.sub_groups[sub_group_name[:dash_index].strip()]
-                sub_list = [name for name, abbrev in sub_group.itema() if abbrev == target_abbrev]
-                
+                sub_list = [name for name, abbrev in sub_group.items() if abbrev == target_abbrev]
+            
+            # Create list with all sub names from sub group
+            else:
+                sub_list = list(sub.sub_groups[sub_group_name].keys())
+            
+            # Check option result
+            main_result = False
+            and_result = True
+            or_result = True
+            
+            main_value = None
+            and_value = None
+            or_value = None
+
+            option_name_and = option_name + " - AND"
+            option_name_or = option_name + " - OR"
+            
             # Subs are treated as a group
             if group_subs:
-                sub_group = sub.sub_groups[sub_group_name]
-                sub_list = list(sub_group.keys())
                 # Get cumulative user value
                 user_value = get_user_value(main_option["metric"], sub_list, user, sub)
                 target_value = main_option.getint("target value")
                 comparison = main_option["comparison"]
                 
-                if not check_value(user_value, comparison, target_value):
-                    continue
+                main_data = check_activity(user, sub, sub_list, main_option)
+                main_result = main_data[0]
+                main_value = main_data[1]
+                
+            else:
+                for sub_name in sub_list:
+                    main_data = check_activity(user, sub, [sub_name], main_option)
+                    main_result = main_data[0]
+                    main_value = main_data[1]
+                    
 
                 # TODO: Rework method so that AND/OR is always checked
                 
@@ -105,14 +136,13 @@ def make_activity_flair(user, sub):
             
             # Subs are treated as individuals
             else:
-                sub_group = sub.sub_groups[sub_group_name]
-                abbrev_list = list(set(sub_group.values()))
-                for abbrev in abbrev_list:
-                    main_data = check_activity(user, sub, abbrev, main_option, sub_group)
+                for sub_name in sub_list:
+                    main_data = check_activity(user, sub, [sub_name], main_option)
                     main_result = main_data[0]
                     main_value = main_data[1]
                     
                     # If the first result is False then move to next tag
+                    # TODO: If main is false then OR should still be checked
                     if not main_result:
                         continue
                     
@@ -124,13 +154,13 @@ def make_activity_flair(user, sub):
                     
                     if option_name_and in activity_options:
                         and_option = activity_options[option_name_and]
-                        and_data = check_activity(user, sub, abbrev, and_option, sub_group)[0]
+                        and_data = check_activity(user, sub, abbrev, and_option)[0]
                         and_result = and_data[0]
                         and_value = and_data[1]
                         
                     elif option_name_or in activity_options:
                         or_option = activity_options[option_name_or]
-                        or_data = check_activity(user, sub, abbrev, or_option, sub_group)[0]
+                        or_data = check_activity(user, sub, abbrev, or_option)[0]
                         or_result = or_data[0]
                         or_value = or_data[1]
                         
@@ -210,17 +240,11 @@ def make_new_accnt_flair(user, sub):
 
 
 # Get user value from a specific sub (and subs that share the same abbreviation)
-def check_activity(user, sub, target_abbrev, option, sub_group):
+def check_activity(user, sub, sub_list, option):
     target_value = int(option["target value"])
     metric = option["metric"]
     comparison = option["comparison"]
     
-    # Get subreddits that have the same abbreviation
-    sub_list = []
-    for sub_name, abbrev in sub_group.items():
-        if abbrev == target_abbrev:
-            sub_list.append(sub_name)
-            
     user_value = get_user_value(metric, sub_list, user, sub)
     activity_result = check_value(user_value, comparison, target_value)
     
