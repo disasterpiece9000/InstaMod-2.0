@@ -91,7 +91,7 @@ The settings for InstaMod uses the .ini format and is read from a wiki page on t
 **Section Name:** [PROGRESSION TIER 1] 
 * **Note:** Each subsequent tier must increment the number at the end. If a number is skipped then the tier will not be seen.
 
-**Description:** Criteria for a user to be placed in the given tier. This section supports secondary criteria.
+**Description:** Sort users into tiers based on their account activity. This section supports secondary criteria.
 
 | Key | Description | Values |
 | ----------- | ----------- | ----------- |
@@ -122,7 +122,7 @@ The settings for InstaMod uses the .ini format and is read from a wiki page on t
 **Section Name:** [ACTIVITY TAG 1]
 * **Note:** Each subsequent tag must increment the number at the end. If a number is skipped then the tag will not be seen.
 
-**Description:** Criteria for a user to receive flair text for the given tag. This section supports secondary criteria.
+**Description:** Add tags to users flair . This section supports secondary criteria.
 
 | Key | Description | Values |
 | ----------- | ----------- | ----------- |
