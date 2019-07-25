@@ -10,7 +10,6 @@ def fetch_queue(comment_queue, flair_queue, perm_queue, sub_list):
         comment = comment_queue.get()
         comment_queue.task_done()
         user = comment.author
-        username = str(user)
         
         # Find sub that the comment was placed in
         target_sub = None
@@ -49,14 +48,12 @@ def fetch_queue(comment_queue, flair_queue, perm_queue, sub_list):
             FlairManager.update_flair(flair_queue, perm_queue, comment.author, target_sub, prog_flair_enabled,
                                       new_accnt_flair_enabled, activity_flair_enabled)
         else:
-            print("")
+            print("All flair settings disabled")
 
 
 def skip_user(user, target_sub):
-    whitelisted_usernames = (target_sub.flair_config["user whitelist"].replace(" ", "")).split(",")
     username = str(user)
-    if user not in target_sub.mods and username not in whitelisted_usernames:
+    if user not in target_sub.mods and username not in target_sub.flair_config["user whitelist"]:
         return False
     else:
         return True
-    

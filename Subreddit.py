@@ -20,19 +20,23 @@ class Subreddit:
         #config.read_string(self.sub.wiki["InstaModTest"].content_md)
         self.main_config = config["MAIN CONFIG"]
         self.flair_config = config["FLAIR"]
+        # Turn comma delimited string into a list of usernames
+        self.flair_config["user whitelist"] = self.flair_config["user whitelist"].replace(" ", "").split(",")
         self.qc_config = config["QUALITY COMMENTS"]
+        # Process sections with secondary criteria
         self.progression_tiers = self.load_nested_config("PROGRESSION TIER", config)
         self.sub_activity = self.load_nested_config("ACTIVITY TAG", config)
         self.sub_groups = self.load_nested_config("SUB GROUP", config)
+        # Setup the sub's database
         self.db = Database(self.folder_name)
     
     # Process config options with multiple tiers
-    # Tiers increment in number and each tier can have one sub-tier (AND or OR)
     @staticmethod
     def load_nested_config(main_name, config):
         hold_config = {}
         tier_count = 1
-        
+
+        # Tiers increment in number and each tier can have one sub-tier (AND or OR)
         while True:
             tier_name = main_name + " " + str(tier_count)
             tier_count += 1
@@ -52,5 +56,5 @@ class Subreddit:
             # Last tier was discovered
             else:
                 break
-        
+
         return hold_config

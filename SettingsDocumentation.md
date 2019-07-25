@@ -17,14 +17,14 @@ The settings for InstaMod uses the .ini format and is read from a wiki page on t
  **Keys**
  
 * Every key has a name and a value, delimited by an equals sign (=). The name appears to the left of the equals sign and the value appears to the right. 
-* The key cannot contain the characters equal sign ( = ), semicolon ( ; ), or hashtag ( # ) as these are reserved characters. However, the value can contain any character. 
+* The key cannot contain the characters equal sign ( = ), semicolon ( ; ), or hashbang ( # ) as these are reserved characters. However, the value can contain any character.
 * Keys cannot contain duplicate names within the same section.
  
  **Sections**
  
 * Keys are grouped into sections. The section name appears on a line by itself, in square brackets ( \[ ] ). All keys after the section declaration are associated with that section. There is no explicit "end of section" delimiter; sections end at the next section declaration, or the end of the file. Sections may not be nested.
 * All sections listed in the documentation and the sample settings file must be present, even if the section is disabled. This does not include secondary criteria sections. 
-* Each section must contain all it's coresponding keys. A key's value can only be left blank if specified in the documentation.
+* Each section must contain all it's corresponding keys. A key's value can only be left blank if specified in the documentation.
 
 **Other**
 
@@ -68,7 +68,7 @@ The settings for InstaMod uses the .ini format and is read from a wiki page on t
 | Key | Description | Values |
 | ----------- | ----------- | ----------- |
 | flair expiration | The number of days until a user's flair is reevaluated | Any integer > 0 |
-| new account age | The number of months an account must be younger than to be considerd new | Any integer >= 0 |
+| new account age | The number of months an account must be younger than to be considered new | Any integer >= 0 |
 | approved icons | A list of icons available to users with the "FLAIR CSS" permission |  A comma delimited list of icon ids |
 
 ## Quality Comments
@@ -132,10 +132,10 @@ The settings for InstaMod uses the .ini format and is read from a wiki page on t
 | comparison | Type of comparison to make between the user's value and the target value (Ex: user value >= target value) | \>, <, >=, <= |
 | target value | Value for the right side of the comparison | Any integer |
 | display value | The user value and metric name can be appended to the tag's text. If a secondary criteria is given, the parent section's user value and metric are used. | True or False |
-| sort | The order (based on user value) which subreddits that meet the criteria are displayed in the tag's text. This option is disabled if group subs is set to True | MOST COMMON (high to low), LEAST COMMON (low to high), or leave blank for random sort |
+| sort | The order (based on user value) which subreddits that meet the criteria are displayed in the tag's text. This option is disabled if group subs is set to True | MOST COMMON (high to low) or LEAST COMMON (low to high)\nThis section defaults to most common if left blank |
 | sub cap | The maximum number of subreddits listed for the tag's text. This option is disabled if group subs is set to True | Any positive integer
 | pre text | Text that comes before the subreddit's abbreviation in the tag's text. If group subs is set to True, then their is no abbreviation added to the tag | Any text or leave empty for none |
-| post text | Text that comes after the subreddit's abbreviation in the tag's text. If group subs is set to True, then their is no abbreviation added to the tag | Any text or leave empty for none |
+| post text | Text that comes after the subreddit's abbreviation (or after the user value if display value = True) in the tag's text. If group subs is set to True, then their is no abbreviation added to the tag | Any text or leave empty for none |
 | permissions | Permission granted if the user meets the criteria | CUSTOM FLAIR, CUSTOM CSS, or leave blank for none |
 
 

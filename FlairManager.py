@@ -1,6 +1,6 @@
 import time
-from ActivityFlair import ActivityFlair as af
-from ProgFlair import ProgFlair as pf
+from ActivityFlair import make_activity_flair
+from ProgFlair import make_prog_flair
 
 
 # Get new flair for all enabled options
@@ -15,7 +15,7 @@ def update_flair(flair_queue, perm_queue, user, sub, prog_flair_enabled,
     
     # Progression Flair
     if prog_flair_enabled:
-        prog_data = pf.make_prog_flair(user, sub)
+        prog_data = make_prog_flair(user, sub)
         prog_flair = prog_data[0]
         css = prog_data[1]
         if prog_data[2] != "None":
@@ -27,7 +27,7 @@ def update_flair(flair_queue, perm_queue, user, sub, prog_flair_enabled,
         
     # Activity Flair
     if activity_flair_enabled:
-        activity_data = af.make_activity_flair(user, sub)
+        activity_data = make_activity_flair(user, sub)
         activity_flair = activity_data[0]
         permissions.append(activity_data[1])
         
@@ -58,6 +58,7 @@ def make_new_accnt_flair(user, sub):
     min_accnt_age = int(sub.flair_config["young account age"])
     user_created = sub.db.fetch_info_table(username, "date created")
     current_time = int(time.time())
+    # Convert seconds to months
     month_diff = int((current_time - user_created) / 2629746)
     
     if month_diff <= min_accnt_age:
@@ -84,6 +85,3 @@ def concat_flair(prog_flair, new_accnt_flair, activity_flair):
             flair_txt += hold_flair + " "
     
     return flair_txt
-
-
-
