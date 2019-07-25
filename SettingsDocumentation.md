@@ -96,9 +96,9 @@ The settings for InstaMod uses the .ini format and is read from a wiki page on t
 | Key | Description | Values |
 | ----------- | ----------- | ----------- |
 | metric | Data point used for criteria | total comment karma, total post karma, total karma, comment karma, post karma, positive comments, negative comments, positive posts, negative posts, positive QC, negative QC, or net QC |
-| target subs | Which subreddit(s) to pull the metric from | <ul><li>Sub group name: SUB GROUP 1</li><li>Sub group name appended with " - abbrev": SUB GROUP 1 - CC</li><li>Subreddit name: CryptoCurrency</li><li>ALL to include data from every sub in the user's history</li></ul> If total comment karma or total post karma are selected for metric then this section is ignored|
 | comparison | Type of comparison to make between the user's value and the target value (Ex: user value >= target value) | \>, <, >=, <= |
 | target value | Value for the right side of the comparison | Any integer |
+| target subs | Which subreddit(s) to pull the metric from | <ul><li>Sub group name: SUB GROUP 1</li><li>Sub group name appended with " - abbrev": SUB GROUP 1 - CC</li><li>Subreddit name: CryptoCurrency</li><li>ALL to include data from every sub in the user's history</li></ul> If total comment karma or total post karma are selected for metric then this section is ignored|
 | flair text | Flair text assigned if the user meets the criteria | Any text with no more than 64 characters or leave blank for none |
 | flair css | Flair CSS assigned if the user meets the criteria | Any valid flair CSS ID or leave blank for none |
 | permissions | Permission granted if the user meets the criteria | CUSTOM FLAIR, CUSTOM CSS, or leave blank for none |
@@ -113,9 +113,9 @@ The settings for InstaMod uses the .ini format and is read from a wiki page on t
 | Key | Description | Values |
 | ----------- | ----------- | ----------- |
 | metric | Data point used for criteria | total comment karma, total post karma, total karma, comment karma, post karma, positive comments, negative comments, positive posts, negative posts, positive QC, negative QC, or net QC |
-| target subs | Which subreddit(s) to pull the metric from | <ul><li>Sub group name: SUB GROUP 1</li><li>Sub group name appended with " - abbrev": SUB GROUP 1 - CC</li><li>Subreddit name: CryptoCurrency</li><li>ALL to include data from every sub in the user's history</li></ul> If total comment karma or total post karma are selected for metric then this section is ignored|
 | comparison | Type of comparison to make between the user's value and the target value (Ex: user value >= target value) | \>, <, >=, <= |
 | target value | Value for the right side of the comparison | Any integer |
+| target subs | Which subreddit(s) to pull the metric from | <ul><li>Sub group name: SUB GROUP 1</li><li>Sub group name appended with " - abbrev": SUB GROUP 1 - CC</li><li>Subreddit name: CryptoCurrency</li><li>ALL to include data from every sub in the user's history</li></ul> If total comment karma or total post karma are selected for metric then this section is ignored|
 
 ## Subreddit Activity Tags
 
@@ -127,9 +127,9 @@ The settings for InstaMod uses the .ini format and is read from a wiki page on t
 | Key | Description | Values |
 | ----------- | ----------- | ----------- |
 | metric | Data point used for criteria | total comment karma, total post karma, total karma, comment karma, post karma, positive comments, negative comments, positive posts, negative posts, positive QC, negative QC, or net QC |
-| target subs | Which subreddit(s) to pull the metric from | <ul><li>Sub group name: SUB GROUP 1</li><li>Sub group name appended with " - abbrev": SUB GROUP 1 - CC</li><li>Subreddit name: CryptoCurrency</li><li>ALL to include data from every sub in the user's history</li></ul> If total comment karma or total post karma are selected for metric then this section is ignored|
-| group subs | Subreddits from the sub group can either be processed individually or as a group (all values are totaled) | True or False |
 | comparison | Type of comparison to make between the user's value and the target value (Ex: user value >= target value) | \>, <, >=, <= |
+| target subs | Which subreddit(s) to pull the metric from | <ul><li>Sub group name: SUB GROUP 1</li><li>Sub group name appended with " - abbrev": SUB GROUP 1 - CC</li><li>Subreddit name: CryptoCurrency</li><li>ALL to include data from every sub in the user's history</li></ul> If total comment karma or total post karma are selected for metric then this section is ignored|
+| combine subs | Subreddits from the sub group can either be processed individually or as a group (all values are totaled) | True or False |
 | target value | Value for the right side of the comparison | Any integer |
 | display value | The user value and metric name can be appended to the tag's text. If a secondary criteria is given, the parent section's user value and metric are used. | True or False |
 | sort | The order (based on user value) which subreddits that meet the criteria are displayed in the tag's text. This option is disabled if group subs is set to True | MOST COMMON (high to low) or LEAST COMMON (low to high)\nThis section defaults to most common if left blank |
@@ -149,9 +149,9 @@ The settings for InstaMod uses the .ini format and is read from a wiki page on t
 | Key | Description | Values |
 | ----------- | ----------- | ----------- |
 | metric | Data point used for criteria | total comment karma, total post karma, total karma, comment karma, post karma, positive comments, negative comments, positive posts, negative posts, positive QC, negative QC, or net QC |
-| target subs | Which subreddit(s) to pull the metric from | <ul><li>Sub group name: SUB GROUP 1</li><li>Sub group name appended with " - abbrev": SUB GROUP 1 - CC</li><li>Subreddit name: CryptoCurrency</li><li>ALL to include data from every sub in the user's history</li></ul> If total comment karma or total post karma are selected for metric then this section is ignored|
 | comparison | Type of comparison to make between the user's value and the target value (Ex: user value >= target value) | \>, <, >=, <= |
 | target value | Value for the right side of the comparison | Any integer |
+| target subs | Which subreddit(s) to pull the metric from | <ul><li>Sub group name: SUB GROUP 1</li><li>Sub group name appended with " - abbrev": SUB GROUP 1 - CC</li><li>Subreddit name: CryptoCurrency</li><li>ALL to include data from every sub in the user's history</li></ul> If total comment karma or total post karma are selected for metric then this section is ignored|
 
 
 ## Subreddit Groups

@@ -155,34 +155,32 @@ class Database:
     
     # Generic getter method for Account History table
     def fetch_hist_table(self, username, sub_list, key):
+        name_list = [data[0] for data in sub_list]
         select_key = self.find_key(key, self.TABLE_ACCNT_ACTIVITY)
         cur = self.conn.cursor()
-        
-        # Sum all rows belonging to the user
-        if sub_list == "ALL":
-            select_str = ("SELECT SUM(" + select_key + ") FROM " + self.TABLE_ACCNT_ACTIVITY
-                          + " WHERE " + self.KEY2_USERNAME + " = ?")
-
-            cur.execute(select_str, (username,))
-            data = cur.fetchone()
-            if data is not None:
-                return data[0]
-            else:
-                return None
 
         # Sum only the specified rows (subreddits)
-        else:
-            select_str = ("SELECT " + select_key + " FROM " + self.TABLE_ACCNT_ACTIVITY
-                          + " WHERE " + self.KEY2_USERNAME + " = ? AND "
-                          + self.KEY2_SUB_NAME + " = ?")
-            
-            value = 0
-            for sub in sub_list:
-                cur.execute(select_str, (username, sub))
-                data = cur.fetchone()
-                if data is not None:
-                    value += data[0]
-            return value
+        select_str = ("SELECT " + select_key + " FROM " + self.TABLE_ACCNT_ACTIVITY
+                      + " WHERE " + self.KEY2_USERNAME + " = ? AND "
+                      + self.KEY2_SUB_NAME + " = ?")
+        
+        value = 0
+        for name in name_list:
+            cur.execute(select_str, (username, name))
+            data = cur.fetchone()
+            if data is not None:
+                value += data[0]
+        return value
+        
+    # Get a list of all subreddits the user has a history in
+    def get_all_subs(self, username):
+        cur = self.conn.cursor()
+        select_str = ("SELECT " + self.KEY2_SUB_NAME + " FROM " + self.TABLE_ACCNT_ACTIVITY
+                      + " WHERE " + self.KEY2_USERNAME + " = ?")
+        cur.execute(select_str, (username,))
+        rows = cur.fetchall()
+        
+        return [row[0] for row in rows]
         
     # Update a user's permissions
     def update_perm(self, username, permission):

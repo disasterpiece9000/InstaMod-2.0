@@ -20,8 +20,6 @@ class Subreddit:
         #config.read_string(self.sub.wiki["InstaModTest"].content_md)
         self.main_config = config["MAIN CONFIG"]
         self.flair_config = config["FLAIR"]
-        # Turn comma delimited string into a list of usernames
-        self.flair_config["user whitelist"] = self.flair_config["user whitelist"].replace(" ", "").split(",")
         self.qc_config = config["QUALITY COMMENTS"]
         # Process sections with secondary criteria
         self.progression_tiers = self.load_nested_config("PROGRESSION TIER", config)

@@ -1,61 +1,54 @@
-# TODO: Consider making meta settings for each module
-# Ex: pre/post text for each flair module type
-
-# TODO: Change name for grouped, option, etc
-
 from collections import defaultdict
 
 
 # Activity flair main method
 def make_activity_flair(user, sub):
-    activity_options = sub.sub_activity
+    activity_settings = sub.sub_activity
     full_flair_text = []
     full_permissions = []
 
-    # Loop through options in order
-    option_count = 1
+    # Loop through settings in order
+    setting_count = 1
     while True:
-        option_name = "ACTIVITY TAG " + str(option_count)
-        option_count += 1
+        setting_name = "ACTIVITY TAG " + str(setting_count)
+        setting_count += 1
 
-        # Process main option
-        if option_name in activity_options:
-            main_option = activity_options[option_name]
-            group_subs = main_option.getboolean("group subs")
-            sub_list = make_sub_list(main_option, sub)
+        # Process main setting
+        if setting_name in activity_settings:
+            main_setting = activity_settings[setting_name]
+            combine_subs = main_setting.getboolean("combine subs")
+            sub_list = make_sub_list(main_setting, sub, user)
 
-            # TODO: Handle "ALL" option
             # Prepare vars to store result info
             and_result = True
             or_result = True
-            option_name_and = option_name + " - AND"
-            option_name_or = option_name + " - OR"
+            setting_name_and = setting_name + " - AND"
+            setting_name_or = setting_name + " - OR"
 
-            # Handle grouped subs
-            if group_subs:
+            # Handle combined subs
+            if combine_subs:
                 sub_names_list = [item[0] for item in sub_list]
-                main_data = check_activity(user, sub, sub_names_list, main_option)
+                main_data = check_activity(user, sub, sub_names_list, main_setting)
                 main_result = main_data[0]
                 main_value = main_data[1]
 
                 # If main result is False check OR only
                 if not main_result:
-                    if option_name_or in activity_options:
-                        or_result = check_sub_option(activity_options, option_name_or, sub, user)
+                    if setting_name_or in activity_settings:
+                        or_result = check_sub_setting(activity_settings, setting_name_or, sub, user)
 
                 # If main result is True check AND and OR
                 else:
-                    if option_name_or in activity_options:
-                        or_result = check_sub_option(activity_options, option_name_or, sub, user)
-                    elif option_name_and in activity_options:
-                        and_result = check_sub_option(activity_options, option_name_and, sub, user)
+                    if setting_name_or in activity_settings:
+                        or_result = check_sub_setting(activity_settings, setting_name_or, sub, user)
+                    elif setting_name_and in activity_settings:
+                        and_result = check_sub_setting(activity_settings, setting_name_and, sub, user)
 
                 # Process results
                 if main_result and and_result and or_result:
-                    # TODO: Fix flair concatenation with split()
-                    pre_text = main_option["pre text"]
-                    post_text = main_option["post text"]
-                    display_value = main_option.getboolean("display value")
+                    pre_text = main_setting["pre text"]
+                    post_text = main_setting["post text"]
+                    display_value = main_setting.getboolean("display value")
                     flair_text = ""
                     flair_text += pre_text + " " if pre_text else ""
                     flair_text += str(main_value) + " " if display_value else ""
@@ -66,7 +59,7 @@ def make_activity_flair(user, sub):
                         full_flair_text.append(flair_text[:len(flair_text) - 1])
 
                     # Check if there is a valid permission
-                    permission = main_option["permissions"]
+                    permission = main_setting["permissions"]
                     if permission in ["custom flair", "custom css"]:
                         full_permissions.append(permission)
 
@@ -82,50 +75,51 @@ def make_activity_flair(user, sub):
                     abbrev = data[1]
                     abbrev_dict[abbrev].append(name)
 
-                # Process subs grouped by abbrev
+                # Process subs combined by abbrev
                 for data in abbrev_dict.items():
                     abbrev = data[0]
-                    grouped_sub_list = data[1]
+                    combined_sub_list = data[1]
 
-                    main_data = check_activity(user, sub, grouped_sub_list, main_option)
+                    main_data = check_activity(user, sub, combined_sub_list, main_setting)
                     main_result = main_data[0]
                     main_value = main_data[1]
 
                     # If main result is False check OR only
                     if not main_result:
-                        if option_name_or in activity_options:
-                            or_result = check_sub_option(activity_options, option_name_or, sub, user)
+                        if setting_name_or in activity_settings:
+                            or_result = check_sub_setting(activity_settings, setting_name_or, sub, user)
 
                     # If main result is True check AND and OR
                     else:
-                        if option_name_or in activity_options:
-                            or_result = check_sub_option(activity_options, option_name_or, sub, user)
-                        elif option_name_and in activity_options:
-                            and_result = check_sub_option(activity_options, option_name_and, sub, user)
+                        if setting_name_or in activity_settings:
+                            or_result = check_sub_setting(activity_settings, setting_name_or, sub, user)
+                        elif setting_name_and in activity_settings:
+                            and_result = check_sub_setting(activity_settings, setting_name_and, sub, user)
 
                             # Process results
                             if main_result and and_result and or_result:
                                 flair_data[abbrev] = main_value
 
-                processed_data = process_flair_data(main_option, flair_data)
-                full_flair_text.append(processed_data[0])
-                # Don't append None to permissions list
+                # Add data to lists unless they are None
+                processed_data = process_flair_data(main_setting, flair_data)
+                if processed_data[0]:
+                    full_flair_text.append(processed_data[0])
                 if processed_data[1]:
                     full_permissions.append(processed_data[1])
 
-        # No more options activity tags to discover
+        # No more settings activity tags to discover
         else:
             break
     return [full_flair_text, full_permissions]
 
 
-def process_flair_data(option, flair_data):
-    sort = option["sort"]
-    sub_cap = option.getint("sub cap")
-    pre_text = option["pre text"]
-    post_text = option["post text"]
-    display_value = option.getboolean("display value")
-    permission = option["permissions"]
+def process_flair_data(setting, flair_data):
+    sort = setting["sort"]
+    sub_cap = setting.getint("sub cap")
+    pre_text = setting["pre text"]
+    post_text = setting["post text"]
+    display_value = setting.getboolean("display value")
+    permission = setting["permissions"]
 
     # Set default sort to most common
     reverse = True
@@ -150,7 +144,11 @@ def process_flair_data(option, flair_data):
         flair_text += ", "
 
     # Remove trailing " , "
-    flair_text = flair_text[:len(flair_text) - 3]
+    flair_text = flair_text[:len(flair_text) - 2]
+    flair_text = flair_text.strip()
+    # Check if text is an empty string
+    if not flair_text:
+        flair_text = None
 
     # Check if there is a valid permission
     if permission not in ["custom flair", "custom css"]:
@@ -160,37 +158,41 @@ def process_flair_data(option, flair_data):
 
 
 # Check result of secondary criteria
-def check_sub_option(activity_options, option_name, parent_sub, user):
-    option = activity_options[option_name]
-    sub_list = make_sub_list(option, parent_sub)
-    data = check_activity(user, parent_sub, sub_list, option)
+def check_sub_setting(activity_settings, setting_name, parent_sub, user):
+    setting = activity_settings[setting_name]
+    sub_list = make_sub_list(setting, parent_sub, user)
+    data = check_activity(user, parent_sub, sub_list, setting)
     return data[0]
 
 
 # Make a list of subreddit names and abbrevs based on section settings
-def make_sub_list(option, sub):
-    sub_group_name = option["target_subs"]
+def make_sub_list(setting, sub, user):
+    sub_group_name = setting["target subs"]
 
-    # Create list with sub names from sub group that match specified abbrev
-    if "-" in sub_group_name:
+    if sub_group_name == "ALL":
+        sub_list = [[name, ""] for name in sub.db.get_all_subs(str(user))]
+    
+    # Create list with sub names from sub combine that match specified abbrev
+    elif "-" in sub_group_name:
         # Get abbrev from string
         dash_index = sub_group_name.find("-")
         target_abbrev = sub_group_name[dash_index + 1:].strip()
         sub_group = sub.sub_groups[sub_group_name[:dash_index].strip()]
         sub_list = [[name, abbrev] for name, abbrev in sub_group.items() if abbrev == target_abbrev]
 
-    # Create list with all sub names from sub group
+    # Create list with all sub names from sub combine
     else:
-        sub_list = list(sub.sub_groups[sub_group_name].keys())
+        sub_group = sub.sub_groups[sub_group_name]
+        sub_list = [[name, abbrev] for name, abbrev in sub_group.items()]
 
     return sub_list
 
 
 # Get user value from a specific sub (and subs that share the same abbreviation)
-def check_activity(user, sub, sub_list, option):
-    target_value = int(option["target value"])
-    metric = option["metric"]
-    comparison = option["comparison"]
+def check_activity(user, sub, sub_list, setting):
+    target_value = int(setting["target value"])
+    metric = setting["metric"]
+    comparison = setting["comparison"]
 
     user_value = get_user_value(metric, sub_list, user, sub)
     activity_result = check_value(user_value, comparison, target_value)
