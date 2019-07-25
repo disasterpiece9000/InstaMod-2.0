@@ -53,9 +53,11 @@ def fetch_queue(comment_queue, flair_queue, perm_queue, sub_list):
 
 def skip_user(user, target_sub):
     username = str(user)
-    # Turn comma delimited string into a list of usernames
+    # Turn comma delimited string into a list of whitelisted usernames
     whitelist = target_sub.flair_config["user whitelist"].replace(" ", "").split(",")
-    if user not in target_sub.mods and username not in whitelist:
-        return False
-    else:
+    # Get user permissions
+    permissions = target_sub.db.fetch_info_table(str(user), "permissions")
+    if permissions == "custom flair" or user in target_sub.mods or username in whitelist:
         return True
+    else:
+        return False

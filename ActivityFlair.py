@@ -32,7 +32,7 @@ def make_activity_flair(user, sub):
                 main_result = main_data[0]
                 main_value = main_data[1]
 
-                # If main result is False check OR only
+                # Check OR only
                 if not main_result:
                     if setting_name_or in activity_settings:
                         or_result = check_sub_setting(activity_settings, setting_name_or, sub, user)
@@ -49,6 +49,8 @@ def make_activity_flair(user, sub):
                     pre_text = main_setting["pre text"]
                     post_text = main_setting["post text"]
                     display_value = main_setting.getboolean("display value")
+                    
+                    # Concatenate flair text
                     flair_text = ""
                     flair_text += pre_text + " " if pre_text else ""
                     flair_text += str(main_value) + " " if display_value else ""
@@ -113,6 +115,7 @@ def make_activity_flair(user, sub):
     return [full_flair_text, full_permissions]
 
 
+# Process combined sub flair data
 def process_flair_data(setting, flair_data):
     sort = setting["sort"]
     sub_cap = setting.getint("sub cap")
@@ -135,6 +138,7 @@ def process_flair_data(setting, flair_data):
     sorted_data = {abbrev: flair_data[abbrev] for abbrev in sorted(
                 flair_data, key=flair_data.get, reverse=reverse)[:sub_cap]}
 
+    # Concatenate flair text
     flair_text = ""
     for abbrev, value in sorted_data.items():
         flair_text += pre_text + " " if pre_text else ""
@@ -146,7 +150,6 @@ def process_flair_data(setting, flair_data):
     # Remove trailing " , "
     flair_text = flair_text[:len(flair_text) - 2]
     flair_text = flair_text.strip()
-    # Check if text is an empty string
     if not flair_text:
         flair_text = None
 
@@ -169,6 +172,7 @@ def check_sub_setting(activity_settings, setting_name, parent_sub, user):
 def make_sub_list(setting, sub, user):
     sub_group_name = setting["target subs"]
 
+    # Create a list of all subs with info in the database
     if sub_group_name == "ALL":
         sub_list = [[name, ""] for name in sub.db.get_all_subs(str(user))]
     

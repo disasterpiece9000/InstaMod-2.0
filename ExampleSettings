@@ -1,5 +1,3 @@
-# TODO: Check that blank values are handled correctly
-
 [MAIN CONFIG]
 progression tier = True
 young account tag = True

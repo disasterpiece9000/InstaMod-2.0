@@ -11,17 +11,19 @@ def make_prog_flair(user, sub):
         if tier_name in prog_tiers:
             main_tier = prog_tiers[tier_name]
             main_result = user_in_tier(main_tier, user, sub)
-
-            if not main_result:
-                continue
-
-            # Check for AND/OR rules
             and_result = True
             or_result = True
             tier_name_and = tier_name + " - AND"
             tier_name_or = tier_name + " - OR"
+            
+            # Check only OR
+            if not main_result:
+                if tier_name_or in prog_tiers:
+                    or_tier = prog_tiers[tier_name_or]
+                    or_result = user_in_tier(or_tier, user, sub)
 
-            if tier_name_and in prog_tiers:
+            # Check for AND/OR rules
+            elif tier_name_and in prog_tiers:
                 and_tier = prog_tiers[tier_name_and]
                 and_result = user_in_tier(and_tier, user, sub)
 
@@ -56,7 +58,7 @@ def user_in_tier(tier, user, sub):
         sub_list = list(sub.sub_groups[target_subs].keys())
 
     else:
-        sub_list = "ALL"
+        sub_list = sub.db.get_all_subs(str(user))
 
     metric = tier["metric"]
     comparison = tier["comparison"]
