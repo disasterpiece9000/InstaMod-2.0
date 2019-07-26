@@ -49,7 +49,7 @@ def make_activity_flair(user, sub):
                     pre_text = main_setting["pre text"]
                     post_text = main_setting["post text"]
                     display_value = main_setting.getboolean("display value")
-                    
+
                     # Concatenate flair text
                     flair_text = ""
                     flair_text += pre_text + " " if pre_text else ""
@@ -61,7 +61,7 @@ def make_activity_flair(user, sub):
                         full_flair_text.append(flair_text[:len(flair_text) - 1])
 
                     # Check if there is a valid permission
-                    permission = main_setting["permissions"]
+                    permission = main_setting["permissions"].lower()
                     if permission in ["custom flair", "custom css"]:
                         full_permissions.append(permission)
 
@@ -175,7 +175,7 @@ def make_sub_list(setting, sub, user):
     # Create a list of all subs with info in the database
     if sub_group_name == "ALL":
         sub_list = [[name, ""] for name in sub.db.get_all_subs(str(user))]
-    
+
     # Create list with sub names from sub combine that match specified abbrev
     elif "-" in sub_group_name:
         # Get abbrev from string
@@ -194,9 +194,9 @@ def make_sub_list(setting, sub, user):
 
 # Get user value from a specific sub (and subs that share the same abbreviation)
 def check_activity(user, sub, sub_list, setting):
-    target_value = int(setting["target value"])
-    metric = setting["metric"]
-    comparison = setting["comparison"]
+    target_value = setting.getint("target value")
+    metric = setting["metric"].lower()
+    comparison = setting["comparison"].lower()
 
     user_value = get_user_value(metric, sub_list, user, sub)
     activity_result = check_value(user_value, comparison, target_value)

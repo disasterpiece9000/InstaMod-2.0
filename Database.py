@@ -54,13 +54,13 @@ class Database:
         cur = self.conn.cursor()
         select_str = ("SELECT " + self.KEY1_USERNAME + " FROM " + self.TABLE_ACCNT_INFO
                       + " WHERE " + self.KEY1_USERNAME + " = ?")
-        
-        exists = False
-        for _ in cur.execute(select_str, (username,)):
-            exists = True
-            break
-        cur.close()
-        return exists
+
+        cur.execute(select_str, (username,))
+        data = cur.fetchone()
+        if data:
+            return True
+        else:
+            return False
     
     # Insert user data into Account Info table
     def insert_info(self, username, created, ratelimit_start, ratelimit_count, total_post_karma,

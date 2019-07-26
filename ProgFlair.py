@@ -33,7 +33,7 @@ def make_prog_flair(user, sub):
 
             # Check if user meets all the criteria (including and/or)
             if main_result and and_result and or_result:
-                return [main_tier["flair text"], main_tier["flair css"], main_tier["permissions"]]
+                return [main_tier["flair text"], main_tier["flair css"], main_tier["permissions"].lower()]
 
         # Last tier was discovered
         else:
@@ -60,9 +60,9 @@ def user_in_tier(tier, user, sub):
     else:
         sub_list = sub.db.get_all_subs(str(user))
 
-    metric = tier["metric"]
+    metric = tier["metric"].lower()
     comparison = tier["comparison"]
-    value = int(tier["target value"])
+    value = tier.getint("target value")
     user_value = get_user_value(metric, sub_list, user, sub)
 
     return check_value(user_value, comparison, value)
