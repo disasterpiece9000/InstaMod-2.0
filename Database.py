@@ -1,5 +1,15 @@
 import sqlite3
 
+# TODO: Separate tables into 2 separate databases. One for subreddit specific info and another for user data that is
+#  shared between all subreddits. The shared db will have 2 tables, one for general user info and another for sub
+#  activity
+
+# TODO: Move total post karma and total comment karma into master db
+
+# TODO: Move last scraped into master db and add last updated to sub db
+
+# TODO: Fix all method calls that are broken by these changes lol
+
 
 class Database:
     # Account Info Table
@@ -11,13 +21,13 @@ class Database:
     KEY1_POST_KARMA = "total_post_karma"
     KEY1_COMMENT_KARMA = "total_comment_karma"
     KEY1_FLAIR_TEXT = "flair_text"
-    KEY1_LAST_SCRAPED = "last_scraped"
+    KEY1_LAST_UPDATED = "last_updated"
     KEY1_PERMISSIONS = "permissions"
     CREATE_ACCNT_INFO = ("CREATE TABLE IF NOT EXISTS " + TABLE_ACCNT_INFO + " (" +
                          KEY1_USERNAME + " TEXT PRIMARY KEY, " + KEY1_DATE_CREATED + " INTEGER, " +
                          KEY1_RATELIMIT_START + " INTEGER, " + KEY1_RATELIMIT_COUNT + " INTEGER, " +
                          KEY1_POST_KARMA + " INTEGER, " + KEY1_COMMENT_KARMA + " INTEGER, " +
-                         KEY1_FLAIR_TEXT + " TEXT, " + KEY1_LAST_SCRAPED + " INTEGER, " +
+                         KEY1_FLAIR_TEXT + " TEXT, " + KEY1_LAST_UPDATED + " INTEGER, " +
                          KEY1_PERMISSIONS + " TEXT" +
                          ")")
     
@@ -43,15 +53,21 @@ class Database:
     
     # Create tables if needed
     def __init__(self, folder_name):
-        self.conn = sqlite3.connect(folder_name + "/master_databank.db", isolation_level=None, check_same_thread=False)
-        cur = self.conn.cursor()
-        cur.execute(self.CREATE_ACCNT_INFO)
-        cur.execute(self.CREATE_ACCNT_HISTORY)
-        cur.close()
+        # Connect to master and sub db
+        self.sub_conn = sqlite3.connect(folder_name + "/sub_databank.db", isolation_level=None, check_same_thread=False)
+        sub_cur = self.sub_conn.cursor()
+        self.master_conn = sqlite3.connect("master_databank.db", isolation_level=None, check_same_thread=False)
+        master_cur = self.master_conn.cursor()
+
+        # Create tables if necessary
+        sub_cur.execute(self.CREATE_ACCNT_INFO)
+        master_cur.execute(self.CREATE_ACCNT_HISTORY)
+        sub_cur.close()
+        master_cur.close()
     
     # Check if a user exists in the database
     def exists_in_db(self, username):
-        cur = self.conn.cursor()
+        cur = self.master_conn.cursor()
         select_str = ("SELECT " + self.KEY1_USERNAME + " FROM " + self.TABLE_ACCNT_INFO
                       + " WHERE " + self.KEY1_USERNAME + " = ?")
 
@@ -66,12 +82,12 @@ class Database:
     def insert_info(self, username, created, ratelimit_start, ratelimit_count, total_post_karma,
                     total_comment_karma, flair_txt, last_scraped, permissions):
         
-        cur = self.conn.cursor()
+        cur = self.sub_conn.cursor()
         insert_str = ("INSERT INTO " + self.TABLE_ACCNT_INFO + "(" + self.KEY1_USERNAME + ", "
                       + self.KEY1_DATE_CREATED + ", " + self.KEY1_RATELIMIT_START + ", "
                       + self.KEY1_RATELIMIT_COUNT + ", " + self.KEY1_POST_KARMA + ", "
                       + self.KEY1_COMMENT_KARMA + ", " + self.KEY1_FLAIR_TEXT + ", "
-                      + self.KEY1_LAST_SCRAPED + ", " + self.KEY1_PERMISSIONS + ") "
+                      + self.KEY1_LAST_UPDATED + ", " + self.KEY1_PERMISSIONS + ") "
                       + "VALUES(?,?,?,?,?,?,?,?,?)")
         
         cur.execute(insert_str, (username, created, ratelimit_start, ratelimit_count, total_post_karma,
@@ -82,11 +98,11 @@ class Database:
     def update_info(self, username, ratelimit_start, ratelimit_count, total_post_karma,
                     total_comment_karma, flair_txt, last_scraped):
         
-        cur = self.conn.cursor()
+        cur = self.sub_conn.cursor()
         update_str = ("UPDATE " + self.TABLE_ACCNT_INFO
                       + " SET " + self.KEY1_RATELIMIT_START + " = ?, " + self.KEY1_RATELIMIT_COUNT + " = ?, "
                       + self.KEY1_POST_KARMA + " = ?, " + self.KEY1_COMMENT_KARMA + " = ?, "
-                      + self.KEY1_FLAIR_TEXT + " = ?, " + self.KEY1_LAST_SCRAPED + " = ? "
+                      + self.KEY1_FLAIR_TEXT + " = ?, " + self.KEY1_LAST_UPDATED + " = ? "
                       + "WHERE " + self.KEY1_USERNAME + " = ?")
         
         cur.execute(update_str, (ratelimit_start, ratelimit_count, total_post_karma,
@@ -97,7 +113,7 @@ class Database:
     def insert_activity(self, username, sub_comment_karma, sub_pos_comments, sub_neg_comments, sub_pos_qc, sub_neg_qc,
                         sub_post_karma, sub_pos_posts, sub_neg_posts):
         
-        cur = self.conn.cursor()
+        cur = self.master_conn.cursor()
         insert_str = ("INSERT INTO " + self.TABLE_ACCNT_ACTIVITY + "("
                       + self.KEY2_USERNAME + ", " + self.KEY2_SUB_NAME + ", "
                       + self.KEY2_POSITIVE_POSTS + ", " + self.KEY2_NEGATIVE_POSTS + ", "
@@ -120,7 +136,7 @@ class Database:
     def update_activity(self, username, sub_comment_karma, sub_pos_comments, sub_neg_comments, sub_pos_qc, sub_neg_qc,
                         sub_post_karma, sub_pos_posts, sub_neg_posts):
         
-        cur = self.conn.cursor()
+        cur = self.master_conn.cursor()
         update_str = ("UPDATE " + self.TABLE_ACCNT_ACTIVITY + " SET "
                       + self.KEY2_COMMENT_KARMA + " = " + self.KEY2_COMMENT_KARMA + "+ ?, "
                       + self.KEY2_POSITIVE_COMMENTS + " = " + self.KEY2_POSITIVE_COMMENTS + "+ ?, "
@@ -144,7 +160,7 @@ class Database:
     # Generic getter method for Account Info table
     def fetch_info_table(self, username, key):
         select_key = self.find_key(key, self.TABLE_ACCNT_INFO)
-        cur = self.conn.cursor()
+        cur = self.sub_conn.cursor()
         select_str = ("SELECT " + select_key + " FROM " + self.TABLE_ACCNT_INFO
                       + " WHERE " + self.KEY1_USERNAME + " = ?")
         
@@ -157,7 +173,7 @@ class Database:
     def fetch_hist_table(self, username, sub_list, key):
         name_list = [data[0] for data in sub_list]
         select_key = self.find_key(key, self.TABLE_ACCNT_ACTIVITY)
-        cur = self.conn.cursor()
+        cur = self.master_conn.cursor()
 
         # Sum only the specified rows (subreddits)
         select_str = ("SELECT " + select_key + " FROM " + self.TABLE_ACCNT_ACTIVITY
@@ -174,7 +190,7 @@ class Database:
         
     # Get a list of all subreddits the user has a history in
     def get_all_subs(self, username):
-        cur = self.conn.cursor()
+        cur = self.master_conn.cursor()
         select_str = ("SELECT " + self.KEY2_SUB_NAME + " FROM " + self.TABLE_ACCNT_ACTIVITY
                       + " WHERE " + self.KEY2_USERNAME + " = ?")
         cur.execute(select_str, (username,))
@@ -184,7 +200,7 @@ class Database:
         
     # Update a user's permissions
     def update_perm(self, username, permission):
-        cur = self.conn.cursor()
+        cur = self.sub_conn.cursor()
         update_str = ("UPDATE " + self.TABLE_ACCNT_INFO + " SET " + self.KEY1_PERMISSIONS
                       + " = ? WHERE " + self.KEY1_USERNAME + " = ?")
         
@@ -193,7 +209,7 @@ class Database:
         
     # Update a user's flair txt
     def update_flair(self, username, flair):
-        cur = self.conn.cursor()
+        cur = self.sub_conn.cursor()
         update_str = ("UPDATE " + self.TABLE_ACCNT_INFO + " SET " + self.KEY1_FLAIR_TEXT
                       + " = ? WHERE " + self.KEY1_USERNAME + " = ?")
     
@@ -217,7 +233,7 @@ class Database:
             elif key == "flair text":
                 return self.KEY1_FLAIR_TEXT
             elif key == "last scraped":
-                return self.KEY1_LAST_SCRAPED
+                return self.KEY1_LAST_UPDATED
             elif key == "permissions":
                 return self.KEY1_PERMISSIONS
         
@@ -242,12 +258,12 @@ class Database:
                 return self.KEY2_COMMENT_KARMA
     
     # Test method pls ignore
-    def print_all_users(self, username, subname):
-        cur = self.conn.cursor()
+    def print_all_users(self, username, sub_name):
+        cur = self.master_conn.cursor()
         select_str = ("SELECT " + self.KEY2_COMMENT_KARMA + " FROM " + self.TABLE_ACCNT_ACTIVITY
                       + " WHERE " + self.KEY2_USERNAME + " = ? AND "
                       + self.KEY2_SUB_NAME + " = ?")
         
-        for row in cur.execute(select_str, (username, subname)):
+        for row in cur.execute(select_str, (username, sub_name)):
             print(row)
         cur.close()
