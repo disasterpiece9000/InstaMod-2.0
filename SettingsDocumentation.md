@@ -168,10 +168,10 @@ The settings for InstaMod uses the .ini format and is read from a wiki page on t
 | ----------- | ----------- | ----------- | ----------- |
 | !noautoflair | Prevents InstaMod from assigning automatic flair to the specified user. This allows moderators to assign a user flair without InstaMod overwriting it and without that user getting full custom flair permissions. | Moderators | True or False |
 | !giveflairperm | Gives the specified user custom flair permissions. The user will be automatically notified after the command is processed. | Moderators | True or False |
-| !updatesettings | Prompt InstaMod to re-read the wiki settings page so that settings changes can take place instantly. InstaMod automatically re-checks settings each hour | Moderators | True or False |
-| !wipe | Prompt InstaMod to remove all stored flair data and reanalyze every users flair. This will only delete data such as the last time the user was analyzed or what their current flair is. It will not delete stored user data | Moderators | True or False |
-| !updateme | Prompt InstaMod to update the senders account data and flair, regardless of if their information is out of date | All users | True or False |
-| !updatethem| Prompt InstaMod to update the specified user's account data and flair, regardless of if their information is out of date | Moderators | True or False |
+| !updatesettings | Re-read the wiki settings page so that settings changes can take place instantly. InstaMod automatically re-checks settings each hour | Moderators | True or False |
+| !wipe | Remove all stored flair data and reanalyze every users flair. This will only delete data such as the last time the user was analyzed or what their current flair is. It will not delete stored user data | Moderators | True or False |
+| !updateme | Update the senders account data and flair, regardless of if their information is out of date | All users | True or False |
+| !updatethem| Update the specified user's account data and flair, regardless of if their information is out of date | Moderators | True or False |
 
 
 ### PM Messages
