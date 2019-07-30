@@ -55,13 +55,16 @@ def fetch_queue(comment_queue, flair_queue, perm_queue, sub_list):
             print("All flair settings disabled")
 
 
+# TODO: Only update user data every 7 days at most
 # Check if user should be skipped and if their data needs to be updated or inserted
 def check_user(user, target_sub):
     # Turn comma delimited string into a list of whitelisted usernames
     whitelist = target_sub.flair_config["user whitelist"].replace(" ", "").split(",")
     username = str(user)
-    skip = False
-    update = False
+    skip = False    # Should the user be skipped over by the bot
+    update = False  # Does the user's flair need to be updated
+    # TODO: Implement check if last_scraped is expired (in addition to last_updated)
+    scrape = False  # Does the user's data need to be updated
 
     # Check if user is a mod or whitelisted
     if user in target_sub.mods or username in whitelist:

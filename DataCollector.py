@@ -8,7 +8,7 @@ ps = PushshiftAPI()
 
 
 def load_data(update, comment, sub):
-    # Account Info Table
+    # General account info
     author = comment.author
     username = str(author)
     created = author.created_utc
@@ -17,15 +17,15 @@ def load_data(update, comment, sub):
     flair_txt = next(sub.sub.flair(username))["flair_text"]
     last_scraped = int(time.time())
 
-    # Temp values
+    # Temp values for postponed ratelimit feature
     ratelimit_count = 0
     ratelimit_start = int(time.time())
 
     if update:
         # Get comments/posts that occurred after the last scrape
-        after_time = sub.db.fetch_info_table(username, "last scraped")
-        sub.db.update_info(username, ratelimit_start, ratelimit_count, total_post_karma,
-                           total_comment_karma, flair_txt, last_scraped)
+        after_time = sub.db.fetch_accnt_info(username, "last scraped")
+        sub.db.update_accnt_info(username, total_post_karma, total_comment_karma, last_scraped)
+        sub.db.update_sub_info(username, ratelimit_start, ratelimit_count, flair_txt, last_scraped)
     else:
         # Get all available comments/posts (up to 1,000 each)
         after_time = int(datetime(2000, 1, 1).timestamp())
