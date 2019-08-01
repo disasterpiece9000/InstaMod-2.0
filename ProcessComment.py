@@ -26,73 +26,76 @@ def fetch_queue(comment_queue, flair_queue, perm_queue, sub_list):
 
         # Check if the user data should be updated
         check_data = check_user(user, target_sub)
-        skip = check_data[0]
-        update = check_data[1]
-        if skip:
-            print("User was skipped: " + str(user))
-            continue
+        update_flair = check_data[0]    # Does user's flair need to be updated
+        scrape_data = check_data[1]     # Does user's data need to be updated
+        user_in_db = check_data[2]      # Does the user's data need to be updated or inserted
+        
+        # TODO: Further debugging of data collection
+        if scrape_data:
+            print("Collecting data...")
+            try:
+                DataCollector.load_data(user_in_db, update_flair, comment, target_sub)
+            except (prawcore.NotFound, prawcore.RequestException) as e:
+                print("\nError in DataCollector: \n" + str(e) + "\n")
+                continue
+            print("Done collecting data")
             
-        # Process comment and check if flair needs to be updated
-        print("Collecting data...")
-        try:
-            DataCollector.load_data(update, comment, target_sub)
-        except (prawcore.NotFound, prawcore.RequestException) as e:
-            print("\nError in DataCollector: \n" + str(e) + "\n")
-            continue
-        print("Done collecting data")
-        
-        # Read flair toggles from sub config
-        prog_flair_enabled = target_sub.main_config.getboolean("progression tier")
-        new_accnt_flair_enabled = target_sub.main_config.getboolean("young account tag")
-        activity_flair_enabled = target_sub.main_config.getboolean("activity tag")
-        
-        # If at least one flair toggle is enabled, update user flair
-        if prog_flair_enabled or new_accnt_flair_enabled or activity_flair_enabled:
-            print("Updating flair...")
-            FlairManager.update_flair(flair_queue, perm_queue, comment.author, target_sub, prog_flair_enabled,
-                                      new_accnt_flair_enabled, activity_flair_enabled)
-        else:
-            print("All flair settings disabled")
+        if update_flair:
+            # Read flair toggles from sub config
+            prog_flair_enabled = target_sub.main_config.getboolean("progression tier")
+            new_accnt_flair_enabled = target_sub.main_config.getboolean("young account tag")
+            activity_flair_enabled = target_sub.main_config.getboolean("activity tag")
+            
+            # If at least one flair toggle is enabled, update user flair
+            if prog_flair_enabled or new_accnt_flair_enabled or activity_flair_enabled:
+                print("Updating flair...")
+                FlairManager.update_flair(flair_queue, perm_queue, comment.author, target_sub, prog_flair_enabled,
+                                          new_accnt_flair_enabled, activity_flair_enabled)
+            else:
+                print("All flair settings disabled")
 
 
-# TODO: Only update user data every 7 days at most
 # Check if user should be skipped and if their data needs to be updated or inserted
 def check_user(user, target_sub):
     # Turn comma delimited string into a list of whitelisted usernames
     whitelist = target_sub.flair_config["user whitelist"].replace(" ", "").split(",")
     username = str(user)
-    skip = False    # Should the user be skipped over by the bot
-    update = False  # Does the user's flair need to be updated
-    # TODO: Implement check if last_scraped is expired (in addition to last_updated)
-    scrape = False  # Does the user's data need to be updated
+    user_in_db = target_sub.db.exists_in_db(username)
 
     # Check if user is a mod or whitelisted
     if user in target_sub.mods or username in whitelist:
-        skip = True
-        update = False
+        update_flair = False
+        scrape_data = False
 
-    # Check if the user has previously had data scraped
-    elif target_sub.db.exists_in_db(username):
+    elif user_in_db:
         # Get user permissions
-        permissions = target_sub.db.fetch_info_table(str(user), "permissions")
-        if permissions == "custom flair":
-            skip = True
-            update = True
-
-        # Check if user data is expired
-        last_seen = target_sub.db.fetch_info_table(username, "last scraped")
+        permissions = target_sub.db.fetch_sub_info_table(username, "permissions")
+        # Get time the user was last updated
+        last_updated = target_sub.db.fetch_sub_info_table(username, "last updated")
         current_time = int(time.time())
-        day_diff = int((current_time - last_seen) / 86400)
-        if day_diff >= target_sub.flair_config.getint("flair expiration"):
-            skip = False
-            update = True
+        day_diff = int((current_time - last_updated) / 86400)
+        
+        # Check if permissions override automatic flair
+        if permissions == "custom flair":
+            update_flair = False
+        # Check if flair is expired
+        elif day_diff >= target_sub.flair_config.getint("flair expiration"):
+            update_flair = True
         else:
-            skip = True
-            update = True
+            update_flair = False
 
-    # All user data needs to be pulled
+        # Check if user data has not been updated in the last 7 days
+        last_scraped = target_sub.db.fetch_accnt_info(username, "last scraped")
+        current_time = int(time.time())
+        day_diff = int((current_time - last_scraped) / 86400)
+        if day_diff > 7:
+            scrape_data = True
+        else:
+            scrape_data = False
+
+    # User hasn't been seen before - pull all account data and update flair
     else:
-        skip = False
-        update = False
+        update_flair = True
+        scrape_data = True
 
-    return [skip, update]
+    return [update_flair, scrape_data, user_in_db]

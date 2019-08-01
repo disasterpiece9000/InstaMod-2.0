@@ -6,6 +6,7 @@ import sqlite3
 
 class Database:
     # Subreddit Info Table
+    # sub_databank.db
     TABLE_SUB_INFO = "sub_info"
     KEY1_USERNAME = "username"
     KEY1_RATELIMIT_START = "ratelimit_start"
@@ -20,6 +21,7 @@ class Database:
                        ")")
     
     # Subreddit Activity Table
+    # master_databank.db
     TABLE_SUB_ACTIVITY = "sub_activity"
     KEY2_USERNAME = "username"
     KEY2_SUB_NAME = "sub_name"
@@ -40,6 +42,7 @@ class Database:
                            ")")
     
     # Account Information Table
+    # master_databank.db
     TABLE_ACCNT_INFO = "accnt_info"
     KEY3_USERNAME = "username"
     KEY3_DATE_CREATED = "date_created"
@@ -60,23 +63,20 @@ class Database:
         self.sub_info_conn = sqlite3.connect(folder_name + "/sub_databank.db", isolation_level=None,
                                              check_same_thread=False)
         sub_info_cur = self.sub_info_conn.cursor()
-        self.sub_activity = sqlite3.connect("master_databank.db", isolation_level=None, check_same_thread=False)
-        sub_activity_cur = self.sub_activity.cursor()
-        self.accnt_info = sqlite3.connect("master_databank.db", isolation_level=None, check_same_thread=False)
-        accnt_info_cur = self.accnt_info.cursor()
+        self.user_info_conn = sqlite3.connect("master_databank.db", isolation_level=None, check_same_thread=False)
+        user_info_cur = self.user_info_conn.cursor()
         
         # Create tables if necessary
         sub_info_cur.execute(self.CREATE_SUB_INFO)
-        sub_activity_cur.execute(self.CREATE_SUB_ACTIVITY)
-        accnt_info_cur.execute(self.CREATE_ACCNT_INFO)
+        user_info_cur.execute(self.CREATE_SUB_ACTIVITY)
+        user_info_cur.execute(self.CREATE_ACCNT_INFO)
         
         sub_info_cur.close()
-        sub_activity_cur.close()
-        accnt_info_cur.close()
-    
+        user_info_cur.close()
+        
     # Check if a user exists in the database
     def exists_in_db(self, username):
-        cur = self.sub_activity.cursor()
+        cur = self.user_info_conn.cursor()
         select_str = ("SELECT " + self.KEY1_USERNAME + " FROM " + self.TABLE_ACCNT_INFO
                       + " WHERE " + self.KEY1_USERNAME + " = ?")
         
@@ -89,7 +89,6 @@ class Database:
     
     # Insert user data into Sub Info table
     def insert_sub_info(self, username, ratelimit_start, ratelimit_count, flair_txt, last_updated, permissions):
-        
         cur = self.sub_info_conn.cursor()
         insert_str = ("INSERT INTO " + self.TABLE_SUB_INFO + "(" + self.KEY1_USERNAME + ", "
                       + self.KEY1_RATELIMIT_START + ", " + self.KEY1_RATELIMIT_COUNT + ", "
@@ -102,7 +101,6 @@ class Database:
     
     # Update existing user's data in Sub Info table
     def update_sub_info(self, username, ratelimit_start, ratelimit_count, flair_txt, last_updated):
-        
         cur = self.sub_info_conn.cursor()
         update_str = ("UPDATE " + self.TABLE_SUB_INFO
                       + " SET " + self.KEY1_RATELIMIT_START + " = ?, " + self.KEY1_RATELIMIT_COUNT + " = ?, "
@@ -115,8 +113,7 @@ class Database:
     # Insert user data into Account History table
     def insert_sub_activity(self, username, sub_comment_karma, sub_pos_comments, sub_neg_comments, sub_pos_qc,
                             sub_neg_qc, sub_post_karma, sub_pos_posts, sub_neg_posts):
-        
-        cur = self.sub_activity.cursor()
+        cur = self.user_info_conn.cursor()
         insert_str = ("INSERT INTO " + self.TABLE_SUB_ACTIVITY + "("
                       + self.KEY2_USERNAME + ", " + self.KEY2_SUB_NAME + ", "
                       + self.KEY2_POSITIVE_POSTS + ", " + self.KEY2_NEGATIVE_POSTS + ", "
@@ -139,7 +136,7 @@ class Database:
     def update_sub_activity(self, username, sub_comment_karma, sub_pos_comments, sub_neg_comments, sub_pos_qc,
                             sub_neg_qc, sub_post_karma, sub_pos_posts, sub_neg_posts):
         
-        cur = self.sub_activity.cursor()
+        cur = self.user_info_conn.cursor()
         update_str = ("UPDATE " + self.TABLE_SUB_ACTIVITY + " SET "
                       + self.KEY2_COMMENT_KARMA + " = " + self.KEY2_COMMENT_KARMA + "+ ?, "
                       + self.KEY2_POSITIVE_COMMENTS + " = " + self.KEY2_POSITIVE_COMMENTS + "+ ?, "
@@ -162,7 +159,7 @@ class Database:
         
     # Insert user data into Account Info table
     def insert_accnt_info(self, username, created, total_post_karma, total_comment_karma, last_scraped):
-        cur = self.accnt_info.cursor()
+        cur = self.user_info_conn.cursor()
         insert_str = ("INSERT INTO " + self.TABLE_ACCNT_INFO + "("
                       + self.KEY3_USERNAME + ", " + self.KEY3_DATE_CREATED + ", "
                       + self.KEY3_POST_KARMA + ", " + self.KEY3_COMMENT_KARMA + ", "
@@ -174,7 +171,7 @@ class Database:
         
     # Update user data in Account Info table
     def update_accnt_info(self, username, post_karma, comment_karma, last_scraped):
-        cur = self.accnt_info.cursor()
+        cur = self.user_info_conn.cursor()
         update_str = ("UPDATE " + self.TABLE_ACCNT_INFO + " SET "
                       + self.KEY3_POST_KARMA + " = ?, " + self.KEY3_COMMENT_KARMA + " = ?, "
                       + self.KEY3_LAST_SCRAPED + " = ? "
@@ -198,7 +195,7 @@ class Database:
     def fetch_sub_activity(self, username, sub_list, key):
         name_list = [data[0] for data in sub_list]
         select_key = self.find_key(key, self.TABLE_SUB_ACTIVITY)
-        cur = self.sub_activity.cursor()
+        cur = self.user_info_conn.cursor()
         
         # Sum only the specified rows (subreddits)
         select_str = ("SELECT " + select_key + " FROM " + self.TABLE_SUB_ACTIVITY
@@ -215,7 +212,7 @@ class Database:
     
     # Generic getter method for Account Info table
     def fetch_accnt_info(self, username, key):
-        cur = self.accnt_info.cursor()
+        cur = self.user_info_conn.cursor()
         select_key = self.find_key(key, self.TABLE_ACCNT_INFO)
         select_str = ("SELECT " + select_key + " FROM " + self.TABLE_ACCNT_INFO
                       + " WHERE " + self.KEY3_USERNAME + " = ?")
@@ -227,7 +224,7 @@ class Database:
     
     # Get a list of all subreddits the user has a history in
     def get_all_subs(self, username):
-        cur = self.sub_activity.cursor()
+        cur = self.user_info_conn.cursor()
         select_str = ("SELECT " + self.KEY2_SUB_NAME + " FROM " + self.TABLE_SUB_ACTIVITY
                       + " WHERE " + self.KEY2_USERNAME + " = ?")
         cur.execute(select_str, (username,))
@@ -288,24 +285,24 @@ class Database:
             if key == "comment karma":
                 return self.KEY2_COMMENT_KARMA
             
-            elif table == self.TABLE_ACCNT_INFO:
-                if key == "date created":
-                    return self.KEY3_DATE_CREATED
-                elif key == "total post karma":
-                    return self.KEY3_POST_KARMA
-                elif key == "total comment karma":
-                    return self.KEY3_COMMENT_KARMA
-                elif key == "last scraped":
-                    return self.KEY3_LAST_SCRAPED
+        elif table == self.TABLE_ACCNT_INFO:
+            if key == "date created":
+                return self.KEY3_DATE_CREATED
+            elif key == "total post karma":
+                return self.KEY3_POST_KARMA
+            elif key == "total comment karma":
+                return self.KEY3_COMMENT_KARMA
+            elif key == "last scraped":
+                return self.KEY3_LAST_SCRAPED
             
-            else:
-                print("Could not find a match for key in the given table"
-                      "\nKey: " + key + "\tTable:" + table)
-                return None
+        else:
+            print("Could not find a match for key in the given table"
+                  "\nKey: " + key + "\tTable:" + table)
+            return None
     
     # Test method pls ignore
     def print_all_users(self, username, sub_name):
-        cur = self.sub_activity.cursor()
+        cur = self.user_info_conn.cursor()
         select_str = ("SELECT " + self.KEY2_COMMENT_KARMA + " FROM " + self.TABLE_SUB_ACTIVITY
                       + " WHERE " + self.KEY2_USERNAME + " = ? AND "
                       + self.KEY2_SUB_NAME + " = ?")

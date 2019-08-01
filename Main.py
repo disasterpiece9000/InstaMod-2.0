@@ -81,15 +81,11 @@ process_thread.start()
 
 while True:
     try:
-        for comment in all_subs.stream.comments(pause_after=1, skip_existing=True):
+        for comment in all_subs.stream.comments(pause_after=1, skip_existing=False):
             if comment is None:
-                print("At none")
                 flair_users()
-                print("Past flair")
                 notify_permission_change()
-                print("Past perm")
-                read_pms()
-                print("Past pm")
+                #read_pms()
                 continue
             print("Got a comment")
             comment_queue.put(comment)
