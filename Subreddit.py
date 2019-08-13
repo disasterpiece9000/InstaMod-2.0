@@ -8,7 +8,7 @@ class Subreddit:
     def __init__(self, folder_name, r):
         self.r = r
         self.folder_name = folder_name
-        self.name = folder_name[2:]
+        self.name = folder_name[2:].lower()
         self.sub = r.subreddit(self.name)
         self.db = None
         self.start_interval = datetime.now()

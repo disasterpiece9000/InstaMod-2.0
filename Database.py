@@ -1,9 +1,6 @@
 import sqlite3
 
 
-# TODO: Add key to sub_info to track if user has enabled custom flair
-
-
 class Database:
     # Subreddit Info Table
     # sub_databank.db
@@ -16,11 +13,13 @@ class Database:
     KEY1_FLAIR_PERM = "flair_perm"
     KEY1_CSS_PERM = "css_perm"
     KEY1_CUSTOM_FLAIR_USED = "custom_flair_used"
+    KEY1_NO_AUTO_FLAIR = "no_auto_flair"
     CREATE_SUB_INFO = ("CREATE TABLE IF NOT EXISTS " + TABLE_SUB_INFO + " (" +
                        KEY1_USERNAME + " TEXT PRIMARY KEY, " + KEY1_RATELIMIT_START + " INTEGER, " +
                        KEY1_RATELIMIT_COUNT + " INTEGER, " + KEY1_FLAIR_TEXT + " TEXT, " +
                        KEY1_LAST_UPDATED + " INTEGER, " + KEY1_FLAIR_PERM + " INTEGER, " +
-                       KEY1_CSS_PERM + " INTEGER, " + KEY1_CUSTOM_FLAIR_USED + " INTEGER"
+                       KEY1_CSS_PERM + " INTEGER, " + KEY1_CUSTOM_FLAIR_USED + " INTEGER, " +
+                       KEY1_NO_AUTO_FLAIR + " INTEGER"
                        ")")
     
     # Subreddit Activity Table
@@ -93,25 +92,27 @@ class Database:
     # Insert user data into Sub Info table
     def insert_sub_info(self, username, ratelimit_start, ratelimit_count, flair_txt, last_updated):
         # Set default permissions to False
-        # These values are updated later in a separate method
+        # These values are updated at different stages
         flair_perm = 0
         css_perm = 0
         custom_flair_used = 0
+        no_auto_flair = 0
         
         cur = self.sub_info_conn.cursor()
         insert_str = ("INSERT INTO " + self.TABLE_SUB_INFO + "(" + self.KEY1_USERNAME + ", "
                       + self.KEY1_RATELIMIT_START + ", " + self.KEY1_RATELIMIT_COUNT + ", "
                       + self.KEY1_FLAIR_TEXT + ", " + self.KEY1_LAST_UPDATED + ", "
                       + self.KEY1_FLAIR_PERM + ", " + self.KEY1_CSS_PERM + ", "
-                      + self.KEY1_CUSTOM_FLAIR_USED + ") "
-                      + "VALUES(?,?,?,?,?,?,?,?)")
+                      + self.KEY1_CUSTOM_FLAIR_USED + ", " + self.KEY1_NO_AUTO_FLAIR
+                      + ") "
+                      + "VALUES(?,?,?,?,?,?,?,?,?)")
         
         cur.execute(insert_str, (username, ratelimit_start, ratelimit_count, flair_txt,
-                                 last_updated, flair_perm, css_perm, custom_flair_used))
+                                 last_updated, flair_perm, css_perm, custom_flair_used, no_auto_flair))
         cur.close()
     
     # Update existing user's data in Sub Info table
-    def update_sub_info(self, username, ratelimit_start, ratelimit_count, flair_txt, last_updated):
+    def update_row_sub_info(self, username, ratelimit_start, ratelimit_count, flair_txt, last_updated):
         cur = self.sub_info_conn.cursor()
         update_str = ("UPDATE " + self.TABLE_SUB_INFO
                       + " SET " + self.KEY1_RATELIMIT_START + " = ?, " + self.KEY1_RATELIMIT_COUNT + " = ?, "
@@ -233,47 +234,14 @@ class Database:
         cur.close()
         return value
     
-    # Get a list of all subreddits the user has a history in
-    def get_all_subs(self, username):
-        cur = self.user_info_conn.cursor()
-        select_str = ("SELECT " + self.KEY2_SUB_NAME + " FROM " + self.TABLE_SUB_ACTIVITY
-                      + " WHERE " + self.KEY2_USERNAME + " = ?")
-        cur.execute(select_str, (username,))
-        rows = cur.fetchall()
-        
-        return [row[0] for row in rows]
-    
-    # Update a user's permissions
-    def update_perm(self, username, perm_type, value):
-        # Get the permission key and check that it's valid
-        update_key = self.find_key(perm_type, self.TABLE_SUB_INFO)
-        if update_key not in [self.KEY1_FLAIR_PERM, self.KEY1_CSS_PERM]:
-            print("Invalid key passed to update_perm\nKey: " + perm_type)
-            return
-        
+    # Generic updater method for sub info table
+    def update_key_sub_info(self, username, key, value):
         cur = self.sub_info_conn.cursor()
-        update_str = ("UPDATE " + self.TABLE_SUB_INFO + " SET " + update_key
-                      + " = ? WHERE " + self.KEY1_USERNAME + " = ?")
+        update_key = self.find_key(key, self.TABLE_SUB_INFO)
+        update_str = ("UPDATE " + self.TABLE_SUB_INFO + " SET " + update_key + " = ? "
+                      + " WHERE " + self.KEY1_USERNAME + " = ?")
         
         cur.execute(update_str, (value, username))
-        cur.close()
-    
-    # Update a user's flair txt
-    def update_flair(self, username, flair):
-        cur = self.sub_info_conn.cursor()
-        update_str = ("UPDATE " + self.TABLE_SUB_INFO + " SET " + self.KEY1_FLAIR_TEXT
-                      + " = ? WHERE " + self.KEY1_USERNAME + " = ?")
-        
-        cur.execute(update_str, (flair, username))
-        cur.close()
-        
-    # Log when a user has used the custom flair perm so their flair isn't overwritten
-    def custom_flair_used(self, username):
-        cur = self.sub_info_conn.cursor()
-        update_str = ("UPDATE " + self.TABLE_SUB_INFO + " SET " + self.KEY1_CUSTOM_FLAIR_USED
-                      + " = 1 WHERE " + self.KEY1_USERNAME + " = ?")
-        
-        cur.execute(update_str, (username,))
     
     # Turn string from INI file into a key
     def find_key(self, key, table):
@@ -293,6 +261,8 @@ class Database:
                 return self.KEY1_CSS_PERM
             elif key == "custom flair used":
                 return self.KEY1_CUSTOM_FLAIR_USED
+            elif key == "no auto flair":
+                return self.KEY1_NO_AUTO_FLAIR
         
         elif table == self.TABLE_SUB_ACTIVITY:
             if key == "sub name":

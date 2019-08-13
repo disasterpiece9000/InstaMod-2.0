@@ -34,7 +34,7 @@ def load_data(user_in_db, update_flair, comment, sub):
         
         # Update database entries
         sub.db.update_accnt_info(username, total_post_karma, total_comment_karma, last_scraped)
-        sub.db.update_sub_info(username, ratelimit_start, ratelimit_count, flair_txt, last_updated)
+        sub.db.update_row_sub_info(username, ratelimit_start, ratelimit_count, flair_txt, last_updated)
     else:
         # Get all available comments/posts (up to 1,000 each)
         after_time = int(datetime(2000, 1, 1).timestamp())
