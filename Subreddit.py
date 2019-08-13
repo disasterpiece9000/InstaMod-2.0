@@ -14,9 +14,19 @@ class Subreddit:
         self.start_interval = datetime.now()
         self.mods = self.sub.moderator()
         
-        # Read config file from wiki page
+        # Prepare to read settings from wiki page
+        self.main_config = None
+        self.flair_config = None
+        self.qc_config = None
+        self.progression_tiers = None
+        self.sub_activity = None
+        self.sub_groups = None
+        self.read_config()
+    
+    # Check wiki page for settings
+    def read_config(self):
         config = ConfigParser(allow_no_value=True)
-        #config.read(self.folder_name + "/config.ini")
+        # config.read(self.folder_name + "/config.ini")
         config.read_string(self.sub.wiki["InstaModTest"].content_md)
         self.main_config = config["MAIN CONFIG"]
         self.flair_config = config["FLAIR"]

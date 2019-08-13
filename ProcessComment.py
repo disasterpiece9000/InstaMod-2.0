@@ -68,15 +68,16 @@ def check_user(user, target_sub):
         scrape_data = False
 
     elif user_in_db:
-        # Get user permissions
-        permissions = target_sub.db.fetch_sub_info_table(username, "permissions")
+        # Check if the user has used their custom flair permission
+        custom_flair_used = target_sub.db.fetch_sub_info(username, "custom flair used") == 1
+        
         # Get time the user was last updated
-        last_updated = target_sub.db.fetch_sub_info_table(username, "last updated")
+        last_updated = target_sub.db.fetch_sub_info(username, "last updated")
         current_time = int(time.time())
         day_diff = int((current_time - last_updated) / 86400)
         
-        # Check if permissions override automatic flair
-        if permissions == "custom flair":
+        # If the user has used custom flair, only update data and not flair
+        if custom_flair_used:
             update_flair = False
         # Check if flair is expired
         elif day_diff >= target_sub.flair_config.getint("flair expiration"):

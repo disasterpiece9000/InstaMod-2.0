@@ -5,7 +5,8 @@ from collections import defaultdict
 def make_activity_flair(user, sub):
     activity_settings = sub.sub_activity
     full_flair_text = []
-    full_permissions = []
+    flair_perm = False
+    css_perm = False
 
     # Loop through settings in order
     setting_count = 1
@@ -62,8 +63,10 @@ def make_activity_flair(user, sub):
 
                     # Check if there is a valid permission
                     permission = main_setting["permissions"].lower()
-                    if permission in ["custom flair", "custom css"]:
-                        full_permissions.append(permission)
+                    if permission == "custom flair":
+                        flair_perm = True
+                    elif permission == "custom css":
+                        css_perm = True
 
             # Handle individual subs
             else:
@@ -104,25 +107,34 @@ def make_activity_flair(user, sub):
 
                 # Add data to lists unless they are None
                 processed_data = process_flair_data(main_setting, flair_data)
+                if len(processed_data) != 3:
+                    print("process_flair_data didn't return all data")
                 if processed_data[0]:
                     full_flair_text.append(processed_data[0])
+                # Check if either perm returned True
                 if processed_data[1]:
-                    full_permissions.append(processed_data[1])
+                    flair_perm = True
+                elif processed_data[2]:
+                    css_perm = True
 
         # No more settings activity tags to discover
         else:
             break
-    return [full_flair_text, full_permissions]
+    return [full_flair_text, flair_perm, css_perm]
 
 
 # Process combined sub flair data
 def process_flair_data(setting, flair_data):
+    # If no subreddits meet criteria then no flair text or permissions are added
+    if len(flair_data) == 0:
+        return [None, False, False]
+    
     sort = setting["sort"]
     sub_cap = setting.getint("sub cap")
     pre_text = setting["pre text"]
     post_text = setting["post text"]
     display_value = setting.getboolean("display value")
-    permission = setting["permissions"]
+    permission = setting["permissions"].lower()
 
     # Set default sort to most common
     reverse = True
@@ -153,11 +165,14 @@ def process_flair_data(setting, flair_data):
     if not flair_text:
         flair_text = None
 
-    # Check if there is a valid permission
-    if permission not in ["custom flair", "custom css"]:
-        permission = None
+    # Process updated permissions
+    flair_perm, css_perm = False
+    if permission == "custom flair":
+        flair_perm = True
+    elif permission == "custom css":
+        css_perm = True
 
-    return [flair_text, permission]
+    return [flair_text, flair_perm, css_perm]
 
 
 # Check result of secondary criteria

@@ -1,4 +1,4 @@
-# TODO: Implement PM Messages section in config file
+# TODO: Implement PM Messages and PM Commands section in config file
 
 message_footer = ("\n\n-----\n\nThis is an automated message. "
                   "Please contact /u/shimmyjimmy97 with any questions, comments, or issues that you have.")
@@ -26,7 +26,7 @@ def process_pm(message, sub_list):
     
     # Return if the subreddit mentioned is not correct
     if target_sub is None:
-        #message.reply("The subreddit specified is not valid" + message_footer)
+        #message.reply("The specified subreddit is not valid" + message_footer)
         #message.mark_read()
         return
     
@@ -43,7 +43,8 @@ def flair_pm(message, target_sub):
     # Return if the user is not in the database yet or if they don't have proper permissions
     if not target_sub.db.exists_in_db(username) or \
             not target_sub.db.fetch_info_table(username, "permissions") == "CUSTOM FLAIR":
-        #message.reply("You have not met the requirements for custom flair" + message_footer)
+        #message.reply("You have not met the requirements for custom flair. You will be notified via a PM"
+        #              "from /u/InstaMod once your account is eligible." + message_footer)
         #message.mark_read()
         return
     
@@ -56,7 +57,7 @@ def flair_pm(message, target_sub):
         flair_css = ""
     
     # Set the flair and notify the user
-    target_sub.sub.flair.set(user, flair_txt, flair_css)
+    target_sub.sub.flair.set(username, flair_txt, flair_css)
     #message.mark_read()
     #message.reply("Your flair has been set!\n\n"
     #              "Flair Text: " + flair_txt + "\n\n"

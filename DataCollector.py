@@ -38,10 +38,9 @@ def load_data(user_in_db, update_flair, comment, sub):
     else:
         # Get all available comments/posts (up to 1,000 each)
         after_time = int(datetime(2000, 1, 1).timestamp())
-        permissions = ""
         # Insert data into accnt_info table
         sub.db.insert_accnt_info(username, created, total_post_karma, total_comment_karma, last_scraped)
-        sub.db.insert_sub_info(username, ratelimit_start, ratelimit_count, flair_txt, last_scraped, permissions)
+        sub.db.insert_sub_info(username, ratelimit_start, ratelimit_count, flair_txt, last_scraped)
     
     # Account Activity Table
     # Comments
@@ -57,6 +56,7 @@ def load_data(user_in_db, update_flair, comment, sub):
     sub_pos_qc = Counter()
     
     for comment in comment_results:
+        # Check that all data was returned
         try:
             data = comment[6]
         except IndexError as e:
@@ -127,6 +127,7 @@ def load_data(user_in_db, update_flair, comment, sub):
     sub_neg_posts = Counter()
     
     for post in post_results:
+        # Check that all data was returned
         try:
             data = post[5]
         except IndexError as e:

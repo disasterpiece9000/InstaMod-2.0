@@ -33,11 +33,22 @@ def make_prog_flair(user, sub):
 
             # Check if user meets all the criteria (including and/or)
             if main_result and and_result and or_result:
-                return [main_tier["flair text"], main_tier["flair css"], main_tier["permissions"].lower()]
+                flair_text = main_tier["flair text"]
+                flair_css = main_tier["flair css"]
+                permissions = main_tier["permissions"].lower()
+                
+                flair_perm = False
+                css_perm = False
+                if permissions == "custom flair":
+                    flair_perm = True
+                elif permissions == "custom css":
+                    css_perm = True
+                #return [main_tier["flair text"], main_tier["flair css"], main_tier["permissions"].lower()]
+                return [flair_text, flair_css, flair_perm, css_perm]
 
         # Last tier was discovered
         else:
-            return [None, None, None]
+            return [None, None, False, False]
 
 
 # Check if the user belongs in the given tier
