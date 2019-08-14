@@ -58,8 +58,8 @@ def fetch_queue(comment_queue, flair_queue, perm_queue, sub_list):
 # Check if user should be skipped and if their data needs to be updated or inserted
 def check_user(user, target_sub):
     # Turn comma delimited string into a list of whitelisted usernames
-    whitelist = target_sub.flair_config["user whitelist"].replace(" ", "").split(",")
-    username = str(user)
+    whitelist = target_sub.flair_config["user whitelist"].lower().replace(" ", "").split(",")
+    username = str(user).lower()
     user_in_db = target_sub.db.exists_in_db(username)
 
     # Check if user is a mod or whitelisted

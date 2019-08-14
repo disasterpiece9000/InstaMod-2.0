@@ -18,6 +18,8 @@ class Subreddit:
         self.main_config = None
         self.flair_config = None
         self.qc_config = None
+        self.pm_commands = None
+        self.pm_messages = None
         self.progression_tiers = None
         self.sub_activity = None
         self.sub_groups = None
@@ -31,6 +33,8 @@ class Subreddit:
         self.main_config = config["MAIN CONFIG"]
         self.flair_config = config["FLAIR"]
         self.qc_config = config["QUALITY COMMENTS"]
+        self.pm_commands = config["PM Commands"]
+        self.pm_messages = config["PM Messages"]
         # Process sections with secondary criteria
         self.progression_tiers = self.load_nested_config("PROGRESSION TIER", config)
         self.sub_activity = self.load_nested_config("ACTIVITY TAG", config)

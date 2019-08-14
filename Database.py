@@ -238,10 +238,15 @@ class Database:
     def update_key_sub_info(self, username, key, value):
         cur = self.sub_info_conn.cursor()
         update_key = self.find_key(key, self.TABLE_SUB_INFO)
+        
         update_str = ("UPDATE " + self.TABLE_SUB_INFO + " SET " + update_key + " = ? "
                       + " WHERE " + self.KEY1_USERNAME + " = ?")
-        
         cur.execute(update_str, (value, username))
+        
+    def wipe_sub_info(self):
+        cur = self.sub_info_conn.cursor()
+        delete_str = "DELETE FROM " + self.TABLE_SUB_INFO
+        cur.execute(delete_str)
     
     # Turn string from INI file into a key
     def find_key(self, key, table):

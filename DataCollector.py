@@ -10,7 +10,7 @@ ps = PushshiftAPI()
 def load_data(user_in_db, update_flair, comment, sub):
     # General account info
     author = comment.author
-    username = str(author)
+    username = str(author).lower()
     created = author.created_utc
     total_post_karma = author.link_karma
     total_comment_karma = author.comment_karma

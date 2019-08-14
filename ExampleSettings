@@ -93,6 +93,20 @@ pre text =
 post text =
 permissions =
 
+[PM Commands]
+!noautoflair = True
+!giveflairperm = True
+!updatesettings = True
+!wipe = True
+!updateme = True
+!updatethem = True
+
+[PM Messages]
+custom flair subj = Test flair subj
+custom flair body = Test flair body
+custom css subj = Test css subj
+custom css body = Test css body
+
 [SUB GROUP 1]
 CRYPTOCURRENCY = CC
 CRYPTOMARKETS = CM
