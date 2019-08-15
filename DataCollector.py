@@ -22,6 +22,7 @@ def load_data(user_in_db, update_flair, comment, sub):
     ratelimit_start = int(time.time())
     
     if user_in_db:
+        print("User in db")
         # Get comments/posts that occurred after the last scrape
         after_time = sub.db.fetch_accnt_info(username, "last scraped")
         
@@ -36,6 +37,7 @@ def load_data(user_in_db, update_flair, comment, sub):
         sub.db.update_accnt_info(username, total_post_karma, total_comment_karma, last_scraped)
         sub.db.update_row_sub_info(username, ratelimit_start, ratelimit_count, flair_txt, last_updated)
     else:
+        print("User not in db")
         # Get all available comments/posts (up to 1,000 each)
         after_time = int(datetime(2000, 1, 1).timestamp())
         # Insert data into accnt_info table

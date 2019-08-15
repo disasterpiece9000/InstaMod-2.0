@@ -6,7 +6,7 @@ from ProgFlair import make_prog_flair
 # Get new flair for all enabled options
 def update_flair(flair_queue, perm_queue, user, sub, prog_flair_enabled,
                  new_accnt_flair_enabled, activity_flair_enabled):
-    username = str(user)
+    username = str(user).lower()
     prog_flair = None
     new_accnt_flair = None
     activity_flair = None
@@ -26,7 +26,7 @@ def update_flair(flair_queue, perm_queue, user, sub, prog_flair_enabled,
             
     # New Account Flair
     if new_accnt_flair_enabled:
-        new_accnt_flair = make_new_accnt_flair(user, sub)
+        new_accnt_flair = make_new_accnt_flair(username, sub)
         
     # Activity Flair
     if activity_flair_enabled:
@@ -57,8 +57,7 @@ def update_flair(flair_queue, perm_queue, user, sub, prog_flair_enabled,
 
 
 # Main method for new account flair
-def make_new_accnt_flair(user, sub):
-    username = str(user)
+def make_new_accnt_flair(username, sub):
     min_accnt_age = int(sub.flair_config["young account age"])
     user_created = sub.db.fetch_accnt_info(username, "date created")
     current_time = int(time.time())

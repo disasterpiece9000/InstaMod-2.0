@@ -98,5 +98,9 @@ def check_user(user, target_sub):
     else:
         update_flair = True
         scrape_data = True
+        
+    print("Update flair:" + str(update_flair))
+    print("Scrape data:" + str(scrape_data))
+    print("In db:" + str(user_in_db))
 
     return [update_flair, scrape_data, user_in_db]

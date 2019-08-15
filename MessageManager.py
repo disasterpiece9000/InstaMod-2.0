@@ -1,6 +1,7 @@
 # TODO: Implement PM Messages and PM Commands section in config file
 
 # TODO: Handle the appended "Re:" from PM replies
+import DataCollector
 
 message_footer = ("\n\n-----\n\nThis is an automated message. "
                   "Please contact /u/shimmyjimmy97 with any questions, comments, or issues that you have.")
@@ -9,10 +10,16 @@ message_footer = ("\n\n-----\n\nThis is an automated message. "
 def process_pm(message, sub_list):
     author = message.author
     author_name = str(author)
-    message_subj = message.subject.split()
+    message_subj = message.subject.lower()
+    
+    # Trim "Re:" from PM reply
+    if message_subj.startswith("re:"):
+        message_subj = message_subj[3:]
+    message_subj = message_subj.split()
+    
     # Return if the PM's subject does not contain the sub name and command
     if len(message_subj) != 2:
-        message.reply("This message is not in the correct format and cannot be processed."
+        message.reply("This message's subject is not in the correct format and cannot be processed."
                       "Each PM command's subject must contain these parameters:\n\n"
                       "     !SubredditName !command" +
                       message_footer)
@@ -21,7 +28,7 @@ def process_pm(message, sub_list):
     
     # Get the subreddit the PM is in reference to
     sub_name = message_subj[0][1:].lower()
-    command = message_subj[1]
+    command = message_subj[1].lower()
     target_sub = None
     for sub in sub_list:
         if sub.name == sub_name:

@@ -87,7 +87,6 @@ while True:
                 notify_permission_change()
                 #read_pms()
                 continue
-            print("Got a comment")
             comment_queue.put(comment)
     except Exception as e:
         print("Error: " + str(e) + "\nSleeping for 1 min")

@@ -2,7 +2,7 @@ from collections import defaultdict
 
 
 # Activity flair main method
-def make_activity_flair(user, sub):
+def make_activity_flair(username, sub):
     activity_settings = sub.sub_activity
     full_flair_text = []
     flair_perm = False
@@ -18,7 +18,7 @@ def make_activity_flair(user, sub):
         if setting_name in activity_settings:
             main_setting = activity_settings[setting_name]
             combine_subs = main_setting.getboolean("combine subs")
-            sub_list = make_sub_list(main_setting, sub, user)
+            sub_list = make_sub_list(main_setting, sub, username)
 
             # Prepare vars to store result info
             and_result = True
@@ -29,21 +29,21 @@ def make_activity_flair(user, sub):
             # Handle combined subs
             if combine_subs:
                 sub_names_list = [item[0] for item in sub_list]
-                main_data = check_activity(user, sub, sub_names_list, main_setting)
+                main_data = check_activity(username, sub, sub_names_list, main_setting)
                 main_result = main_data[0]
                 main_value = main_data[1]
 
                 # Check OR only
                 if not main_result:
                     if setting_name_or in activity_settings:
-                        or_result = check_sub_setting(activity_settings, setting_name_or, sub, user)
+                        or_result = check_sub_setting(activity_settings, setting_name_or, sub, username)
 
                 # If main result is True check AND and OR
                 else:
                     if setting_name_or in activity_settings:
-                        or_result = check_sub_setting(activity_settings, setting_name_or, sub, user)
+                        or_result = check_sub_setting(activity_settings, setting_name_or, sub, username)
                     elif setting_name_and in activity_settings:
-                        and_result = check_sub_setting(activity_settings, setting_name_and, sub, user)
+                        and_result = check_sub_setting(activity_settings, setting_name_and, sub, username)
 
                 # Process results
                 if main_result and and_result and or_result:
@@ -85,21 +85,21 @@ def make_activity_flair(user, sub):
                     abbrev = data[0]
                     combined_sub_list = data[1]
 
-                    main_data = check_activity(user, sub, combined_sub_list, main_setting)
+                    main_data = check_activity(username, sub, combined_sub_list, main_setting)
                     main_result = main_data[0]
                     main_value = main_data[1]
 
                     # If main result is False check OR only
                     if not main_result:
                         if setting_name_or in activity_settings:
-                            or_result = check_sub_setting(activity_settings, setting_name_or, sub, user)
+                            or_result = check_sub_setting(activity_settings, setting_name_or, sub, username)
 
                     # If main result is True check AND and OR
                     else:
                         if setting_name_or in activity_settings:
-                            or_result = check_sub_setting(activity_settings, setting_name_or, sub, user)
+                            or_result = check_sub_setting(activity_settings, setting_name_or, sub, username)
                         elif setting_name_and in activity_settings:
-                            and_result = check_sub_setting(activity_settings, setting_name_and, sub, user)
+                            and_result = check_sub_setting(activity_settings, setting_name_and, sub, username)
 
                             # Process results
                             if main_result and and_result and or_result:
@@ -176,20 +176,20 @@ def process_flair_data(setting, flair_data):
 
 
 # Check result of secondary criteria
-def check_sub_setting(activity_settings, setting_name, parent_sub, user):
+def check_sub_setting(activity_settings, setting_name, parent_sub, username):
     setting = activity_settings[setting_name]
-    sub_list = make_sub_list(setting, parent_sub, user)
-    data = check_activity(user, parent_sub, sub_list, setting)
+    sub_list = make_sub_list(setting, parent_sub, username)
+    data = check_activity(username, parent_sub, sub_list, setting)
     return data[0]
 
 
 # Make a list of subreddit names and abbrevs based on section settings
-def make_sub_list(setting, sub, user):
+def make_sub_list(setting, sub, username):
     sub_group_name = setting["target subs"]
 
     # Create a list of all subs with info in the database
     if sub_group_name == "ALL":
-        sub_list = [[name, ""] for name in sub.db.get_all_subs(str(user))]
+        sub_list = [[name, ""] for name in sub.db.get_all_subs(username)]
 
     # Create list with sub names from sub combine that match specified abbrev
     elif "-" in sub_group_name:
@@ -208,20 +208,19 @@ def make_sub_list(setting, sub, user):
 
 
 # Get user value from a specific sub (and subs that share the same abbreviation)
-def check_activity(user, sub, sub_list, setting):
+def check_activity(username, sub, sub_list, setting):
     target_value = setting.getint("target value")
     metric = setting["metric"].lower()
     comparison = setting["comparison"].lower()
 
-    user_value = get_user_value(metric, sub_list, user, sub)
+    user_value = get_user_value(metric, sub_list, username, sub)
     activity_result = check_value(user_value, comparison, target_value)
 
     return [activity_result, user_value]
 
 
 # Fetch the user_value from the database
-def get_user_value(metric, sub_list, user, sub):
-    username = str(user)
+def get_user_value(metric, sub_list, username, sub):
     user_value = 0
 
     # Get data from accnt_info table

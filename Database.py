@@ -73,6 +73,9 @@ class Database:
         user_info_cur.execute(self.CREATE_SUB_ACTIVITY)
         user_info_cur.execute(self.CREATE_ACCNT_INFO)
         
+        self.sub_info_conn.commit()
+        self.user_info_conn.commit()
+        
         sub_info_cur.close()
         user_info_cur.close()
         
@@ -109,6 +112,7 @@ class Database:
         
         cur.execute(insert_str, (username, ratelimit_start, ratelimit_count, flair_txt,
                                  last_updated, flair_perm, css_perm, custom_flair_used, no_auto_flair))
+        self.sub_info_conn.commit()
         cur.close()
     
     # Update existing user's data in Sub Info table
@@ -120,6 +124,7 @@ class Database:
                       + "WHERE " + self.KEY1_USERNAME + " = ?")
         
         cur.execute(update_str, (ratelimit_start, ratelimit_count, flair_txt, last_updated, username))
+        self.sub_info_conn.commit()
         cur.close()
     
     # Insert user data into Account History table
@@ -141,7 +146,7 @@ class Database:
                                      sub_pos_comments[sub], sub_neg_comments[sub],
                                      sub_pos_qc[sub], sub_neg_qc[sub],
                                      sub_post_karma[sub], sub_comment_karma[sub]))
-        
+        self.user_info_conn.commit()
         cur.close()
     
     # Update existing user's data in Account History table
@@ -166,7 +171,7 @@ class Database:
             cur.execute(update_str, (sub_comment_karma[sub], sub_pos_comments[sub], sub_neg_comments[sub],
                                      sub_pos_qc[sub], sub_neg_qc[sub], sub_post_karma[sub],
                                      sub_pos_posts[sub], sub_neg_posts[sub], username))
-        
+        self.user_info_conn.commit()
         cur.close()
         
     # Insert user data into Account Info table
@@ -179,7 +184,9 @@ class Database:
                       + "VALUES(?,?,?,?,?)")
         
         cur.execute(insert_str, (username, created, total_post_karma, total_comment_karma, last_scraped))
+        self.user_info_conn.commit()
         cur.close()
+        print("Account info inserted for " + username + " - " + str(created))
         
     # Update user data in Account Info table
     def update_accnt_info(self, username, post_karma, comment_karma, last_scraped):
@@ -190,6 +197,8 @@ class Database:
                       + "WHERE " + self.KEY3_USERNAME + " = ?")
         
         cur.execute(update_str, (post_karma, comment_karma, last_scraped, username))
+        self.user_info_conn.commit()
+        cur.close()
     
     # Generic getter method for Account Info table
     def fetch_sub_info(self, username, key):
@@ -224,6 +233,12 @@ class Database:
     
     # Generic getter method for Account Info table
     def fetch_accnt_info(self, username, key):
+        exists = self.exists_in_db(username)
+        if exists:
+            print("User has row in accnt info")
+        else:
+            print("User has no row in accnt info")
+        
         cur = self.user_info_conn.cursor()
         select_key = self.find_key(key, self.TABLE_ACCNT_INFO)
         select_str = ("SELECT " + select_key + " FROM " + self.TABLE_ACCNT_INFO
@@ -242,11 +257,15 @@ class Database:
         update_str = ("UPDATE " + self.TABLE_SUB_INFO + " SET " + update_key + " = ? "
                       + " WHERE " + self.KEY1_USERNAME + " = ?")
         cur.execute(update_str, (value, username))
+        self.sub_info_conn.commit()
+        cur.close()
         
     def wipe_sub_info(self):
         cur = self.sub_info_conn.cursor()
         delete_str = "DELETE FROM " + self.TABLE_SUB_INFO
         cur.execute(delete_str)
+        self.sub_info_conn.commit()
+        cur.close()
     
     # Turn string from INI file into a key
     def find_key(self, key, table):
