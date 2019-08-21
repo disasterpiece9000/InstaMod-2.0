@@ -1,12 +1,12 @@
 # TODO: Implement PM Messages and PM Commands section in config file
 
-# TODO: Handle the appended "Re:" from PM replies
 import DataCollector
 
 message_footer = ("\n\n-----\n\nThis is an automated message. "
                   "Please contact /u/shimmyjimmy97 with any questions, comments, or issues that you have.")
 
 
+# Main method for responding to PM commands
 def process_pm(message, sub_list):
     author = message.author
     author_name = str(author)

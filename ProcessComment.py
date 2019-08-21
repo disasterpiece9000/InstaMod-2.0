@@ -30,7 +30,6 @@ def fetch_queue(comment_queue, flair_queue, perm_queue, sub_list):
         scrape_data = check_data[1]     # Does user's data need to be updated
         user_in_db = check_data[2]      # Does the user's data need to be updated or inserted
         
-        # TODO: Further debugging of data collection
         if scrape_data:
             print("Collecting data...")
             try:

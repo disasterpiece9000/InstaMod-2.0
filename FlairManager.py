@@ -50,10 +50,10 @@ def update_flair(flair_queue, perm_queue, user, sub, prog_flair_enabled,
     
     if flair_perm and not old_flair_perm:
         sub.db.update_key_sub_info(username, "flair perm", int(flair_perm))
-        perm_queue.put([username, "flair perm"])
+        perm_queue.put([username, "flair perm", sub])
     if css_perm and not old_css_perm:
         sub.db.update_key_sub_info(username, "flair perm", int(css_perm))
-        perm_queue.put([username, "css perm"])
+        perm_queue.put([username, "css perm", sub])
 
 
 # Main method for new account flair
