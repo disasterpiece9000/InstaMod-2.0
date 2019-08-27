@@ -2,56 +2,76 @@ import DataCollector
 import FlairManager
 import prawcore
 import time
+import logging
+import traceback
 
 
 # Get new comments as they are added to the queue by the producer thread
 def fetch_queue(comment_queue, flair_queue, perm_queue, sub_list):
     # Loop continuously checking for new comments
     while True:
-        comment = comment_queue.get()
-        comment_queue.task_done()
-        user = comment.author
-        
-        # Find sub that the comment was placed in
-        target_sub = None
-        comment_sub = str(comment.subreddit).lower()
-        for sub in sub_list:
-            if sub.name.lower() == comment_sub:
-                target_sub = sub
-                break
-        if target_sub is None:
-            print("Target sub not found"
-                  "\nSubreddit: " + comment_sub)
-            continue
-
-        # Check if the user data should be updated
-        check_data = check_user(user, target_sub)
-        update_flair = check_data[0]    # Does user's flair need to be updated
-        scrape_data = check_data[1]     # Does user's data need to be updated
-        user_in_db = check_data[2]      # Does the user's data need to be updated or inserted
-        
-        if scrape_data:
-            print("Collecting data...")
-            try:
-                DataCollector.load_data(user_in_db, update_flair, comment, target_sub)
-            except (prawcore.NotFound, prawcore.RequestException) as e:
-                print("\nError in DataCollector: \n" + str(e) + "\n")
+        try:
+            comment = comment_queue.get()
+            comment_queue.task_done()
+            user = comment.author
+            
+            logging.info("Processing comment from " + str(user) + "...")
+            
+            # Find sub that the comment was placed in
+            target_sub = None
+            comment_sub = str(comment.subreddit).lower()
+            for sub in sub_list:
+                if sub.name.lower() == comment_sub:
+                    target_sub = sub
+                    break
+            if target_sub is None:
+                logging.warning("Target sub not found: " + comment_sub)
                 continue
-            print("Done collecting data")
             
-        if update_flair:
-            # Read flair toggles from sub config
-            prog_flair_enabled = target_sub.main_config.getboolean("progression tier")
-            new_accnt_flair_enabled = target_sub.main_config.getboolean("young account tag")
-            activity_flair_enabled = target_sub.main_config.getboolean("activity tag")
+            logging.info("Target sub: " + comment_sub)
             
-            # If at least one flair toggle is enabled, update user flair
-            if prog_flair_enabled or new_accnt_flair_enabled or activity_flair_enabled:
-                print("Updating flair...")
-                FlairManager.update_flair(flair_queue, perm_queue, comment.author, target_sub, prog_flair_enabled,
-                                          new_accnt_flair_enabled, activity_flair_enabled)
-            else:
-                print("All flair settings disabled")
+            # Check if the user data should be updated
+            check_data = check_user(user, target_sub)
+            update_flair = check_data[0]  # Does user's flair need to be updated
+            scrape_data = check_data[1]  # Does user's data need to be updated
+            user_in_db = check_data[2]  # Does the user's data need to be updated or inserted
+            logging.info("Check User:"
+                         "\n\tUpdate flair: " + str(update_flair) +
+                         "\n\tScrape data: " + str(scrape_data) +
+                         "\n\tIn db: " + str(user_in_db))
+            
+            if scrape_data:
+                logging.info("Collecting data...")
+                try:
+                    DataCollector.load_data(user_in_db, update_flair, comment, target_sub)
+                except (prawcore.NotFound, prawcore.RequestException) as e:
+                    logging.warning("\nError in DataCollector: \n" + str(e) + "\n")
+                    continue
+                logging.info("Done collecting data")
+            
+            if update_flair:
+                # Read flair toggles from sub config
+                prog_flair_enabled = target_sub.main_config.getboolean("progression tier")
+                new_accnt_flair_enabled = target_sub.main_config.getboolean("young account tag")
+                activity_flair_enabled = target_sub.main_config.getboolean("activity tag")
+                
+                logging.info("Active flair modules:"
+                             "\n\tProg: " + str(prog_flair_enabled) +
+                             "\n\tNew accnt: " + str(new_accnt_flair_enabled) +
+                             "\n\tActivity: " + str(activity_flair_enabled))
+                
+                # If at least one flair toggle is enabled, update user flair
+                if prog_flair_enabled or new_accnt_flair_enabled or activity_flair_enabled:
+                    logging.info("Updating flair...")
+                    FlairManager.update_flair(flair_queue, perm_queue, comment.author, target_sub, prog_flair_enabled,
+                                              new_accnt_flair_enabled, activity_flair_enabled)
+                else:
+                    logging.debug("All flair settings disabled")
+        
+        except Exception as e:
+            logging.debug("Error at process_comment: " + traceback.format_exc())
+            traceback.print_exc()
+            time.sleep(60)
 
 
 # Check if user should be skipped and if their data needs to be updated or inserted
@@ -60,12 +80,12 @@ def check_user(user, target_sub):
     whitelist = target_sub.flair_config["user whitelist"].lower().replace(" ", "").split(",")
     username = str(user).lower()
     user_in_db = target_sub.db.exists_in_db(username)
-
+    
     # Check if user is a mod or whitelisted
     if user in target_sub.mods or username in whitelist:
         update_flair = False
         scrape_data = False
-
+    
     elif user_in_db:
         # Check if the user has used their custom flair permission
         custom_flair_used = target_sub.db.fetch_sub_info(username, "custom flair used") == 1
@@ -83,7 +103,7 @@ def check_user(user, target_sub):
             update_flair = True
         else:
             update_flair = False
-
+        
         # Check if user data has not been updated in the last 7 days
         last_scraped = target_sub.db.fetch_accnt_info(username, "last scraped")
         current_time = int(time.time())
@@ -92,14 +112,10 @@ def check_user(user, target_sub):
             scrape_data = True
         else:
             scrape_data = False
-
+    
     # User hasn't been seen before - pull all account data and update flair
     else:
         update_flair = True
         scrape_data = True
-        
-    print("Update flair:" + str(update_flair))
-    print("Scrape data:" + str(scrape_data))
-    print("In db:" + str(user_in_db))
-
+    
     return [update_flair, scrape_data, user_in_db]

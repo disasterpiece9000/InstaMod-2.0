@@ -1,4 +1,5 @@
 from collections import defaultdict
+import logging
 
 
 # Activity flair main method
@@ -14,6 +15,8 @@ def make_activity_flair(username, sub):
         setting_name = "ACTIVITY TAG " + str(setting_count)
         setting_count += 1
 
+        logging.debug("Checking " + setting_name)
+
         # Process main setting
         if setting_name in activity_settings:
             main_setting = activity_settings[setting_name]
@@ -28,22 +31,35 @@ def make_activity_flair(username, sub):
 
             # Handle combined subs
             if combine_subs:
+                logging.debug("Processing combined subs...")
                 sub_names_list = [item[0] for item in sub_list]
                 main_data = check_activity(username, sub, sub_names_list, main_setting)
                 main_result = main_data[0]
                 main_value = main_data[1]
+                
+                logging.debug("Main result: " + str(main_result) +
+                              "Main value " + str(main_value))
 
                 # Check OR only
                 if not main_result:
+                    logging.debug("Checking OR only")
                     if setting_name_or in activity_settings:
                         or_result = check_sub_setting(activity_settings, setting_name_or, sub, username)
+                    else:
+                        logging.debug("OR not found")
 
                 # If main result is True check AND and OR
                 else:
                     if setting_name_or in activity_settings:
+                        logging.debug("Checking OR")
                         or_result = check_sub_setting(activity_settings, setting_name_or, sub, username)
                     elif setting_name_and in activity_settings:
+                        logging.debug("Checking AND")
                         and_result = check_sub_setting(activity_settings, setting_name_and, sub, username)
+
+                logging.debug("Main result: " + str(main_result) +
+                              "\n\tOR result: " + str(or_result) +
+                              "\n\tAND result: " + str(and_result))
 
                 # Process results
                 if main_result and and_result and or_result:
@@ -59,17 +75,21 @@ def make_activity_flair(username, sub):
 
                     if flair_text != "":
                         # Trim trailing whitespace
+                        logging.debug("Flair text: " + flair_text)
                         full_flair_text.append(flair_text[:len(flair_text) - 1])
 
                     # Check if there is a valid permission
                     permission = main_setting["permissions"].lower()
                     if permission == "custom flair":
                         flair_perm = True
+                        logging.debug("Flair perm = True")
                     elif permission == "custom css":
                         css_perm = True
+                        logging.debug("CSS perm = True")
 
             # Handle individual subs
             else:
+                logging.debug("Processing individual subs...")
                 # Store data on results that meet criteria so that sort and sub cap can be implemented later
                 flair_data = {}
 
@@ -89,37 +109,58 @@ def make_activity_flair(username, sub):
                     main_result = main_data[0]
                     main_value = main_data[1]
 
+                    #logging.debug("Main result: " + str(main_result) +
+                    #              "Main value " + str(main_value))
+
                     # If main result is False check OR only
                     if not main_result:
+                        logging.debug("Checking OR only")
                         if setting_name_or in activity_settings:
                             or_result = check_sub_setting(activity_settings, setting_name_or, sub, username)
+                        else:
+                            logging.debug("OR not found")
 
                     # If main result is True check AND and OR
                     else:
                         if setting_name_or in activity_settings:
+                            logging.debug("Checking OR")
                             or_result = check_sub_setting(activity_settings, setting_name_or, sub, username)
                         elif setting_name_and in activity_settings:
+                            logging.debug("Checking AND")
                             and_result = check_sub_setting(activity_settings, setting_name_and, sub, username)
 
-                            # Process results
-                            if main_result and and_result and or_result:
-                                flair_data[abbrev] = main_value
+                    #logging.debug("Main result: " + str(main_result) +
+                    #              "\n\tOR result: " + str(or_result) +
+                    #              "\n\tAND result: " + str(and_result))
+
+                    # Process results
+                    if main_result and and_result and or_result:
+                        flair_data[abbrev] = main_value
 
                 # Add data to lists unless they are None
                 processed_data = process_flair_data(main_setting, flair_data)
                 if len(processed_data) != 3:
-                    print("process_flair_data didn't return all data")
+                    logging.debug("process_flair_data didn't return all data")
                 if processed_data[0]:
                     full_flair_text.append(processed_data[0])
+                    logging.debug("Flair text: " + str(processed_data[0]))
                 # Check if either perm returned True
                 if processed_data[1]:
                     flair_perm = True
+                    logging.debug("Flair perm = True")
                 elif processed_data[2]:
                     css_perm = True
+                    logging.debug("CSS perm = True")
 
         # No more settings activity tags to discover
         else:
             break
+            
+    logging.debug("Final results:" +
+                  "\n\tFull text: " + str(full_flair_text) +
+                  "\n\tFlair perm: " + str(flair_perm) +
+                  "\n\tCSS perm: " + str(css_perm))
+    
     return [full_flair_text, flair_perm, css_perm]
 
 

@@ -1,4 +1,5 @@
 import sqlite3
+import logging
 
 
 class Database:
@@ -186,7 +187,7 @@ class Database:
         cur.execute(insert_str, (username, created, total_post_karma, total_comment_karma, last_scraped))
         self.user_info_conn.commit()
         cur.close()
-        print("Account info inserted for " + username + " - " + str(created))
+        logging.info("Account info inserted for " + username + " - " + str(created))
         
     # Update user data in Account Info table
     def update_accnt_info(self, username, post_karma, comment_karma, last_scraped):
@@ -233,12 +234,6 @@ class Database:
     
     # Generic getter method for Account Info table
     def fetch_accnt_info(self, username, key):
-        exists = self.exists_in_db(username)
-        if exists:
-            print("User has row in accnt info")
-        else:
-            print("User has no row in accnt info")
-        
         cur = self.user_info_conn.cursor()
         select_key = self.find_key(key, self.TABLE_ACCNT_INFO)
         select_str = ("SELECT " + select_key + " FROM " + self.TABLE_ACCNT_INFO
@@ -319,8 +314,8 @@ class Database:
                 return self.KEY3_LAST_SCRAPED
             
         else:
-            print("Could not find a match for key in the given table"
-                  "\nKey: " + key + "\tTable:" + table)
+            logging.warning("Could not find a match for key in the given table"
+                      "\nKey: " + key + "\tTable:" + table)
             return None
     
     # Test method pls ignore

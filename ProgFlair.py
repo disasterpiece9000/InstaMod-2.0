@@ -1,3 +1,6 @@
+import logging
+
+
 # Get progression tier flair
 def make_prog_flair(user, sub):
     prog_tiers = sub.progression_tiers
@@ -9,6 +12,8 @@ def make_prog_flair(user, sub):
         tier_count += 1
 
         if tier_name in prog_tiers:
+            logging.debug("Checking " + tier_name)
+            
             main_tier = prog_tiers[tier_name]
             main_result = user_in_tier(main_tier, user, sub)
             and_result = True
@@ -18,18 +23,27 @@ def make_prog_flair(user, sub):
             
             # Check only OR
             if not main_result:
+                logging.debug("Checking OR only")
                 if tier_name_or in prog_tiers:
                     or_tier = prog_tiers[tier_name_or]
                     or_result = user_in_tier(or_tier, user, sub)
+                else:
+                    logging.debug("OR not found")
 
             # Check for AND/OR rules
             elif tier_name_and in prog_tiers:
+                logging.debug("Checking AND")
                 and_tier = prog_tiers[tier_name_and]
                 and_result = user_in_tier(and_tier, user, sub)
 
             elif tier_name_or in prog_tiers:
+                logging.debug("Checking OR")
                 or_tier = prog_tiers[tier_name_or]
                 or_result = user_in_tier(or_tier, user, sub)
+                
+            logging.debug("Main result: " + str(main_result) +
+                          "\n\tOR result: " + str(or_result) +
+                          "\n\tAND result: " + str(and_result))
 
             # Check if user meets all the criteria (including and/or)
             if main_result and and_result and or_result:
@@ -43,11 +57,16 @@ def make_prog_flair(user, sub):
                     flair_perm = True
                 elif permissions == "custom css":
                     css_perm = True
-                #return [main_tier["flair text"], main_tier["flair css"], main_tier["permissions"].lower()]
+                
+                logging.debug("Flair text: " + flair_text +
+                              "\n\tFlair css: " + flair_css +
+                              "\n\tFlair perm: " + str(flair_perm) +
+                              "\n\tCSS perm: " + str(css_perm))
                 return [flair_text, flair_css, flair_perm, css_perm]
 
         # Last tier was discovered
         else:
+            logging.debug("No tiers found")
             return [None, None, False, False]
 
 

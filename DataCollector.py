@@ -1,6 +1,7 @@
 from collections import Counter
 from datetime import datetime
 import time
+import logging
 from psaw import PushshiftAPI
 
 # PushShift Instance
@@ -22,7 +23,6 @@ def load_data(user_in_db, update_flair, comment, sub):
     ratelimit_start = int(time.time())
     
     if user_in_db:
-        print("User in db")
         # Get comments/posts that occurred after the last scrape
         after_time = sub.db.fetch_accnt_info(username, "last scraped")
         
@@ -37,7 +37,6 @@ def load_data(user_in_db, update_flair, comment, sub):
         sub.db.update_accnt_info(username, total_post_karma, total_comment_karma, last_scraped)
         sub.db.update_row_sub_info(username, ratelimit_start, ratelimit_count, flair_txt, last_updated)
     else:
-        print("User not in db")
         # Get all available comments/posts (up to 1,000 each)
         after_time = int(datetime(2000, 1, 1).timestamp())
         # Insert data into accnt_info table
@@ -46,6 +45,9 @@ def load_data(user_in_db, update_flair, comment, sub):
     
     # Account Activity Table
     # Comments
+    
+    # Sleep for 1 sec to avoid ratelimit
+    #time.sleep(2)
     comment_results = ps.search_comments(author=author,
                                          after=after_time,
                                          filter=["id", "score", "subreddit", "body"],
@@ -59,11 +61,15 @@ def load_data(user_in_db, update_flair, comment, sub):
     
     for comment in comment_results:
         # Check that all data was returned
+        data = comment[len(comment) - 1]
         try:
-            data = comment[6]
-        except IndexError as e:
-            print("IndexError at comment_results:\n" + str(e))
-            return
+            data["id"]
+            data["score"]
+            data["subreddit"]
+            data["body"]
+        except KeyError as e:
+            logging.warning("PSAW didn't return some parameters in post_results: " + str(data))
+            continue
         
         score = data["score"]
         subreddit = data["subreddit"].lower()
@@ -119,6 +125,8 @@ def load_data(user_in_db, update_flair, comment, sub):
             if neg_qc_words or neg_qc_score:
                 sub_neg_qc[subreddit] += 1
     
+    # Sleep for 1 sec to avoid ratelimit
+    #time.sleep(2)
     # Posts
     post_results = ps.search_submissions(author=author,
                                          after=after_time,
@@ -130,11 +138,14 @@ def load_data(user_in_db, update_flair, comment, sub):
     
     for post in post_results:
         # Check that all data was returned
+        data = post[len(post) - 1]
         try:
-            data = post[5]
-        except IndexError as e:
-            print("IndexError at post_results:\n" + str(e))
-            return
+            data["subreddit"]
+            data["score"]
+            data["id"]
+        except KeyError as e:
+            logging.warning("PSAW didn't return some parameters in post_results: " + str(data))
+            continue
         
         score = data["score"]
         subreddit = data["subreddit"].lower()

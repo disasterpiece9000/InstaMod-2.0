@@ -42,7 +42,7 @@ def update_flair(flair_queue, perm_queue, user, sub, prog_flair_enabled,
     old_flair_txt = sub.db.fetch_sub_info(username, "flair text")
     if new_flair_txt != old_flair_txt:
         sub.db.update_key_sub_info(username, "flair text", new_flair_txt)
-        flair_queue.put([username, new_flair_txt, css])
+        flair_queue.put([username, new_flair_txt, css, sub])
 
     # Check if the user has earned any new permissions
     old_flair_perm = sub.db.fetch_sub_info(username, "flair perm")
