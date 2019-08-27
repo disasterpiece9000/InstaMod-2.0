@@ -3,9 +3,9 @@
 **Currently in development!**
 
     CHECKING PROGRESS...
-    >> 70%	
-    >> ██████████████░░░░░░
-    RETURNING TO CODING MODE...
+    >> 85%	
+    >> █████████████████░░░
+    ENABLE DEBUGGING MODE...
 
 InstaMod is a toolbox of features that moderators can implement and customize to tailor fit their needs. It's built with customization in mind to ensure that each subreddit can have it’s own unique configuration. InstaMod is currently running on a network of subreddits totaling over 1,000,000 subscribers!
 
