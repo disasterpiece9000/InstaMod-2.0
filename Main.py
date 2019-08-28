@@ -141,7 +141,7 @@ while True:
         for comment in all_subs.stream.comments(pause_after=3, skip_existing=False):
             # If no new comments are found after 3 checks do other stuff
             if comment is None:
-                # logging.info("No new comments found")
+                logging.info("No new comments found")
                 flair_users()
                 notify_permission_change()
                 # read_pms()

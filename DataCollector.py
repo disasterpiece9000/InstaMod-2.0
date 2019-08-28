@@ -62,15 +62,17 @@ def load_data(user_in_db, update_flair, comment, sub):
     for comment in comment_results:
         # Check that all data was returned
         data = comment[len(comment) - 1]
+        post_data_valid = False
         try:
-            data["id"]
-            data["score"]
-            data["subreddit"]
-            data["body"]
+            if None not in [data["id"], data["score"], data["subreddit"], data["body"]]:
+                post_data_valid = True
         except KeyError as e:
             logging.warning("PSAW didn't return some parameters in post_results: " + str(data))
             continue
-        
+            
+        if not post_data_valid:
+            continue
+            
         score = data["score"]
         subreddit = data["subreddit"].lower()
         body = data["body"]
@@ -139,12 +141,15 @@ def load_data(user_in_db, update_flair, comment, sub):
     for post in post_results:
         # Check that all data was returned
         data = post[len(post) - 1]
+        post_data_valid = False
         try:
-            data["subreddit"]
-            data["score"]
-            data["id"]
+            if None not in [data["subreddit"], data["score"], data["id"]]:
+                post_data_valid = True
         except KeyError as e:
             logging.warning("PSAW didn't return some parameters in post_results: " + str(data))
+            continue
+            
+        if not post_data_valid:
             continue
         
         score = data["score"]
