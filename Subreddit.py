@@ -29,7 +29,7 @@ class Subreddit:
     def read_config(self):
         config = ConfigParser(allow_no_value=True)
         # config.read(self.folder_name + "/config.ini")
-        config.read_string(self.sub.wiki["InstaModTest"].content_md)
+        config.read_string(self.sub.wiki["InstaModSettings"].content_md)
         self.main_config = config["MAIN CONFIG"]
         self.flair_config = config["FLAIR"]
         self.qc_config = config["QUALITY COMMENTS"]
