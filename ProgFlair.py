@@ -77,10 +77,19 @@ def user_in_tier(tier, user, sub):
     if "-" in target_subs:
         # Get abbreviation from string
         target_abbrev = target_subs[target_subs.find("-") + 1:].strip()
+        # Check if multiple abbreviations are given
+        if "," in target_abbrev:
+            target_abbrev = target_abbrev.replace(" ", "").split(",")
+        else:
+            target_abbrev = [target_abbrev]
+
+        # Get sub group name from string
         sub_group = sub.sub_groups[target_subs[:target_subs.find("-")].strip()]
+
+        # Create a list of all subreddits with matching abbreviations
         sub_list = []
         for sub_name, abbrev in sub_group.items():
-            if abbrev == target_abbrev:
+            if abbrev in target_abbrev:
                 sub_list.append(sub_name)
 
     # Turn Sub Group into list if all subs option not selected

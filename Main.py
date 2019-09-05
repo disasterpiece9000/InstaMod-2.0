@@ -136,19 +136,15 @@ process_thread.setDaemon(False)
 process_thread.start()
 
 while True:
-    try:
-        # Grab any comments made in subreddits using InstaMod
-        for comment in all_subs.stream.comments(pause_after=3, skip_existing=False):
-            # If no new comments are found after 3 checks do other stuff
-            if comment is None:
-                logging.info("No new comments found")
-                flair_users()
-                notify_permission_change()
-                # read_pms()
-                continue
-            comment_queue.put(comment)
-            logging.info("Comment added to queue")
-    except Exception as e:
-        logging.warning("Error: " + traceback.format_exc())
-        traceback.print_exc()
-        time.sleep(60)
+    # Grab any comments made in subreddits using InstaMod
+    for comment in all_subs.stream.comments(pause_after=3, skip_existing=False):
+        # If no new comments are found after 3 checks do other stuff
+        if comment is None:
+            logging.info("No new comments found")
+            flair_users()
+            notify_permission_change()
+            # read_pms()
+            continue
+        comment_queue.put(comment)
+        logging.info("Comment added to queue from " + str(comment.author))
+
