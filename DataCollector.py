@@ -70,7 +70,7 @@ def load_data(user_in_accnt_info, user_in_sub_info, update_flair, comment, sub):
         try:
             if None not in [data["id"], data["score"], data["subreddit"], data["body"]]:
                 post_data_valid = True
-        except KeyError as e:
+        except KeyError:
             logging.warning("PSAW didn't return some parameters in post_results: " + str(data))
             continue
             
@@ -149,7 +149,7 @@ def load_data(user_in_accnt_info, user_in_sub_info, update_flair, comment, sub):
         try:
             if None not in [data["subreddit"], data["score"], data["id"]]:
                 post_data_valid = True
-        except KeyError as e:
+        except KeyError:
             logging.warning("PSAW didn't return some parameters in post_results: " + str(data))
             continue
             
@@ -165,7 +165,7 @@ def load_data(user_in_accnt_info, user_in_sub_info, update_flair, comment, sub):
         else:
             sub_neg_posts[subreddit] += 1
     
-    if user_in_db:
+    if user_in_accnt_info:
         sub.db.update_sub_activity(username, sub_comment_karma, sub_pos_comments, sub_neg_comments,
                                    sub_pos_qc, sub_neg_qc, sub_post_karma, sub_pos_posts, sub_neg_posts)
     else:

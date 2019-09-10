@@ -1,7 +1,5 @@
 # TODO: Implement PM Messages and PM Commands section in config file
 
-import DataCollector
-
 message_footer = ("\n\n-----\n\nThis is an automated message. "
                   "Please contact /u/shimmyjimmy97 with any questions, comments, or issues that you have.")
 

@@ -2,9 +2,7 @@ import praw
 from queue import Queue
 import threading
 import os
-import time
 import logging
-import traceback
 
 from Subreddit import Subreddit
 import ProcessComment
@@ -92,12 +90,13 @@ def notify_permission_change():
         
         # Notify user of flair perm via PM
         if new_perm == "flair perm":
-            auto_perm_msg = "Your contributions to /r/" + target_sub.name + " have granted you access to custom flair " \
-                            "options. You will continue to receive automatic flair until you apply a custom flair. " \
-                            "In order to apply your desired flair, please click on [this preformatted link.](" \
-                            "https://www.reddit.com/message/compose?to=InstaMod&subject=!CryptoMarkets%20!flair&" \
-                            "message=REPLACE%20THIS%20WITH%20DESIRED%20FLAIR%20TEXT%0A%0AREPLACE%20THIS%20WITH%20" \
-                            "DESIRED%20FLAIR%20ICON%20OR%20DELETE%20FOR%20NONE)" \
+            auto_perm_msg = "Your contributions to /r/" + target_sub.name + \
+                            " have granted you access to custom flair options. You will continue to receive " \
+                            "automatic flair until you apply a custom flair. In order to apply your desired " \
+                            "flair, please click on [this pre-formatted link.](https://www.reddit.com/message" \
+                            "/compose?to=InstaMod&subject=!CryptoMarkets%20!flair&message=REPLACE%20THIS%20WITH" \
+                            "%20DESIRED%20FLAIR%20TEXT%0A%0AREPLACE%20THIS%20WITH%20DESIRED%20FLAIR%20ICON%20OR" \
+                            "%20DELETE%20FOR%20NONE)" \
                             "\n\n**Note:** This link will not work on mobile and it can be used to change your flair" \
                             " as many times as you want.\n\n"
             
@@ -106,9 +105,9 @@ def notify_permission_change():
             subject = target_sub.pm_messages["custom flair subj"]
         
         elif new_perm == "css perm":
-            auto_perm_msg = "Your contributions to /r/" + target_sub.name + " have granted you access to custom flair " \
-                            "icons. Your flair will still be updated automatically. " \
-                            "In order to apply your desired flair icon, please click on [this preformatted link.](" \
+            auto_perm_msg = "Your contributions to /r/" + target_sub.name + " have granted you access to custom " \
+                            "flair icons. Your flair will still be updated automatically. " \
+                            "In order to apply your desired flair icon, please click on [this pre-formatted link.](" \
                             "https://www.reddit.com/message/compose?to=InstaMod&subject=!CryptoMarkets%20!flair&" \
                             "message=REPLACE%20THIS%20WITH%20DESIRED%20FLAIR%20TEXT%0A%0AREPLACE%20THIS%20WITH%20" \
                             "DESIRED%20FLAIR%20ICON%20OR%20DELETE%20FOR%20NONE)" \
@@ -147,4 +146,3 @@ while True:
             continue
         comment_queue.put(comment)
         logging.info("Comment added to queue from " + str(comment.author))
-
