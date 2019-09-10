@@ -70,7 +70,7 @@ def check_if_mod(author_name, target_sub, message):
 
 # Check if the target user exists in the database
 def user_in_db(username, target_sub, message):
-    if not target_sub.db.exists_in_db(username):
+    if not target_sub.db.exists_in_accnt_info(username):
         message.reply("This user has no entry in the database and cannot be modified. "
                       "To fix this, you can use the !updatethem PM command and then try again."
                       + message_footer)

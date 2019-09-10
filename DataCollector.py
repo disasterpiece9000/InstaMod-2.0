@@ -8,7 +8,7 @@ from psaw import PushshiftAPI
 ps = PushshiftAPI()
 
 
-def load_data(user_in_db, update_flair, comment, sub):
+def load_data(user_in_accnt_info, user_in_sub_info, update_flair, comment, sub):
     # General account info
     author = comment.author
     username = str(author).lower()
@@ -22,10 +22,7 @@ def load_data(user_in_db, update_flair, comment, sub):
     ratelimit_count = 0
     ratelimit_start = int(time.time())
     
-    if user_in_db:
-        # Get comments/posts that occurred after the last scrape
-        after_time = sub.db.fetch_accnt_info(username, "last scraped")
-        
+    if user_in_sub_info:
         # Flair will be updated now
         if update_flair:
             last_updated = int(time.time())
@@ -33,15 +30,22 @@ def load_data(user_in_db, update_flair, comment, sub):
         else:
             last_updated = sub.db.fetch_sub_info(username, "last updated")
         
+        sub.db.update_row_sub_info(username, ratelimit_start, ratelimit_count, flair_txt, last_updated)
+    else:
+        last_updated = last_scraped
+        sub.db.insert_sub_info(username, ratelimit_start, ratelimit_count, flair_txt, last_updated)
+    
+    if user_in_accnt_info:
+        # Get comments/posts that occurred after the last scrape
+        after_time = sub.db.fetch_accnt_info(username, "last scraped")
+        
         # Update database entries
         sub.db.update_accnt_info(username, total_post_karma, total_comment_karma, last_scraped)
-        sub.db.update_row_sub_info(username, ratelimit_start, ratelimit_count, flair_txt, last_updated)
     else:
         # Get all available comments/posts (up to 1,000 each)
         after_time = int(datetime(2000, 1, 1).timestamp())
         # Insert data into accnt_info table
         sub.db.insert_accnt_info(username, created, total_post_karma, total_comment_karma, last_scraped)
-        sub.db.insert_sub_info(username, ratelimit_start, ratelimit_count, flair_txt, last_scraped)
     
     # Account Activity Table
     # Comments
