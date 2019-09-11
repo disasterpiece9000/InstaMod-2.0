@@ -56,12 +56,9 @@ The settings for InstaMod uses the .ini format and is read from a wiki page on t
 
 | Key | Description | Values |
 | ----------- | ----------- | ----------- |
-| thread lock | Turn on/off the thread lock feature | True or False |
-| tier flair | Turn on/off the progression flair feature | True or False |
-| new account tag | Turn on/off the new account tag feature | True or False |
-| activity flair | Turn on/off the activity flair feature | True or False |
-| comment ratelimit | Turn on/off the comment ratelimit feature | True or False |
-| toxicity report | Turn on/off the toxicity report feature | True or False |
+| progression tier | Turn on/off the progression flair feature | True or False |
+| young account tag | Turn on/off the new account tag feature | True or False |
+| activity tag | Turn on/off the activity flair feature | True or False |
 
 ## Flair
 

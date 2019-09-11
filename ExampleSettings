@@ -1,4 +1,4 @@
-# TODO: Support Sub Group 1 - CC,CM,CT
+# This is the config currently in use on /r/CryptoCurrency
 
 [MAIN CONFIG]
 progression tier = True
@@ -6,14 +6,14 @@ young account tag = True
 activity tag = True
 
 [FLAIR]
-flair expiration = 14
+flair expiration = 7
 young account age = 6
 approved icons =
-user whitelist = AutoModerator, ccticker, ccnewsbot
+user whitelist = AutoModerator
 
 [QUALITY COMMENTS]
 positive score = 3
-positive word count =
+positive word count = 10
 positive criteria type = AND
 
 negative score = -1
@@ -22,39 +22,58 @@ negative criteria type = AND
 
 [PROGRESSION TIER 1]
 metric = net QC
-target subs = SUB GROUP 1 - BTC
+target subs = SUB GROUP 1
 comparison = <=
-target value = 25
-flair text = Low Crypto Activity
-flair css = Training
+target value = 50
+flair text = Bronze
+flair css = Warning-level1
 permissions =
+
 
 [PROGRESSION TIER 2]
 metric = net QC
 target subs = SUB GROUP 1
 comparison = <=
 target value = 100
-flair text = Crypto Nerd
+flair text = Silver
 flair CSS =
 permissions =
+
+[PROGRESSION TIER 2 - AND]
+metric = net QC
+comparison = <=
+target subs = SUB GROUP 2
+target value = 10
 
 [PROGRESSION TIER 3]
 metric = net QC
 target subs = SUB GROUP 1
 comparison = <=
 target value = 200
-flair text = Crypto Expert
+flair text = Gold
 flair CSS =
 permissions =
+
+[PROGRESSION TIER 3 - AND]
+metric = net QC
+comparison = <=
+target subs = SUB GROUP 2
+target value = 5
 
 [PROGRESSION TIER 4]
 metric = net QC
 target subs = SUB GROUP 1
 comparison = >
 target value = 200
-flair text = Crypto God
+flair text = Platinum
 flair CSS =
 permissions = CUSTOM FLAIR
+
+[PROGRESSION TIER 4 - AND]
+metric = net QC
+comparison = <=
+target subs = SUB GROUP 2
+target value = 5
 
 [ACTIVITY TAG 1]
 metric = net QC
@@ -65,8 +84,8 @@ target value = 15
 display value = True
 sort = MOST COMMON
 sub cap = 3
-pre text =
-post text = Test 1
+pre text = QC:
+post text = 
 permissions =
 
 [ACTIVITY TAG 2]
@@ -78,22 +97,10 @@ target value = -10
 display value = False
 sort = LEAST COMMON
 sub cap = 3
-pre text =
+pre text = 
 post text = critic
 permissions =
 
-[ACTIVITY TAG 3]
-metric = net QC
-target subs = SUB GROUP 2
-group subs = False
-comparison = >=
-target value = 3
-display value = True
-sort = MOST COMMON
-sub cap = 1
-pre text =
-post text =
-permissions =
 
 [PM Commands]
 !noautoflair = True
@@ -104,8 +111,8 @@ permissions =
 !updatethem = True
 
 [PM Messages]
-custom flair subj = Test flair subj
-custom flair body = Test flair body
+custom flair subj = You have been granted custom flair permissions on /r/CryptoCurrency
+custom flair body = Your contributions to /r/CryptoCurrency have granted you access to custom flair options. You will continue to receive automatic flair unless you choose to apply a custom flair. In order to apply your desired flair, please click on [this preformatted link.](https://www.reddit.com/message/compose?to=InstaMod&subject=!CryptoCurrency%20!flair&message=REPLACE%20THIS%20WITH%20DESIRED%20FLAIR%20TEXT%0A%0AREPLACE%20THIS%20WITH%20DESIRED%20FLAIR%20ICON%20OR%20DELETE%20FOR%20NONE)\n\nThis link will likely not work on mobile. It can be used to change your flair as many times as you want. Do not use this flair for:\n\n* Self promotion\n* Referral links\n* Impersonating a moderator or Reddit Admin\n\nThis action was preformed automatically by /u/InstaMod on behalf of the /r/CryptoCurrency moderators. For assistance, please PM /u/shimmyjimmy97
 custom css subj = Test css subj
 custom css body = Test css body
 
