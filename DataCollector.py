@@ -71,7 +71,7 @@ def load_data(user_in_accnt_info, user_in_sub_info, update_flair, comment, sub):
             if None not in [data["id"], data["score"], data["subreddit"], data["body"]]:
                 post_data_valid = True
         except KeyError:
-            logging.warning("PSAW didn't return some parameters in post_results: " + str(data))
+            logging.debug("PSAW didn't return some parameters in post_results: " + str(data))
             continue
             
         if not post_data_valid:
@@ -150,7 +150,7 @@ def load_data(user_in_accnt_info, user_in_sub_info, update_flair, comment, sub):
             if None not in [data["subreddit"], data["score"], data["id"]]:
                 post_data_valid = True
         except KeyError:
-            logging.warning("PSAW didn't return some parameters in post_results: " + str(data))
+            logging.debug("PSAW didn't return some parameters in post_results: " + str(data))
             continue
             
         if not post_data_valid:
@@ -171,7 +171,11 @@ def load_data(user_in_accnt_info, user_in_sub_info, update_flair, comment, sub):
     else:
         sub.db.insert_sub_activity(username, sub_comment_karma, sub_pos_comments, sub_neg_comments,
                                    sub_pos_qc, sub_neg_qc, sub_post_karma, sub_pos_posts, sub_neg_posts)
-
+        
+    # Check if user is now in all 3 tables
+    accnt = sub.db.exists_in_accnt_info(username)
+    sub = sub.db.exists_in_sub_info(username)
+    
 
 def count_words(body):
     body_list = body.split()

@@ -36,25 +36,17 @@ def make_activity_flair(username, sub):
                 main_data = check_activity(username, sub, sub_names_list, main_setting)
                 main_result = main_data[0]
                 main_value = main_data[1]
-                
-                logging.debug("Main result: " + str(main_result) +
-                              "Main value " + str(main_value))
 
                 # Check OR only
                 if not main_result:
-                    logging.debug("Checking OR only")
                     if setting_name_or in activity_settings:
                         or_result = check_sub_setting(activity_settings, setting_name_or, sub, username)
-                    else:
-                        logging.debug("OR not found")
 
                 # If main result is True check AND and OR
                 else:
                     if setting_name_or in activity_settings:
-                        logging.debug("Checking OR")
                         or_result = check_sub_setting(activity_settings, setting_name_or, sub, username)
                     elif setting_name_and in activity_settings:
-                        logging.debug("Checking AND")
                         and_result = check_sub_setting(activity_settings, setting_name_and, sub, username)
 
                 logging.debug("Main result: " + str(main_result) +
@@ -109,24 +101,16 @@ def make_activity_flair(username, sub):
                     main_result = main_data[0]
                     main_value = main_data[1]
 
-                    #logging.debug("Main result: " + str(main_result) +
-                    #              "Main value " + str(main_value))
-
                     # If main result is False check OR only
                     if not main_result:
-                        logging.debug("Checking OR only")
                         if setting_name_or in activity_settings:
                             or_result = check_sub_setting(activity_settings, setting_name_or, sub, username)
-                        else:
-                            logging.debug("OR not found")
 
                     # If main result is True check AND and OR
                     else:
                         if setting_name_or in activity_settings:
-                            logging.debug("Checking OR")
                             or_result = check_sub_setting(activity_settings, setting_name_or, sub, username)
                         elif setting_name_and in activity_settings:
-                            logging.debug("Checking AND")
                             and_result = check_sub_setting(activity_settings, setting_name_and, sub, username)
 
                     #logging.debug("Main result: " + str(main_result) +
@@ -140,7 +124,7 @@ def make_activity_flair(username, sub):
                 # Add data to lists unless they are None
                 processed_data = process_flair_data(main_setting, flair_data)
                 if len(processed_data) != 3:
-                    logging.debug("process_flair_data didn't return all data")
+                    logging.critical("process_flair_data didn't return all data")
                 if processed_data[0]:
                     full_flair_text.append(processed_data[0])
                     logging.debug("Flair text: " + str(processed_data[0]))

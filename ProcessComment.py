@@ -55,11 +55,6 @@ def fetch_queue(comment_queue, flair_queue, perm_queue, sub_list):
             new_accnt_flair_enabled = target_sub.main_config.getboolean("young account tag")
             activity_flair_enabled = target_sub.main_config.getboolean("activity tag")
             
-            logging.info("Active flair modules:"
-                         "\n\tProg: " + str(prog_flair_enabled) +
-                         "\n\tNew accnt: " + str(new_accnt_flair_enabled) +
-                         "\n\tActivity: " + str(activity_flair_enabled))
-            
             # If at least one flair toggle is enabled, update user flair
             if prog_flair_enabled or new_accnt_flair_enabled or activity_flair_enabled:
                 logging.info("Updating flair...")

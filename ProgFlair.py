@@ -12,7 +12,6 @@ def make_prog_flair(user, sub):
         tier_count += 1
 
         if tier_name in prog_tiers:
-            logging.debug("Checking " + tier_name)
             
             main_tier = prog_tiers[tier_name]
             main_result = user_in_tier(main_tier, user, sub)
@@ -23,12 +22,9 @@ def make_prog_flair(user, sub):
             
             # Check only OR
             if not main_result:
-                logging.debug("Checking OR only")
                 if tier_name_or in prog_tiers:
                     or_tier = prog_tiers[tier_name_or]
                     or_result = user_in_tier(or_tier, user, sub)
-                else:
-                    logging.debug("OR not found")
 
             # Check for AND/OR rules
             elif tier_name_and in prog_tiers:

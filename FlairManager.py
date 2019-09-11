@@ -1,4 +1,6 @@
 import time
+import logging
+
 from ActivityFlair import make_activity_flair
 from ProgFlair import make_prog_flair
 
@@ -41,17 +43,22 @@ def update_flair(flair_queue, perm_queue, user, sub, prog_flair_enabled,
     new_flair_txt = concat_flair(prog_flair, new_accnt_flair, activity_flair)
     old_flair_txt = sub.db.fetch_sub_info(username, "flair text")
     if new_flair_txt != old_flair_txt:
+        logging.info("New flair: " + new_flair_txt)
         sub.db.update_key_sub_info(username, "flair text", new_flair_txt)
         flair_queue.put([username, new_flair_txt, css, sub])
+    else:
+        logging.info("Flair has not changed since last update")
 
     # Check if the user has earned any new permissions
     old_flair_perm = sub.db.fetch_sub_info(username, "flair perm")
     old_css_perm = sub.db.fetch_sub_info(username, "css perm")
     
     if flair_perm and not old_flair_perm:
+        logging.info("User granted flair perm")
         sub.db.update_key_sub_info(username, "flair perm", int(flair_perm))
         perm_queue.put([username, "flair perm", sub])
     if css_perm and not old_css_perm:
+        logging.info("User granted css permissions")
         sub.db.update_key_sub_info(username, "flair perm", int(css_perm))
         perm_queue.put([username, "css perm", sub])
 
