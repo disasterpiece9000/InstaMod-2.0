@@ -110,18 +110,18 @@ def get_user_value(metric, sub_list, user, sub):
 
     # Get data from accnt_info table
     if metric in ("total comment karma", "total post karma"):
-        user_value = sub.db.fetch_info_table(username, metric)
+        user_value = sub.db.fetch_accnt_info(username, metric)
     elif metric == "total karma":
-        user_value = sub.db.fetch_info_table(username, "total post karma") + \
-                     sub.db.fetch_info_table(username, "total comment karma")
+        user_value = sub.db.fetch_accnt_info(username, "total post karma") + \
+                     sub.db.fetch_accnt_info(username, "total comment karma")
 
     # Get data from accnt_history table
     elif metric in ("comment karma", "post karma", "positive comments", "negative comments",
                     "positive posts", "negative posts", "positive QC", "negative QC"):
-        user_value = sub.db.fetch_hist_table(username, sub_list, metric)
-    elif metric == "net QC":
-        user_value = sub.db.fetch_hist_table(username, sub_list, "positive QC") - \
-                     sub.db.fetch_hist_table(username, sub_list, "negative QC")
+        user_value = sub.db.fetch_sub_activity(username, sub_list, metric)
+    elif metric == "net qc":
+        user_value = sub.db.fetch_sub_activity(username, sub_list, "positive QC") - \
+                     sub.db.fetch_sub_activity(username, sub_list, "negative QC")
 
     return user_value
 
