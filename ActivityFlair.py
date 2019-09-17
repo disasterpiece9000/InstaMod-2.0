@@ -3,7 +3,8 @@ import logging
 
 
 # Activity flair main method
-def make_activity_flair(username, sub):
+def make_activity_flair(user, sub):
+    username = str(user)
     activity_settings = sub.sub_activity
     full_flair_text = []
     flair_perm = False
@@ -20,7 +21,7 @@ def make_activity_flair(username, sub):
         # Process main setting
         if setting_name in activity_settings:
             main_setting = activity_settings[setting_name]
-            combine_subs = main_setting.getboolean("combine subs")
+            group_subs = main_setting.getboolean("group subs")
             sub_list = make_sub_list(main_setting, sub, username)
 
             # Prepare vars to store result info
@@ -30,7 +31,7 @@ def make_activity_flair(username, sub):
             setting_name_or = setting_name + " - OR"
 
             # Handle combined subs
-            if combine_subs:
+            if group_subs:
                 logging.debug("Processing combined subs...")
                 sub_names_list = [item[0] for item in sub_list]
                 main_data = check_activity(username, sub, sub_names_list, main_setting)
@@ -191,7 +192,8 @@ def process_flair_data(setting, flair_data):
         flair_text = None
 
     # Process updated permissions
-    flair_perm, css_perm = False
+    flair_perm = False
+    css_perm = False
     if permission == "custom flair":
         flair_perm = True
     elif permission == "custom css":
@@ -236,7 +238,7 @@ def make_sub_list(setting, sub, username):
 def check_activity(username, sub, sub_list, setting):
     target_value = setting.getint("target value")
     metric = setting["metric"].lower()
-    comparison = setting["comparison"].lower()
+    comparison = setting["comparison"]
 
     user_value = get_user_value(metric, sub_list, username, sub)
     activity_result = check_value(user_value, comparison, target_value)
@@ -250,18 +252,18 @@ def get_user_value(metric, sub_list, username, sub):
 
     # Get data from accnt_info table
     if metric in ("total comment karma", "total post karma"):
-        user_value = sub.db.fetch_info_table(username, metric)
+        user_value = sub.db.fetch_accnt_info(username, metric)
     elif metric == "total karma":
-        user_value = sub.db.fetch_info_table(username, "total post karma") + \
-                     sub.db.fetch_info_table(username, "total comment karma")
+        user_value = sub.db.fetch_accnt_info(username, "total post karma") + \
+                     sub.db.fetch_accnt_info(username, "total comment karma")
 
     # Get data from accnt_history table
     elif metric in ("comment karma", "post karma", "positive comments", "negative comments",
-                    "positive posts", "negative posts", "positive QC", "negative QC"):
-        user_value = sub.db.fetch_hist_table(username, sub_list, metric)
-    elif metric == "net QC":
-        user_value = sub.db.fetch_hist_table(username, sub_list, "positive QC") - \
-                     sub.db.fetch_hist_table(username, sub_list, "negative QC")
+                    "positive posts", "negative posts", "positive qc", "negative qc"):
+        user_value = sub.db.fetch_sub_activity(username, sub_list, metric)
+    elif metric == "net qc":
+        user_value = sub.db.fetch_sub_activity(username, sub_list, "positive qc") - \
+                     sub.db.fetch_sub_activity(username, sub_list, "negative qc")
 
     return user_value
 

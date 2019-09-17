@@ -26,11 +26,11 @@ logging.basicConfig(filename="info.log", filemode="w", level=logging.INFO)
 
 # Check inbox
 def read_pms():
-    logging.info("Checking PMs...")
+    logging.debug("Checking PMs...")
     for message in r.inbox.messages():
         if not message.was_comment:
             MessageManager.process_pm(message, sub_list)
-    logging.info("Done with PMs")
+    logging.debug("Done with PMs")
 
 
 # Create all subreddit objects and return multisub for comment stream
@@ -51,27 +51,29 @@ def get_multisub():
 
 # Process flair queue
 def flair_users():
-    logging.info("Flairing users...")
+    logging.debug("Flairing users...")
     while not flair_queue.empty():
         flair_data = flair_queue.get()
         flair_queue.task_done()
         
         username = flair_data[0]
-        flair_txt = flair_data[1]
-        flair_css = flair_data[2]
+        flair_txt = flair_data[1] if flair_data[1] else ""
+        flair_css = flair_data[2] if flair_data[2] else ""
         target_sub = flair_data[3]
         
-        logging.info("\tFlair results"
+        # TODO: Figure out why target_sub.name returns None
+        
+        logging.info("Flair results"
                      + "\n\tUser: " + username
                      + "\n\tFlair: " + flair_txt
                      + "\n\tCSS: " + flair_css
                      + "\n\tSub: " + target_sub.name + "\n")
-    logging.info("Done flairing users")
+    logging.debug("Done flairing users")
 
 
 # Process permission queue
 def notify_permission_change():
-    logging.info("Updating permissions...")
+    logging.debug("Updating permissions...")
     while not perm_queue.empty():
         perm_data = perm_queue.get()
         perm_queue.task_done()
@@ -117,20 +119,20 @@ def notify_permission_change():
             body = auto_perm_msg + target_sub.pm_messages["custom css body"] + message_footer
             subject = target_sub.pm_messages["custom css subj"]
         
-        logging.info("\tPermissions updated:"
+        logging.info("Permissions updated:"
                      "\n\tUser: " + username +
                      "\n\tType: " + new_perm +
                      "\n\tSub: " + target_sub.name +
-                     "\n\t Message Subj: " + subject +
-                     "\n\t Message Body: " + body + "\n")
-    logging.info("Done updating permissions")
+                     "\n\tMessage Subj: " + subject +
+                     "\n\tMessage Body: " + body + "\n")
+    logging.debug("Done updating permissions")
 
 
 # Main Method
 all_subs = get_multisub()
 # Child thread for processing comments
 process_thread = threading.Thread(target=ProcessComment.fetch_queue,
-                                  args=(comment_queue, flair_queue, perm_queue, sub_list))
+                                  args=(comment_queue, flair_queue, perm_queue, sub_list, r))
 process_thread.setDaemon(False)
 process_thread.start()
 
@@ -139,7 +141,7 @@ while True:
     for comment in all_subs.stream.comments(pause_after=3, skip_existing=False):
         # If no new comments are found after 3 checks do other stuff
         if comment is None:
-            logging.info("No new comments found")
+            logging.debug("No new comments found")
             flair_users()
             notify_permission_change()
             # read_pms()

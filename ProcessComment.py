@@ -3,10 +3,11 @@ import FlairManager
 import prawcore
 import time
 import logging
+import timeit
 
 
 # Get new comments as they are added to the queue by the producer thread
-def fetch_queue(comment_queue, flair_queue, perm_queue, sub_list):
+def fetch_queue(comment_queue, flair_queue, perm_queue, sub_list, r):
     # Loop continuously checking for new comments
     while True:
         comment = comment_queue.get()
@@ -43,11 +44,10 @@ def fetch_queue(comment_queue, flair_queue, perm_queue, sub_list):
         if scrape_data:
             logging.info("Collecting data...")
             try:
-                DataCollector.load_data(user_in_accnt_info, user_in_sub_info, update_flair, comment, target_sub)
+                DataCollector.load_data(user_in_accnt_info, user_in_sub_info, update_flair, comment, target_sub, r)
             except (prawcore.NotFound, prawcore.RequestException) as e:
                 logging.warning("\nError in DataCollector: \n" + str(e) + "\n")
                 continue
-            logging.info("Done collecting data")
         
         if update_flair:
             # Read flair toggles from sub config

@@ -1,4 +1,4 @@
-# TODO: Implement PM Messages and PM Commands section in config file
+# TODO: Implement PM Commands section in config file
 
 message_footer = ("\n\n-----\n\nThis is an automated message. "
                   "Please contact /u/shimmyjimmy97 with any questions, comments, or issues that you have.")

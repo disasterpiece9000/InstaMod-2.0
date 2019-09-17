@@ -4,11 +4,11 @@ import time
 import logging
 from psaw import PushshiftAPI
 
-# PushShift Instance
-ps = PushshiftAPI()
 
-
-def load_data(user_in_accnt_info, user_in_sub_info, update_flair, comment, sub):
+def load_data(user_in_accnt_info, user_in_sub_info, update_flair, comment, sub, r):
+    # PushShift Instance
+    ps = PushshiftAPI(r)
+    
     # General account info
     author = comment.author
     username = str(author).lower()
@@ -54,8 +54,7 @@ def load_data(user_in_accnt_info, user_in_sub_info, update_flair, comment, sub):
     #time.sleep(2)
     comment_results = ps.search_comments(author=author,
                                          after=after_time,
-                                         filter=["id", "score", "subreddit", "body"],
-                                         limit=1000)
+                                         filter=["id", "score", "subreddit", "body"],)
     
     sub_comment_karma = Counter()
     sub_pos_comments = Counter()
@@ -63,23 +62,11 @@ def load_data(user_in_accnt_info, user_in_sub_info, update_flair, comment, sub):
     sub_neg_qc = Counter()
     sub_pos_qc = Counter()
     
-    for comment in comment_results:
-        # Check that all data was returned
-        data = comment[len(comment) - 1]
-        post_data_valid = False
-        try:
-            if None not in [data["id"], data["score"], data["subreddit"], data["body"]]:
-                post_data_valid = True
-        except KeyError:
-            logging.debug("PSAW didn't return some parameters in post_results: " + str(data))
-            continue
+    for ps_comment in comment_results:
             
-        if not post_data_valid:
-            continue
-            
-        score = data["score"]
-        subreddit = data["subreddit"].lower()
-        body = data["body"]
+        score = ps_comment.score
+        subreddit = str(ps_comment.subreddit).lower()
+        body = ps_comment.body
         
         sub_comment_karma[subreddit] += score
         if score > 0:
@@ -136,28 +123,14 @@ def load_data(user_in_accnt_info, user_in_sub_info, update_flair, comment, sub):
     # Posts
     post_results = ps.search_submissions(author=author,
                                          after=after_time,
-                                         filter=["id", "score", "subreddit"],
-                                         limit=1000)
+                                         filter=["id", "score", "subreddit"],)
     sub_post_karma = Counter()
     sub_pos_posts = Counter()
     sub_neg_posts = Counter()
     
-    for post in post_results:
-        # Check that all data was returned
-        data = post[len(post) - 1]
-        post_data_valid = False
-        try:
-            if None not in [data["subreddit"], data["score"], data["id"]]:
-                post_data_valid = True
-        except KeyError:
-            logging.debug("PSAW didn't return some parameters in post_results: " + str(data))
-            continue
-            
-        if not post_data_valid:
-            continue
-        
-        score = data["score"]
-        subreddit = data["subreddit"].lower()
+    for ps_post in post_results:
+        score = ps_post.score
+        subreddit = str(ps_post.subreddit).lower()
         
         sub_post_karma[subreddit] += score
         if score > 0:
@@ -171,11 +144,7 @@ def load_data(user_in_accnt_info, user_in_sub_info, update_flair, comment, sub):
     else:
         sub.db.insert_sub_activity(username, sub_comment_karma, sub_pos_comments, sub_neg_comments,
                                    sub_pos_qc, sub_neg_qc, sub_post_karma, sub_pos_posts, sub_neg_posts)
-        
-    # Check if user is now in all 3 tables
-    accnt = sub.db.exists_in_accnt_info(username)
-    sub = sub.db.exists_in_sub_info(username)
-    
+
 
 def count_words(body):
     body_list = body.split()

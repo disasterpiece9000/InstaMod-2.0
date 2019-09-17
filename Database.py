@@ -1,3 +1,5 @@
+# TODO: Merge all databases into one and have different tables for each subreddit
+
 import sqlite3
 import logging
 
@@ -227,7 +229,6 @@ class Database:
     
     # Generic getter method for Account History table
     def fetch_sub_activity(self, username, sub_list, key):
-        name_list = [data[0] for data in sub_list]
         select_key = self.find_key(key, self.TABLE_SUB_ACTIVITY)
         cur = self.user_info_conn.cursor()
         
@@ -237,7 +238,7 @@ class Database:
                       + self.KEY2_SUB_NAME + " = ?")
         
         value = 0
-        for name in name_list:
+        for name in sub_list:
             cur.execute(select_str, (username, name))
             data = cur.fetchone()
             if data is not None:
