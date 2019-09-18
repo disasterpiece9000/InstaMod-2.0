@@ -1,11 +1,16 @@
 # TODO: Implement PM Commands section in config file
 
+import prawcore
+import DataCollector
+import FlairManager
+import ProcessComment
+
 message_footer = ("\n\n-----\n\nThis is an automated message. "
                   "Please contact /u/shimmyjimmy97 with any questions, comments, or issues that you have.")
 
 
 # Main method for responding to PM commands
-def process_pm(message, sub_list):
+def process_pm(message, sub_list, flair_queue, perm_queue, r):
     author = message.author
     author_name = str(author)
     message_subj = message.subject.lower()
@@ -19,7 +24,7 @@ def process_pm(message, sub_list):
     if len(message_subj) != 2:
         message.reply("This message's subject is not in the correct format and cannot be processed."
                       "Each PM command's subject must contain these parameters:\n\n"
-                      "     !SubredditName !command" +
+                      "     !SubredditName !Command" +
                       message_footer)
         message.mark_read()
         return
@@ -42,18 +47,35 @@ def process_pm(message, sub_list):
     if command == "!flair":
         flair_pm(message, target_sub)
     
-    if command == "!noautoflair" and check_if_mod(author_name, target_sub, message):
+    elif command == "!noautoflair" and check_if_mod(author_name, target_sub, message):
         remove_auto_flair(message, target_sub)
         
-    if command == "!giveflairperm" and check_if_mod(author_name, target_sub, message):
-        give_flair_perm(message, target_sub)
+    elif command == "!giveflairperm" and check_if_mod(author_name, target_sub, message):
+        give_flair_perm(message, target_sub, perm_queue)
         
-    if command == "!updatesettings" and check_if_mod(author_name, target_sub, message):
+    elif command == "!updatesettings" and check_if_mod(author_name, target_sub, message):
         target_sub.read_config()
+        message.mark_read()
+        
+    elif command == "!updatethem" and check_if_mod(author_name, target_sub, message):
+        # Get user from username and verify that they exist
+        target_user = get_user(message.body, r)
+        if target_user is None:
+            message.reply("The user " + message.body + " does not exist and cannot be updated" + message_footer)
+        
+        update_user(target_user, target_sub, r, flair_queue, perm_queue)
+        message.reply("The user " + str(target_user) + " has had their data and flair updated" + message_footer)
+        message.mark_read()
+        
+    elif command == "!updateme":
+        update_user(message.author, target_sub, r, flair_queue, perm_queue)
+        message.reply("Your data and flair have been updated" + message_footer)
+        message.mark_read()
         
     # TODO: Consider adding a confirmation step to prevent accidental data loss
-    if command == "!wipe" and check_if_mod(author, target_sub, message):
+    elif command == "!wipe" and check_if_mod(author, target_sub, message):
         target_sub.db.wipe_sub_info()
+        message.mark_read()
 
 
 # Check if the user is a mod in the target_sub
@@ -68,14 +90,42 @@ def check_if_mod(author_name, target_sub, message):
 
 # Check if the target user exists in the database
 def user_in_db(username, target_sub, message):
-    if not target_sub.db.exists_in_accnt_info(username):
+    if not target_sub.db.exists_in_sub_info(username):
         message.reply("This user has no entry in the database and cannot be modified. "
-                      "To fix this, you can use the !updatethem PM command and then try again."
+                      "To fix this, you can use the !updatethem or !updateme PM command and then try again."
                       + message_footer)
         message.mark_read()
         return False
     else:
         return True
+    
+
+def get_user(username, r):
+    user = r.redditor(username)
+    try:
+        user.created
+    except prawcore.NotFound:
+        return None
+    return user
+    
+
+# Handle !updatethem and !updateme
+def update_user(target_user, target_sub, r, flair_queue, perm_queue):
+    # Check existing data
+    check_data = ProcessComment.check_user(target_user, target_sub)
+    update_flair = True
+    user_in_accnt_info = check_data[2]  # Does the user's data need to be updated or inserted
+    user_in_sub_info = check_data[3]
+    
+    # Collect new data
+    DataCollector.load_data(user_in_accnt_info, user_in_sub_info, update_flair, target_user, target_sub, r)
+
+    # Update flair with new data
+    prog_flair_enabled = target_sub.main_config.getboolean("progression tier")
+    new_accnt_flair_enabled = target_sub.main_config.getboolean("young account tag")
+    activity_flair_enabled = target_sub.main_config.getboolean("activity tag")
+    FlairManager.update_flair(flair_queue, perm_queue, target_user, target_sub,
+                              prog_flair_enabled, new_accnt_flair_enabled, activity_flair_enabled)
 
 
 # Handle custom flair requests
@@ -131,7 +181,7 @@ def remove_auto_flair(message, target_sub):
 
 
 # Grant a user the ability to assign themselves custom flair
-def give_flair_perm(message, target_sub):
+def give_flair_perm(message, target_sub, perm_queue):
     target_username = message.body.lower()
     # Return if the user doesn't exist in the database
     in_db = user_in_db(target_username, target_sub, message)
@@ -142,3 +192,4 @@ def give_flair_perm(message, target_sub):
     message.reply("The user " + target_username + " has been granted custom flair permissions and will be notified."
                   + message_footer)
     message.mark_read()
+    perm_queue.put([target_username, "flair perm", target_sub])

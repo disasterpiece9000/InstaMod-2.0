@@ -92,6 +92,6 @@ def concat_flair(prog_flair, new_accnt_flair, activity_flair):
         if flair_txt != "":
             flair_txt += " | "
         for hold_flair in activity_flair:
-            flair_txt += hold_flair + " "
+            flair_txt += hold_flair + " | "
     
     return flair_txt

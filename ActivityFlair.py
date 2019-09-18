@@ -176,18 +176,19 @@ def process_flair_data(setting, flair_data):
     sorted_data = {abbrev: flair_data[abbrev] for abbrev in sorted(
                 flair_data, key=flair_data.get, reverse=reverse)[:sub_cap]}
 
-    # Concatenate flair text
-    flair_text = ""
+    # Add pre text
+    flair_text = pre_text + " " if pre_text else ""
+    # Concatenate flair data
     for abbrev, value in sorted_data.items():
-        flair_text += pre_text + " " if pre_text else ""
         flair_text += abbrev + " "
-        flair_text += str(value) + " " if display_value else ""
-        flair_text += post_text + " " if post_text else ""
+        flair_text += str(value) if display_value else ""
         flair_text += ", "
 
     # Remove trailing " , "
-    flair_text = flair_text[:len(flair_text) - 2]
-    flair_text = flair_text.strip()
+    flair_text = flair_text[:len(flair_text) - 2].strip()
+    # Add post text
+    flair_text += " " + post_text if post_text else ""
+    
     if not flair_text:
         flair_text = None
 

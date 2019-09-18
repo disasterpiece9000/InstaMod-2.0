@@ -3,7 +3,6 @@ import FlairManager
 import prawcore
 import time
 import logging
-import timeit
 
 
 # Get new comments as they are added to the queue by the producer thread
@@ -44,7 +43,7 @@ def fetch_queue(comment_queue, flair_queue, perm_queue, sub_list, r):
         if scrape_data:
             logging.info("Collecting data...")
             try:
-                DataCollector.load_data(user_in_accnt_info, user_in_sub_info, update_flair, comment, target_sub, r)
+                DataCollector.load_data(user_in_accnt_info, user_in_sub_info, update_flair, user, target_sub, r)
             except (prawcore.NotFound, prawcore.RequestException) as e:
                 logging.warning("\nError in DataCollector: \n" + str(e) + "\n")
                 continue
@@ -92,6 +91,8 @@ def check_user(user, target_sub):
         if user_in_sub_info:
             # Check if the user has used their custom flair permission
             custom_flair_used = target_sub.db.fetch_sub_info(username, "custom flair used") == 1
+            # Check if the user is not permitted to recieve custom flair
+            no_auto_flair = target_sub.db.fetch_sub_info(username, "no auto flair") == 1
     
             # Get time the user was last updated
             last_updated = target_sub.db.fetch_sub_info(username, "last updated")
@@ -99,7 +100,7 @@ def check_user(user, target_sub):
             day_diff = int((current_time - last_updated) / 86400)
     
             # If the user has used custom flair, only update data and not flair
-            if custom_flair_used:
+            if custom_flair_used or no_auto_flair:
                 update_flair = False
             # Check if flair is expired
             elif day_diff >= target_sub.flair_config.getint("flair expiration"):

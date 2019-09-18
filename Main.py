@@ -1,8 +1,9 @@
-import praw
-from queue import Queue
 import threading
 import os
 import logging
+import praw
+from praw.models import Message
+from queue import Queue
 
 from Subreddit import Subreddit
 import ProcessComment
@@ -27,9 +28,9 @@ logging.basicConfig(filename="info.log", filemode="w", level=logging.INFO)
 # Check inbox
 def read_pms():
     logging.debug("Checking PMs...")
-    for message in r.inbox.messages():
-        if not message.was_comment:
-            MessageManager.process_pm(message, sub_list)
+    for item in r.inbox.unread():
+        if isinstance(item, Message):
+            MessageManager.process_pm(item, sub_list, flair_queue, perm_queue, r)
     logging.debug("Done with PMs")
 
 
@@ -96,9 +97,9 @@ def notify_permission_change():
                             " have granted you access to custom flair options. You will continue to receive " \
                             "automatic flair until you apply a custom flair. In order to apply your desired " \
                             "flair, please click on [this pre-formatted link.](https://www.reddit.com/message" \
-                            "/compose?to=InstaMod&subject=!CryptoMarkets%20!flair&message=REPLACE%20THIS%20WITH" \
-                            "%20DESIRED%20FLAIR%20TEXT%0A%0AREPLACE%20THIS%20WITH%20DESIRED%20FLAIR%20ICON%20OR" \
-                            "%20DELETE%20FOR%20NONE)" \
+                            "/compose?to=InstaMod&subject=!" + target_sub.name + "%20!flair&message=REPLACE" \
+                            "%20THIS%20WITH%20DESIRED%20FLAIR%20TEXT%0A%0AREPLACE%20THIS%20WITH%20DESIRED" \
+                            "%20FLAIR%20ICON%20OR%20DELETE%20FOR%20NONE)" \
                             "\n\n**Note:** This link will not work on mobile and it can be used to change your flair" \
                             " as many times as you want.\n\n"
             
@@ -110,9 +111,9 @@ def notify_permission_change():
             auto_perm_msg = "Your contributions to /r/" + target_sub.name + " have granted you access to custom " \
                             "flair icons. Your flair will still be updated automatically. " \
                             "In order to apply your desired flair icon, please click on [this pre-formatted link.](" \
-                            "https://www.reddit.com/message/compose?to=InstaMod&subject=!CryptoMarkets%20!flair&" \
-                            "message=REPLACE%20THIS%20WITH%20DESIRED%20FLAIR%20TEXT%0A%0AREPLACE%20THIS%20WITH%20" \
-                            "DESIRED%20FLAIR%20ICON%20OR%20DELETE%20FOR%20NONE)" \
+                            "https://www.reddit.com/message/compose?to=InstaMod&subject=!" + target_sub.name + \
+                            "CryptoMarkets%20!flair&message=REPLACE%20THIS%20WITH%20DESIRED%20FLAIR%20TEXT" \
+                            "%0A%0AREPLACE%20THIS%20WITH%20DESIRED%20FLAIR%20ICON%20OR%20DELETE%20FOR%20NONE)" \
                             "\n\n**Note:** This link will not work on mobile and it can be used to change your flair" \
                             " icon as many times as you want.\n\n"
             
@@ -138,13 +139,13 @@ process_thread.start()
 
 while True:
     # Grab any comments made in subreddits using InstaMod
-    for comment in all_subs.stream.comments(pause_after=3, skip_existing=False):
+    for comment in all_subs.stream.comments(pause_after=3, skip_existing=True):
         # If no new comments are found after 3 checks do other stuff
         if comment is None:
             logging.debug("No new comments found")
             flair_users()
             notify_permission_change()
-            # read_pms()
+            read_pms()
             continue
         comment_queue.put(comment)
         logging.info("Comment added to queue from " + str(comment.author))

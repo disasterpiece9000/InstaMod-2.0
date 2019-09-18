@@ -5,12 +5,11 @@ import logging
 from psaw import PushshiftAPI
 
 
-def load_data(user_in_accnt_info, user_in_sub_info, update_flair, comment, sub, r):
+def load_data(user_in_accnt_info, user_in_sub_info, update_flair, author, sub, r):
     # PushShift Instance
     ps = PushshiftAPI(r)
     
     # General account info
-    author = comment.author
     username = str(author).lower()
     created = author.created_utc
     total_post_karma = author.link_karma
