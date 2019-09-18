@@ -1,9 +1,13 @@
 import threading
-import os
 import logging
+import shutil
+import os
+import time
+from os import path
 import praw
 from praw.models import Message
 from queue import Queue
+import prawcore
 
 from Subreddit import Subreddit
 import ProcessComment
@@ -23,6 +27,8 @@ perm_queue = Queue()
 lock = threading.Lock()
 # Logging
 logging.basicConfig(filename="info.log", filemode="w", level=logging.INFO)
+# Store times for re-checking sub config
+last_config_check = int(time.time())
 
 
 # Check inbox
@@ -36,18 +42,60 @@ def read_pms():
 
 # Create all subreddit objects and return multisub for comment stream
 def get_multisub():
-    # Get all folder names (subreddit names)
-    folder_names = [name for name in os.listdir(".")
-                    if name.startswith("r-") and os.path.isdir(name)]
-    
-    # Create subreddit objects and multisub
     multisub_str = ""
-    for folder_name in folder_names:
-        sub_name = folder_name[2:]
-        sub_list.append(Subreddit(folder_name, r))
+    # Read subreddit names from master list
+    master_list = open("subreddit_master_list.txt", "r", )
+    for sub_name in master_list:
+        sub_list.append(Subreddit(sub_name.strip(), r))
         multisub_str += sub_name + "+"
     
+    # Remove trailing '+'
     return r.subreddit(multisub_str[:-1])
+
+
+def check_backup():
+    cur_time = int(time.time())
+    db_path = path.realpath("master_databank.db")
+    main_path, main_file = path.split(db_path)
+    backup_path = main_path + "\\Backups\\"
+    
+    for root, dirs, files in os.walk("./Backups"):
+        if len(files) == 0:
+            # Initial daily backup
+            first_daily_path = backup_path + "DAILY-" + str(cur_time) + ".db.bak"
+            shutil.copy(db_path, first_daily_path)
+            shutil.copystat(db_path, first_daily_path)
+            # Initial weekly backup
+            first_weekly_path = backup_path + "WEEKLY-" + str(cur_time) + ".db.bak"
+            shutil.copy(db_path, first_weekly_path)
+            shutil.copystat(db_path, first_weekly_path)
+            # Initial monthly backup
+            first_monthly_path = backup_path + "MONTHLY-" + str(cur_time) + ".db.bak"
+            shutil.copy(db_path, first_monthly_path)
+            shutil.copystat(db_path, first_monthly_path)
+            return
+            
+        for filename in files:
+            file_data = filename.split("-")
+            time_diff = cur_time - int(file_data[1][:-7])
+            old_path = None
+            new_path = None
+            
+            if file_data[0] == "DAILY" and time_diff > 86400:
+                old_path = backup_path + "DAILY-" + str(file_data[1])
+                new_path = backup_path + "DAILY-" + str(cur_time) + ".db.bak"
+            
+            elif file_data[0] == "WEEKLY" and time_diff > 604800:
+                old_path = backup_path + "WEEKLY-" + str(file_data[1])
+                new_path = backup_path + "WEEKLY-" + str(cur_time) + ".db.bak"
+                
+            elif file_data[0] == "MONTHLY" and time_diff > 2592000:
+                old_path = backup_path + "MONTHLY-" + str(file_data[1])
+                new_path = backup_path + "MONTHLY-" + str(cur_time) + ".db.bak"
+
+            os.remove(old_path)                 # Remove old file
+            shutil.copy(db_path, new_path)      # Copy source file to backup folder and rename
+            shutil.copystat(db_path, new_path)  # Copy permissions from source to destination
 
 
 # Process flair queue
@@ -129,23 +177,40 @@ def notify_permission_change():
     logging.debug("Done updating permissions")
 
 
-# Main Method
+# Get multisub
 all_subs = get_multisub()
-# Child thread for processing comments
+
+# Create thread for processing comments
 process_thread = threading.Thread(target=ProcessComment.fetch_queue,
                                   args=(comment_queue, flair_queue, perm_queue, sub_list, r))
 process_thread.setDaemon(False)
 process_thread.start()
 
 while True:
-    # Grab any comments made in subreddits using InstaMod
-    for comment in all_subs.stream.comments(pause_after=3, skip_existing=True):
-        # If no new comments are found after 3 checks do other stuff
-        if comment is None:
-            logging.debug("No new comments found")
-            flair_users()
-            notify_permission_change()
-            read_pms()
-            continue
-        comment_queue.put(comment)
-        logging.info("Comment added to queue from " + str(comment.author))
+    try:
+        # Grab any comments made in subreddits using InstaMod
+        for comment in all_subs.stream.comments(pause_after=3, skip_existing=False):
+            # If no new comments are found after 3 checks do other stuff
+            if comment is None:
+                logging.debug("No new comments found")
+                flair_users()
+                notify_permission_change()
+                read_pms()
+                
+                # Re-read each subreddit's config file each hour
+                current_time = int(time.time())
+                if current_time - last_config_check < 3600:
+                    for sub in sub_list:
+                        sub.read_config()
+                    last_config_check = current_time
+                    
+                    # Create a backup of database file every day/week/month
+                    check_backup()
+                
+                continue
+            comment_queue.put(comment)
+            logging.info("Comment added to queue from " + str(comment.author))
+    except prawcore.ServerError:
+        logging.warning("Server Error: Sleeping for 1 min")
+        time.sleep(60)
+        continue

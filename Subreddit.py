@@ -5,10 +5,9 @@ from Database import Database
 
 class Subreddit:
     # Load settings from wiki page
-    def __init__(self, folder_name, r):
+    def __init__(self, name, r):
         self.r = r
-        self.folder_name = folder_name
-        self.name = folder_name[2:].lower()
+        self.name = name.lower()
         self.sub = r.subreddit(self.name)
         self.db = None
         self.start_interval = datetime.now()
@@ -40,7 +39,7 @@ class Subreddit:
         self.sub_activity = self.load_nested_config("ACTIVITY TAG", config)
         self.sub_groups = self.load_nested_config("SUB GROUP", config)
         # Setup the sub's database
-        self.db = Database(self.folder_name)
+        self.db = Database(self.name)
     
     # Process config options with multiple tiers
     @staticmethod

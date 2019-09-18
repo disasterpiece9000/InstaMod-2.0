@@ -61,7 +61,9 @@ def process_pm(message, sub_list, flair_queue, perm_queue, r):
         # Get user from username and verify that they exist
         target_user = get_user(message.body, r)
         if target_user is None:
-            message.reply("The user " + message.body + " does not exist and cannot be updated" + message_footer)
+            message.reply("The user " + message.body + " does not exist" + message_footer)
+            message.mark_read()
+            return
         
         update_user(target_user, target_sub, r, flair_queue, perm_queue)
         message.reply("The user " + str(target_user) + " has had their data and flair updated" + message_footer)
