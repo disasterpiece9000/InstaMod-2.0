@@ -111,8 +111,6 @@ def flair_users():
         flair_css = flair_data[2] if flair_data[2] else ""
         target_sub = flair_data[3]
         
-        # TODO: Figure out why target_sub.name returns None
-        
         logging.info("Flair results"
                      + "\n\tUser: " + username
                      + "\n\tFlair: " + flair_txt
