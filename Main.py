@@ -93,9 +93,10 @@ def check_backup():
                 old_path = backup_path + "MONTHLY-" + str(file_data[1])
                 new_path = backup_path + "MONTHLY-" + str(cur_time) + ".db.bak"
 
-            os.remove(old_path)                 # Remove old file
-            shutil.copy(db_path, new_path)      # Copy source file to backup folder and rename
-            shutil.copystat(db_path, new_path)  # Copy permissions from source to destination
+            if None not in [old_path, new_path, db_path]:
+                os.remove(old_path)                 # Remove old file
+                shutil.copy(db_path, new_path)      # Copy source file to backup folder and rename
+                shutil.copystat(db_path, new_path)  # Copy permissions from source to destination
 
 
 # Process flair queue

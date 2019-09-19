@@ -27,7 +27,6 @@ class Subreddit:
     # Check wiki page for settings
     def read_config(self):
         config = ConfigParser(allow_no_value=True, interpolation=None)
-        # config.read(self.folder_name + "/config.ini")
         config.read_string(self.sub.wiki["InstaModSettings"].content_md)
         self.main_config = config["MAIN CONFIG"]
         self.flair_config = config["FLAIR"]

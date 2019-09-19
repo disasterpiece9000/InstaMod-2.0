@@ -97,10 +97,23 @@ def user_in_tier(tier, user, sub):
 
     metric = tier["metric"].lower()
     comparison = tier["comparison"]
-    value = tier.getint("target value")
-    user_value = get_user_value(metric, sub_list, user, sub)
+    value = tier["target value"]
+    if "percent" in value:
+        user_value = get_user_perc(metric, sub_list, user, sub)
+        value = value.split()[0]
+    else:
+        user_value = get_user_value(metric, sub_list, user, sub)
+        value = int(value)
 
     return check_value(user_value, comparison, value)
+
+
+# Handel % in progression tier
+def get_user_perc(metric, sub_list, user, sub):
+    username = str(user)
+    hold = sub.db.fetch_sub_activity_perc(username, sub_list, metric)
+    hold = hold
+
 
 
 # Fetch the user_value from the database
