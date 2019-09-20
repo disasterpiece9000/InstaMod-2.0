@@ -4,6 +4,8 @@ import logging
 from ActivityFlair import make_activity_flair
 from ProgFlair import make_prog_flair
 
+#TODO: Fix problems with flair concatenation
+
 
 # Get new flair for all enabled options
 def update_flair(flair_queue, perm_queue, user, sub, prog_flair_enabled,

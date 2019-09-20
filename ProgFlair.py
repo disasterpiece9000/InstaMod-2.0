@@ -3,6 +3,7 @@ import logging
 
 # Get progression tier flair
 def make_prog_flair(user, sub):
+    username = str(user).lower()
     prog_tiers = sub.progression_tiers
 
     # Loop through tiers in order
@@ -14,7 +15,7 @@ def make_prog_flair(user, sub):
         if tier_name in prog_tiers:
             
             main_tier = prog_tiers[tier_name]
-            main_result = user_in_tier(main_tier, user, sub)
+            main_result = user_in_tier(main_tier, username, sub)
             and_result = True
             or_result = True
             tier_name_and = tier_name + " - AND"
@@ -24,18 +25,18 @@ def make_prog_flair(user, sub):
             if not main_result:
                 if tier_name_or in prog_tiers:
                     or_tier = prog_tiers[tier_name_or]
-                    or_result = user_in_tier(or_tier, user, sub)
+                    or_result = user_in_tier(or_tier, username, sub)
 
             # Check for AND/OR rules
             elif tier_name_and in prog_tiers:
                 logging.debug("Checking AND")
                 and_tier = prog_tiers[tier_name_and]
-                and_result = user_in_tier(and_tier, user, sub)
+                and_result = user_in_tier(and_tier, username, sub)
 
             elif tier_name_or in prog_tiers:
                 logging.debug("Checking OR")
                 or_tier = prog_tiers[tier_name_or]
-                or_result = user_in_tier(or_tier, user, sub)
+                or_result = user_in_tier(or_tier, username, sub)
                 
             logging.debug("Main result: " + str(main_result) +
                           "\n\tOR result: " + str(or_result) +
@@ -67,7 +68,7 @@ def make_prog_flair(user, sub):
 
 
 # Check if the user belongs in the given tier
-def user_in_tier(tier, user, sub):
+def user_in_tier(tier, username, sub):
     target_subs = tier["target subs"]
     # If an abbreviation is specified make a list of all subs with a matching abbreviation
     if "-" in target_subs:
@@ -93,32 +94,29 @@ def user_in_tier(tier, user, sub):
         sub_list = list(sub.sub_groups[target_subs].keys())
 
     else:
-        sub_list = sub.db.get_all_subs(str(user))
+        sub_list = sub.db.get_all_subs(username)
 
     metric = tier["metric"].lower()
     comparison = tier["comparison"]
     value = tier["target value"]
     if "percent" in value:
-        user_value = get_user_perc(metric, sub_list, user, sub)
-        value = value.split()[0]
+        user_value = get_user_perc(metric, sub_list, username, sub)
+        value = int(value.split()[0])
     else:
-        user_value = get_user_value(metric, sub_list, user, sub)
+        user_value = get_user_value(metric, sub_list, username, sub)
         value = int(value)
 
     return check_value(user_value, comparison, value)
 
 
 # Handel % in progression tier
-def get_user_perc(metric, sub_list, user, sub):
-    username = str(user)
-    hold = sub.db.fetch_sub_activity_perc(username, sub_list, metric)
-    hold = hold
-
+def get_user_perc(metric, sub_list, username, sub):
+    user_pos, total = sub.db.fetch_sub_activity_perc(username, sub_list, metric)
+    return int((user_pos / total) * 100)
 
 
 # Fetch the user_value from the database
-def get_user_value(metric, sub_list, user, sub):
-    username = str(user)
+def get_user_value(metric, sub_list, username, sub):
     user_value = 0
 
     # Get data from accnt_info table

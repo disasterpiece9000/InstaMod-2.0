@@ -239,10 +239,9 @@ class Database:
     
     def fetch_sub_activity_perc(self, username, sub_list, key):
         cur = self.conn.cursor()
-        
-        # Fix SUM() combining all users into one
+
         if key == "net qc":
-            select_str = "SELECT top_rank FROM (" + \
+            user_select_str = "SELECT top_rank FROM (" + \
                             "SELECT " + self.KEY2_USERNAME + ", RANK() OVER(ORDER BY summed DESC) AS 'top_rank' " \
                             "FROM (" \
                                 "SELECT SUM(" + self.KEY2_POSITIVE_QC + ") - SUM(" + self.KEY2_NEGATIVE_QC + ") " \
@@ -255,15 +254,26 @@ class Database:
         else:
             select_key = self.find_key(key, self.TABLE_SUB_ACTIVITY)
             
-            select_str = "SELECT rowid FROM (" \
-                         "SELECT SUM(" + select_key + ") AS summed " \
-                                                      "FROM " + self.TABLE_SUB_ACTIVITY + \
-                         " ORDER BY summed DESC" \
-                         "WHERE " + self.KEY2_SUB_NAME + " IN (" + ", ".join(sub_list) + ")" \
-                                                                                         ") WHERE " + self.KEY2_USERNAME + " = ?"
+            user_select_str = "SELECT top_rank FROM (" + \
+                            "SELECT " + self.KEY2_USERNAME + ", RANK() OVER(ORDER BY summed DESC) AS 'top_rank' " \
+                            "FROM (" \
+                                "SELECT SUM(" + select_key + ") " \
+                                    "AS 'summed', " + self.KEY2_USERNAME + " " \
+                                "FROM " + self.TABLE_SUB_ACTIVITY + " " \
+                                "WHERE " + self.KEY2_SUB_NAME + " IN ('" + "', '".join(sub_list) + "')" \
+                                "GROUP BY " + self.KEY2_USERNAME + ") " \
+                            "ui) " \
+                        "uo WHERE " + self.KEY2_USERNAME + " = ?"
         
-        cur.execute(select_str, (username.lower(),))
+        cur.execute(user_select_str, (username,))
         user_pos = cur.fetchone()[0]
+
+        total_select_str = "SELECT COUNT(" + self.KEY1_USERNAME + ") " \
+                            "FROM " + self.TABLE_SUB_INFO
+        cur.execute(total_select_str)
+        total_num = cur.fetchone()[0]
+
+        return user_pos, total_num
         
     
     # Generic getter method for Account Info table

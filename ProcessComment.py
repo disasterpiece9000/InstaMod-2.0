@@ -13,7 +13,8 @@ def fetch_queue(comment_queue, flair_queue, perm_queue, sub_list, r):
         comment_queue.task_done()
         user = comment.author
         
-        logging.info("Processing comment from " + str(user) + "...")
+        logging.info("Processing comment from " + str(user) +
+                     "\nComment queue size: " + str(len(comment_queue)))
         
         # Find sub that the comment was placed in
         target_sub = None
@@ -34,7 +35,7 @@ def fetch_queue(comment_queue, flair_queue, perm_queue, sub_list, r):
         scrape_data = check_data[1]  # Does user's data need to be updated
         user_in_accnt_info = check_data[2]  # Does the user's data need to be updated or inserted
         user_in_sub_info = check_data[3]
-        logging.info("Check User:"
+        logging.info("Check User: " + str(user) +
                      "\n\tUpdate flair: " + str(update_flair) +
                      "\n\tScrape data: " + str(scrape_data) +
                      "\n\tIn accnt_info: " + str(user_in_accnt_info) +
