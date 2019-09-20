@@ -3,6 +3,7 @@ import FlairManager
 import prawcore
 import time
 import logging
+import queue
 
 
 # Get new comments as they are added to the queue by the producer thread
@@ -13,8 +14,7 @@ def fetch_queue(comment_queue, flair_queue, perm_queue, sub_list, r):
         comment_queue.task_done()
         user = comment.author
         
-        logging.info("Processing comment from " + str(user) +
-                     "\nComment queue size: " + str(len(comment_queue)))
+        logging.info("Processing comment from " + str(user))
         
         # Find sub that the comment was placed in
         target_sub = None
@@ -92,7 +92,7 @@ def check_user(user, target_sub):
         if user_in_sub_info:
             # Check if the user has used their custom flair permission
             custom_flair_used = target_sub.db.fetch_sub_info(username, "custom flair used") == 1
-            # Check if the user is not permitted to recieve custom flair
+            # Check if the user is not permitted to receive custom flair
             no_auto_flair = target_sub.db.fetch_sub_info(username, "no auto flair") == 1
     
             # Get time the user was last updated

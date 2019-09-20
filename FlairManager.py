@@ -34,7 +34,7 @@ def update_flair(flair_queue, perm_queue, user, sub, prog_flair_enabled,
         
     # Activity Flair
     if activity_flair_enabled:
-        activity_data = make_activity_flair(user, sub)
+        activity_data = make_activity_flair(username, sub)
         activity_flair = activity_data[0]
         if activity_data[1]:
             flair_perm = True
@@ -95,5 +95,10 @@ def concat_flair(prog_flair, new_accnt_flair, activity_flair):
             flair_txt += " | "
         for hold_flair in activity_flair:
             flair_txt += hold_flair + " | "
+
+    # Remove trailing space and |
+    flair_txt = flair_txt.strip()
+    if flair_txt.endswith(" |"):
+        flair_txt = flair_txt[:-2]
     
     return flair_txt

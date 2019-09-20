@@ -37,7 +37,7 @@ def make_prog_flair(user, sub):
                 logging.debug("Checking OR")
                 or_tier = prog_tiers[tier_name_or]
                 or_result = user_in_tier(or_tier, username, sub)
-                
+
             logging.debug("Main result: " + str(main_result) +
                           "\n\tOR result: " + str(or_result) +
                           "\n\tAND result: " + str(and_result))
@@ -47,14 +47,14 @@ def make_prog_flair(user, sub):
                 flair_text = main_tier["flair text"]
                 flair_css = main_tier["flair css"]
                 permissions = main_tier["permissions"].lower()
-                
+
                 flair_perm = False
                 css_perm = False
                 if permissions == "custom flair":
                     flair_perm = True
                 elif permissions == "custom css":
                     css_perm = True
-                
+
                 logging.debug("Flair text: " + flair_text +
                               "\n\tFlair css: " + flair_css +
                               "\n\tFlair perm: " + str(flair_perm) +
@@ -98,15 +98,19 @@ def user_in_tier(tier, username, sub):
 
     metric = tier["metric"].lower()
     comparison = tier["comparison"]
-    value = tier["target value"]
-    if "percent" in value:
+
+    # Parse the target value out of the metric
+    target_value = comparison[2:] if ">=" in comparison or "<=" else comparison[1:]
+    target_value = target_value.strip()
+
+    if "percent" in target_value:
         user_value = get_user_perc(metric, sub_list, username, sub)
-        value = int(value.split()[0])
+        target_value = int(target_value.split()[0])
     else:
         user_value = get_user_value(metric, sub_list, username, sub)
-        value = int(value)
+        target_value = int(target_value)
 
-    return check_value(user_value, comparison, value)
+    return check_value(user_value, comparison, target_value)
 
 
 # Handel % in progression tier

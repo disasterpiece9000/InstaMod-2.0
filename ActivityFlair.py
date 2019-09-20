@@ -3,8 +3,7 @@ import logging
 
 
 # Activity flair main method
-def make_activity_flair(user, sub):
-    username = str(user)
+def make_activity_flair(username, sub):
     activity_settings = sub.sub_activity
     full_flair_text = []
     flair_perm = False
@@ -114,10 +113,6 @@ def make_activity_flair(user, sub):
                         elif setting_name_and in activity_settings:
                             and_result = check_sub_setting(activity_settings, setting_name_and, sub, username)
 
-                    #logging.debug("Main result: " + str(main_result) +
-                    #              "\n\tOR result: " + str(or_result) +
-                    #              "\n\tAND result: " + str(and_result))
-
                     # Process results
                     if main_result and and_result and or_result:
                         flair_data[abbrev] = main_value
@@ -140,12 +135,12 @@ def make_activity_flair(user, sub):
         # No more settings activity tags to discover
         else:
             break
-            
+
     logging.debug("Final results:" +
                   "\n\tFull text: " + str(full_flair_text) +
                   "\n\tFlair perm: " + str(flair_perm) +
                   "\n\tCSS perm: " + str(css_perm))
-    
+
     return [full_flair_text, flair_perm, css_perm]
 
 
@@ -154,7 +149,7 @@ def process_flair_data(setting, flair_data):
     # If no subreddits meet criteria then no flair text or permissions are added
     if len(flair_data) == 0:
         return [None, False, False]
-    
+
     sort = setting["sort"]
     sub_cap = setting.getint("sub cap")
     pre_text = setting["pre text"]
@@ -213,23 +208,34 @@ def check_sub_setting(activity_settings, setting_name, parent_sub, username):
 
 # Make a list of subreddit names and abbrevs based on section settings
 def make_sub_list(setting, sub, username):
-    sub_group_name = setting["target subs"]
+    target_subs = setting["target subs"]
 
     # Create a list of all subs with info in the database
-    if sub_group_name == "ALL":
+    if target_subs == "ALL":
         sub_list = [[name, ""] for name in sub.db.get_all_subs(username)]
 
     # Create list with sub names from sub combine that match specified abbrev
-    elif "-" in sub_group_name:
-        # Get abbrev from string
-        dash_index = sub_group_name.find("-")
-        target_abbrev = sub_group_name[dash_index + 1:].strip()
-        sub_group = sub.sub_groups[sub_group_name[:dash_index].strip()]
-        sub_list = [[name, abbrev] for name, abbrev in sub_group.items() if abbrev == target_abbrev]
+    elif "-" in target_subs:
+        # Get abbreviation from string
+        target_abbrev = target_subs[target_subs.find("-") + 1:].strip()
+        # Check if multiple abbreviations are given
+        if "," in target_abbrev:
+            target_abbrev = target_abbrev.replace(" ", "").split(",")
+        else:
+            target_abbrev = [target_abbrev]
+
+        # Get sub group name from string
+        sub_group = sub.sub_groups[target_subs[:target_subs.find("-")].strip()]
+
+        # Create a list of all subreddits with matching abbreviations
+        sub_list = []
+        for sub_name, abbrev in sub_group.items():
+            if abbrev in target_abbrev:
+                sub_list.append(sub_name)
 
     # Create list with all sub names from sub combine
     else:
-        sub_group = sub.sub_groups[sub_group_name]
+        sub_group = sub.sub_groups[target_subs]
         sub_list = [[name, abbrev] for name, abbrev in sub_group.items()]
 
     return sub_list
@@ -237,14 +243,29 @@ def make_sub_list(setting, sub, username):
 
 # Get user value from a specific sub (and subs that share the same abbreviation)
 def check_activity(username, sub, sub_list, setting):
-    target_value = setting.getint("target value")
-    metric = setting["metric"].lower()
+    metric = setting["metric"]
     comparison = setting["comparison"]
 
-    user_value = get_user_value(metric, sub_list, username, sub)
+    # Parse the target value out of the metric
+    target_value = comparison[2:] if ">=" in comparison or "<=" else comparison[1:]
+    target_value = target_value.strip()
+
+    if "percent" in target_value:
+        user_value = get_user_perc(metric, sub_list, username, sub)
+        target_value = int(target_value.split()[0])
+    else:
+        user_value = get_user_value(metric, sub_list, username, sub)
+        target_value = int(target_value)
+
     activity_result = check_value(user_value, comparison, target_value)
 
     return [activity_result, user_value]
+
+
+# Handel % in progression tier
+def get_user_perc(metric, sub_list, username, sub):
+    user_pos, total = sub.db.fetch_sub_activity_perc(username, sub_list, metric)
+    return int((user_pos / total) * 100)
 
 
 # Fetch the user_value from the database
