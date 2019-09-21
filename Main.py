@@ -46,20 +46,22 @@ def get_multisub():
     # Read subreddit names from master list
     master_list = open("subreddit_master_list.txt", "r", )
     for sub_name in master_list:
-        sub_list.append(Subreddit(sub_name.strip(), r))
+        sub_name = sub_name.replace("\n", "")
+        sub_list.append(Subreddit(sub_name, r))
         multisub_str += sub_name + "+"
     
     # Remove trailing '+'
     return r.subreddit(multisub_str[:-1])
 
 
+#TODO: Fix backups on Linux
 def check_backup():
     cur_time = int(time.time())
     db_path = path.realpath("master_databank.db")
     main_path, main_file = path.split(db_path)
-    backup_path = main_path + "\\Backups\\"
+    backup_path = main_path + "/Backups/"
     
-    for root, dirs, files in os.walk("./Backups"):
+    for root, dirs, files in os.walk(backup_path):
         if len(files) == 0:
             # Initial daily backup
             first_daily_path = backup_path + "DAILY-" + str(cur_time) + ".db.bak"

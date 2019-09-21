@@ -240,6 +240,11 @@ class Database:
     def fetch_sub_activity_perc(self, username, sub_list, key):
         cur = self.conn.cursor()
 
+        total_select_str = "SELECT COUNT(" + self.KEY1_USERNAME + ") " \
+                           "FROM " + self.TABLE_SUB_INFO
+        cur.execute(total_select_str)
+        total_num = cur.fetchone()[0]
+
         if key == "net qc":
             user_select_str = "SELECT top_rank FROM (" + \
                                 "SELECT " + self.KEY2_USERNAME + ", RANK() OVER(ORDER BY summed DESC) AS 'top_rank' " \
@@ -269,14 +274,8 @@ class Database:
         try:
             user_pos = cur.fetchone()[0]
         except TypeError:
-            print("TypeError\n"
-                  "Username: " + username + "\n"
-                  "Query: " + user_select_str)
-
-        total_select_str = "SELECT COUNT(" + self.KEY1_USERNAME + ") " \
-                           "FROM " + self.TABLE_SUB_INFO
-        cur.execute(total_select_str)
-        total_num = cur.fetchone()[0]
+            logging.debug("User has no rows in sub_activity: " + username)
+            user_pos = total_num
 
         return user_pos, total_num
 
