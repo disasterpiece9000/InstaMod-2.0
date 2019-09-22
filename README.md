@@ -8,14 +8,14 @@
     STAND BY
     PREPARING FOR LAUNCH...
 
-InstaMod is a toolbox of features that moderators can implement and customize to tailor fit their needs. It's built with customization in mind to ensure that each subreddit can have it’s own unique configuration. InstaMod's deep customization options allow for it to fit seamlessly into any community. With a robust feature set and unlimited combinations of settings, InstaMod gives moderators an easy way to customize and moderate their community. 
+InstaMod is a toolbox of features that moderators can implement and customize to tailor fit their needs. With a robust feature set and unlimited combinations of settings, InstaMod gives moderators the ability to customize and moderate their community in ways that AutoModerator can't. 
 
 To get a better idea of the customization options available, please check out the [settings documentation](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/SettingsDocumentation.md) or one of the subreddits currently using InstaMod
 * [/r/CryptoCurrency](https://www.reddit.com/r/CryptoCurrency)
 * [/r/CryptoTechnology](https://www.reddit.com/r/CryptoTechnology)
 * [/r/CryptoMarkets](https://www.reddit.com/r/CryptoMarkets)
 
-## Launch Features
+## Features - Flair Management
 
 ### User Tiers
 

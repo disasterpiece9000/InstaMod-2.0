@@ -18,32 +18,33 @@ def make_prog_flair(user, sub):
             main_result = user_in_tier(main_tier, username, sub)
             and_result = True
             or_result = True
+            final_result = False
             tier_name_and = tier_name + " - AND"
             tier_name_or = tier_name + " - OR"
             
-            # Check only OR
+            # Only check OR
             if not main_result:
                 if tier_name_or in prog_tiers:
                     or_tier = prog_tiers[tier_name_or]
                     or_result = user_in_tier(or_tier, username, sub)
+                    if or_result:
+                        final_result = True
 
-            # Check for AND/OR rules
+            # Only check AND
             elif tier_name_and in prog_tiers:
                 logging.debug("Checking AND")
                 and_tier = prog_tiers[tier_name_and]
                 and_result = user_in_tier(and_tier, username, sub)
-
-            elif tier_name_or in prog_tiers:
-                logging.debug("Checking OR")
-                or_tier = prog_tiers[tier_name_or]
-                or_result = user_in_tier(or_tier, username, sub)
+                if and_result:
+                    final_result = True
 
             logging.debug("Main result: " + str(main_result) +
                           "\n\tOR result: " + str(or_result) +
-                          "\n\tAND result: " + str(and_result))
+                          "\n\tAND result: " + str(and_result) +
+                          "\n\tFINAL result: " + str(final_result))
 
             # Check if user meets all the criteria (including and/or)
-            if main_result and and_result and or_result:
+            if final_result:
                 flair_text = main_tier["flair text"]
                 flair_css = main_tier["flair css"]
                 permissions = main_tier["permissions"].lower()
@@ -100,7 +101,13 @@ def user_in_tier(tier, username, sub):
     comparison = tier["comparison"]
 
     # Parse the target value out of the metric
-    target_value = comparison[2:] if ">=" in comparison or "<=" else comparison[1:]
+    if ">=" in comparison or "<=" in comparison:
+        target_value = comparison[2:]
+        comparison = comparison[:2]
+    else:
+        target_value = comparison[1:]
+        comparison = comparison[:1]
+
     target_value = target_value.strip()
 
     if "percent" in target_value:
@@ -116,6 +123,9 @@ def user_in_tier(tier, username, sub):
 # Handel % in progression tier
 def get_user_perc(metric, sub_list, username, sub):
     user_pos, total = sub.db.fetch_sub_activity_perc(username, sub_list, metric)
+    if total == 0:
+        logging.warning("No rows found in sub_info. Cannot divide by 0")
+        return 100
     return int((user_pos / total) * 100)
 
 

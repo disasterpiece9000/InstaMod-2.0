@@ -1,5 +1,3 @@
-# This is the config currently in use on /r/CryptoCurrency
-
 [MAIN CONFIG]
 progression tier = True
 young account tag = True
@@ -17,70 +15,66 @@ positive word count = 10
 positive criteria type = AND
 
 negative score = -1
-negative word count =
+negative word count = 5
 negative criteria type = AND
 
 [PROGRESSION TIER 1]
 metric = net QC
 target subs = SUB GROUP 1
-comparison = <=
-target value = 50
+comparison = >= 50 percent
 flair text = Bronze
 flair css = Warning-level1
 permissions =
 
+[PROGRESSION TIER 1 - OR]
+metric = net QC
+comparison = < 50
+target subs = SUB GROUP 1
 
 [PROGRESSION TIER 2]
 metric = net QC
 target subs = SUB GROUP 1
-comparison = <=
-target value = 100
+comparison = >= 25 percent
 flair text = Silver
 flair CSS =
 permissions =
 
 [PROGRESSION TIER 2 - AND]
 metric = net QC
-comparison = <=
-target subs = SUB GROUP 2
-target value = 10
+comparison = >= 50
+target subs = SUB GROUP 1
 
 [PROGRESSION TIER 3]
 metric = net QC
 target subs = SUB GROUP 1
-comparison = <=
-target value = 200
+comparison = >= 15 percent
 flair text = Gold
 flair CSS =
 permissions =
 
 [PROGRESSION TIER 3 - AND]
 metric = net QC
-comparison = <=
-target subs = SUB GROUP 2
-target value = 5
+comparison = >= 100
+target subs = SUB GROUP 1
 
 [PROGRESSION TIER 4]
 metric = net QC
 target subs = SUB GROUP 1
-comparison = >
-target value = 200
+comparison = < 5 percent
 flair text = Platinum
 flair CSS =
 permissions = CUSTOM FLAIR
 
 [PROGRESSION TIER 4 - AND]
 metric = net QC
-comparison = <=
-target subs = SUB GROUP 2
-target value = 5
+comparison = >= 200
+target subs = SUB GROUP 1
 
 [ACTIVITY TAG 1]
 metric = net QC
 target subs = SUB GROUP 1
 group subs = False
-comparison = >=
-target value = 15
+comparison = >= 15
 display value = True
 sort = MOST COMMON
 sub cap = 3
@@ -92,29 +86,31 @@ permissions =
 metric = net QC
 target subs = SUB GROUP 1
 group subs = False
-comparison = <=
-target value = -10
+comparison = <= -10
 display value = False
 sort = LEAST COMMON
-sub cap = 3
+sub cap = 1
 pre text = 
 post text = critic
 permissions =
 
-
-[PM Commands]
-!noautoflair = True
-!giveflairperm = True
-!updatesettings = True
-!wipe = True
-!updateme = True
-!updatethem = True
+[ACTIVITY TAG 3] 
+metric = net QC 
+target subs = SUB GROUP 3 
+group subs = False 
+comparison = <= 10 
+display value = True 
+sort = MOST COMMON 
+sub cap = 1 
+pre text = 
+post text = 
+permissions =
 
 [PM Messages]
 custom flair subj = You have been granted custom flair permissions on /r/CryptoCurrency
-custom flair body = Your contributions to /r/CryptoCurrency have granted you access to custom flair options. You will continue to receive automatic flair unless you choose to apply a custom flair. In order to apply your desired flair, please click on [this preformatted link.](https://www.reddit.com/message/compose?to=InstaMod&subject=!CryptoCurrency%20!flair&message=REPLACE%20THIS%20WITH%20DESIRED%20FLAIR%20TEXT%0A%0AREPLACE%20THIS%20WITH%20DESIRED%20FLAIR%20ICON%20OR%20DELETE%20FOR%20NONE)\n\nThis link will likely not work on mobile. It can be used to change your flair as many times as you want. Do not use this flair for:\n\n* Self promotion\n* Referral links\n* Impersonating a moderator or Reddit Admin\n\nThis action was preformed automatically by /u/InstaMod on behalf of the /r/CryptoCurrency moderators. For assistance, please PM /u/shimmyjimmy97
-custom css subj = Test css subj
-custom css body = Test css body
+custom flair body = Do not use this flair for:\n\n* Self promotion\n* Referral links\n* Impersonating a moderator or Reddit Admin\n\nThis action was preformed automatically by /u/InstaMod on behalf of the /r/CryptoCurrency moderators. For assistance, please PM /u/shimmyjimmy97
+custom css subj =
+custom css body =
 
 [SUB GROUP 1]
 CRYPTOCURRENCY = CC
@@ -240,3 +236,78 @@ BUTTCOIN = BUTT
 FREEKARMA4U = Karma Farming
 FREE_KARMA = Karma Farming
 FREEKARMA4ALL = Karma Farming
+
+[SUB GROUP 3]
+LITECOINMARKETS : TraderSubs 
+BITCOINMARKETS : TraderSubs 
+CRYPTOMARKETS : TraderSubs 
+ETHTRADER : TraderSubs 
+ETHINSIDER : TraderSubs 
+IOTAMARKETS : TraderSubs 
+ICOCrypto : TraderSubs 
+LINKTRADER : TraderSubs 
+POLONIEX : ExchSubs 
+BITTREX : ExchSubs 
+BINANCE : ExchSubs 
+BINANCEEXCHANGE : ExchSubs 
+COINBASE : ExchSubs 
+ETHERDELTA : ExchSubs 
+ETHERMINING : MiningSubs 
+MONEROMINING : MiningSubs 
+GPUMINING : MiningSubs 
+LITECOINMINING : MiningSubs 
+BITCOINMINING : MiningSubs 
+DOGEMINING : MiningSubs 
+NICEHASH : MiningSubs 
+MINERGATE : MiningSubs 
+PRIVACY : r/Privacy 
+PRIVACYTOOLSIO : r/PrivacyTools 
+TECHNOLOGY : r/Technology 
+TECHSUPPORT : r/TechSupport 
+OPENSOURCE : r/OpenSource 
+PROGRAMMING : r/Programming 
+COMPSCI : r/CompSci 
+NETSEC : r/NetSec 
+LINUX : r/Linux 
+SOFTWARE : r/Software 
+ANDROID : r/Android 
+LINEAGEOS : r/LineageOS 
+IOS : r/iOS 
+MOZILLA : r/Mozzila 
+FIREFOX : r/Firefox 
+CHROME : r/Chrome 
+GOOGLE : r/Google 
+MAC : r/Mac 
+APPLE : r/Apple 
+MICROSOFT : r/Microsoft 
+AMAZON : r/Amazon 
+CYBERLAWS : r/CyberLaws 
+C_PROGRAMMING : C_programming 
+CODING : r/Coding 
+HACKING : r/Hacking 
+CSS : r/CSS 
+HTML : r/HTML 
+JAVA : r/Java 
+JAVASCRIPT : r/JavaScript 
+PERL : r/Perl 
+PHP : r/PHP 
+PYTHON : r/Python 
+RUBY : r/Ruby 
+SQL : r/SQL 
+IPFS : r/IPFS 
+BITTORENT : r/Bittorennt 
+TOR : r/Tor 
+ONIONS : r/Onions 
+I2P : r/I2P 
+TAX : r/Tax 
+INVESTING : r/Investing 
+INVESTMENTCLUB : r/InvestmentClub 
+FOREX : r/FOREX 
+OPTIONS : r/Options 
+ECONOMICS : r/Economics 
+STOCKMARKET : r/StockMarket 
+FINANCE : r/Finance 
+BUSINESS : r/Business 
+PERSONALFINANCE : r/PersonalFinance 
+SECURITYANALYSIS : r/SecurityAnalysis 
+ACCOUNTING : r/Accounting

@@ -10,10 +10,9 @@ class Subreddit:
         self.name = name.lower()
         self.sub = r.subreddit(self.name)
         self.db = None
-        self.start_interval = datetime.now()
-        self.mods = self.sub.moderator()
+        self.mods = None
         
-        # Prepare to read settings from wiki page
+        # Read settings from wiki page
         self.main_config = None
         self.flair_config = None
         self.qc_config = None
@@ -31,7 +30,6 @@ class Subreddit:
         self.main_config = config["MAIN CONFIG"]
         self.flair_config = config["FLAIR"]
         self.qc_config = config["QUALITY COMMENTS"]
-        self.pm_commands = config["PM Commands"]
         self.pm_messages = config["PM Messages"]
         # Process sections with secondary criteria
         self.progression_tiers = self.load_nested_config("PROGRESSION TIER", config)
@@ -39,6 +37,8 @@ class Subreddit:
         self.sub_groups = self.load_nested_config("SUB GROUP", config)
         # Setup the sub's database
         self.db = Database(self.name)
+        # Fetch the mod list
+        self.mods = self.sub.moderator()
     
     # Process config options with multiple tiers
     @staticmethod

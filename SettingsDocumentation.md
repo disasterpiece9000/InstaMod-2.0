@@ -1,15 +1,26 @@
  # Settings File Documentation
  
- * **[Editing the Settings](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/SettingsDocumentation.md#editing-the-settings)**
- * **[Main Configuration](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/SettingsDocumentation.md#main-configuration)**
- * **[Flair](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/SettingsDocumentation.md#flair)**
- * **[Quality Comments](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/SettingsDocumentation.md#quality-comments)**
- * **[Progression Tiers](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/SettingsDocumentation.md#progression-tiers)**
-    * [Secondary Progression Tier Criteria](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/SettingsDocumentation.md#secondary-progression-tier-criteria)
+
+ 
+ ## Getting Started
+ 
+ This document details the options and requirements for the settings wiki page.
+ 
+ If you are just getting started, here are some resources that may help:
+ * [Completed settings page from /r/CryptoCurrency](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/ExampleSettings)
+ * [Blank settings template](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/SettingsTemplate.ini)
+ 
+ ### Index
+ 
+* **[Editing the Settings](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/SettingsDocumentation.md#editing-the-settings)**
+* **[Main Configuration](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/SettingsDocumentation.md#main-configuration)**
+* **[Flair](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/SettingsDocumentation.md#flair)**
+* **[Quality Comments](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/SettingsDocumentation.md#quality-comments)**
+* **[Progression Tiers](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/SettingsDocumentation.md#progression-tiers)**
+  * [Secondary Progression Tier Criteria](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/SettingsDocumentation.md#secondary-progression-tier-criteria)
 * **[Subreddit Activity Tags](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/SettingsDocumentation.md#subreddit-activity-tags)**
-    * [Secondary Activity Tag Criteria](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/SettingsDocumentation.md#secondary-activity-tag-criteria)
+  * [Secondary Activity Tag Criteria](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/SettingsDocumentation.md#secondary-activity-tag-criteria)
 * **[Subreddit Groups](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/SettingsDocumentation.md#subreddit-groups)**
-* **[PM Commands](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/SettingsDocumentation.md#pm-commands)**
 * **[PM Messages](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/SettingsDocumentation.md#pm-messages)**
  
  ## Editing the Settings
@@ -25,7 +36,7 @@ The settings for InstaMod uses the .ini format and is read from a wiki page on t
  **Sections**
  
 * Keys are grouped into sections. The section name appears on a line by itself, in square brackets ( \[ ] ). All keys after the section declaration are associated with that section. There is no explicit "end of section" delimiter; sections end at the next section declaration, or the end of the file. Sections may not be nested.
-* All sections listed in the documentation and the sample settings file must be present, even if the section is disabled. This does not include secondary criteria sections. 
+* All sections listed in the documentation, with the exception of Progression Tiers, Activity Tiers, and Sub Groups, must be present.
 * Each section must contain all it's corresponding keys. A key's value can only be left blank if specified in the documentation.
 
 **Other**
@@ -42,7 +53,7 @@ The settings for InstaMod uses the .ini format and is read from a wiki page on t
     key1=value
     key2 = value
     
-    # Comment
+    # This is a comment
     [Section 2]
     key1= value
     key2 =  value
@@ -53,6 +64,8 @@ The settings for InstaMod uses the .ini format and is read from a wiki page on t
 **Section Name:** [MAIN CONFIG]  
 
 **Description:** Turn main features on or off
+
+**Required:** Yes
 
 | Key | Description | Values |
 | ----------- | ----------- | ----------- |
@@ -66,6 +79,8 @@ The settings for InstaMod uses the .ini format and is read from a wiki page on t
 
 **Description:** General settings for flair management
 
+**Required:** Yes
+
 | Key | Description | Values |
 | ----------- | ----------- | ----------- |
 | flair expiration | The number of days until a user's flair is reevaluated | Any integer > 0 |
@@ -76,7 +91,9 @@ The settings for InstaMod uses the .ini format and is read from a wiki page on t
 
 **Section Name:** [Quality Comments]
 
-**Description:** Criteria for positive and negative QC
+**Description:** Quality comments is a criteria that you can define based on a comment's score and word count. Positive QC defines what a good comment consists of and Negative QC defines what a bad comment consists of. This can be used as a metric in the Progression and Activity section.
+
+**Required:** Yes
 
 | Key | Description | Values |
 | ----------- | ----------- | ----------- |
@@ -94,6 +111,8 @@ The settings for InstaMod uses the .ini format and is read from a wiki page on t
 
 **Description:** Sort users into tiers based on their account activity. This section supports secondary criteria.
 
+**Required:** No
+
 | Key | Description | Values |
 | ----------- | ----------- | ----------- |
 | metric | Data point pulled from the user's history that is used for criteria | <ul><li>total comment karma, total post karma, total karma</li><li>comment karma, post karma</li><li>positive comments, negative comments</li><li>positive posts, negative posts</li><li>positive QC, negative QC, net QC |
@@ -106,9 +125,11 @@ The settings for InstaMod uses the .ini format and is read from a wiki page on t
 ### Secondary Progression Tier Criteria
 
 **Section Name:** [Progression Tier 1 - And] or [Progression Tier 1 - Or]
-* **Note:** This section type is **not** required. Secondary progression tiers must match up with an existing progression tier of the same number.
+* **Note:** Secondary progression tiers must match up with an existing progression tier of the same number.
 
-**Description:** Each progression tier can have a secondary criteria specified. The second criteria is denoted by appending " - And" or " - Or" to the parent section's name (Ex: "Progression Tier 1 - And"). If And is used then the user must meet both criteria. If Or is used then the user must meet at least one of the criteria.
+**Description:** Each progression tier can have **one** secondary criteria specified. The second criteria is denoted by appending " - And" or " - Or" to the parent section's name (Ex: "Progression Tier 1 - And"). If And is used then the user must meet both criteria. If Or is used then the user must meet at least one of the criteria.
+
+**Required:** No
 
 | Key | Description | Values |
 | ----------- | ----------- | ----------- |
@@ -121,6 +142,8 @@ The settings for InstaMod uses the .ini format and is read from a wiki page on t
 * **Note:** Each subsequent tag must increment the number at the end. If a number is skipped then the tag will not be seen.
 
 **Description:** Add tags to users flair . This section supports secondary criteria.
+
+**Required:** No
 
 | Key | Description | Values |
 | ----------- | ----------- | ----------- |
@@ -139,9 +162,11 @@ The settings for InstaMod uses the .ini format and is read from a wiki page on t
 ### Secondary Activity Tag Criteria
 
 **Section Name:** [Activity Tag 1 - And] or [Activity Tag 1 - Or]
-* **Note:** This section type is **not** required. Secondary activity tags must match up with an existing activity tag of the same number. Sub groups are automatically combined (group subs = True).
+* **Note:** Secondary activity tags must match up with an existing activity tag of the same number. Sub groups are automatically combined (group subs = True).
  
-**Description:** Each activity tag can have a secondary criteria specified. The second criteria is denoted by appending " - And" or " - Or" to the parent section's name (Ex: "Activity Tag 1 - And"). If And is used then the user must meet both criteria. If Or is used then the user must meet at least one of the criteria.
+**Description:** Each activity tag can have **one** secondary criteria specified. The second criteria is denoted by appending " - And" or " - Or" to the parent section's name (Ex: "Activity Tag 1 - And"). If And is used then the user must meet both criteria. If Or is used then the user must meet at least one of the criteria.
+
+**Required:** No
 
 | Key | Description | Values |
 | ----------- | ----------- | ----------- |
@@ -154,6 +179,8 @@ The settings for InstaMod uses the .ini format and is read from a wiki page on t
 **Section Name:** [PM Messages]
 
 **Description:** InstaMod will occasionally need to message users about new permissions, comment removals, etc. This section allows you to set the test that the message will contain
+
+**Required:** Yes
 
 | Key | Description | Values |
 | ----------- | ----------- | ----------- |
@@ -169,6 +196,8 @@ The settings for InstaMod uses the .ini format and is read from a wiki page on t
 * **Note:** Each subsequent group must increment the number at the end. If a number is skipped then the group will not be seen.
 
 **Description:** Groupings of subreddits and their corresponding abbreviations. Each key is a subreddit name and the value is it's abbreviation.
+
+**Required:** No
 
 **Example:**
      

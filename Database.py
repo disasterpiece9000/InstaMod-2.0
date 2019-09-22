@@ -16,36 +16,40 @@ class Database:
     KEY1_NO_AUTO_FLAIR = "no_auto_flair"
 
     # Subreddit Activity Table
-    TABLE_SUB_ACTIVITY = "sub_activity"
+    TABLE_SUB_ACTIVITY = ""
     KEY2_USERNAME = "username"
     KEY2_SUB_NAME = "sub_name"
-    KEY2_POSITIVE_POSTS = "positive_posts"
-    KEY2_NEGATIVE_POSTS = "negative_posts"
-    KEY2_POSITIVE_COMMENTS = "positive_comments"
-    KEY2_NEGATIVE_COMMENTS = "negative_comments"
     KEY2_POSITIVE_QC = "positive_qc"
     KEY2_NEGATIVE_QC = "negative_qc"
-    KEY2_POST_KARMA = "post_karma"
-    KEY2_COMMENT_KARMA = "comment_karma"
-    CREATE_SUB_ACTIVITY = ("CREATE TABLE IF NOT EXISTS " + TABLE_SUB_ACTIVITY + " (" +
-                           KEY2_USERNAME + " TEXT, " + KEY2_SUB_NAME + " TEXT, " +
-                           KEY2_POSITIVE_POSTS + " INTEGER, " + KEY2_NEGATIVE_POSTS + " INTEGER, " +
-                           KEY2_POSITIVE_COMMENTS + " INTEGER, " + KEY2_NEGATIVE_COMMENTS + " INTEGER, " +
-                           KEY2_POSITIVE_QC + " INTEGER, " + KEY2_NEGATIVE_QC + " INTEGER, " +
-                           KEY2_POST_KARMA + " INTEGER, " + KEY2_COMMENT_KARMA + " INTEGER" +
+
+    # Account Activity Table
+    TABLE_ACCNT_ACTIVITY = "accnt_activity"
+    KEY3_USERNAME = "username"
+    KEY3_SUB_NAME = "sub_name"
+    KEY3_POSITIVE_POSTS = "positive_posts"
+    KEY3_NEGATIVE_POSTS = "negative_posts"
+    KEY3_POSITIVE_COMMENTS = "positive_comments"
+    KEY3_NEGATIVE_COMMENTS = "negative_comments"
+    KEY3_POST_KARMA = "post_karma"
+    KEY3_COMMENT_KARMA = "comment_karma"
+    CREATE_SUB_ACTIVITY = ("CREATE TABLE IF NOT EXISTS " + TABLE_ACCNT_ACTIVITY + " (" +
+                           KEY3_USERNAME + " TEXT, " + KEY3_SUB_NAME + " TEXT, " +
+                           KEY3_POSITIVE_POSTS + " INTEGER, " + KEY3_NEGATIVE_POSTS + " INTEGER, " +
+                           KEY3_POSITIVE_COMMENTS + " INTEGER, " + KEY3_NEGATIVE_COMMENTS + " INTEGER, " +
+                           KEY3_POST_KARMA + " INTEGER, " + KEY3_COMMENT_KARMA + " INTEGER" +
                            ")")
 
     # Account Information Table
     TABLE_ACCNT_INFO = "accnt_info"
-    KEY3_USERNAME = "username"
-    KEY3_DATE_CREATED = "date_created"
-    KEY3_POST_KARMA = "total_post_karma"
-    KEY3_COMMENT_KARMA = "total_comment_karma"
-    KEY3_LAST_SCRAPED = "last_scraped"
+    KEY4_USERNAME = "username"
+    KEY4_DATE_CREATED = "date_created"
+    KEY4_POST_KARMA = "total_post_karma"
+    KEY4_COMMENT_KARMA = "total_comment_karma"
+    KEY4_LAST_SCRAPED = "last_scraped"
     CREATE_ACCNT_INFO = ("CREATE TABLE IF NOT EXISTS " + TABLE_ACCNT_INFO + " (" +
-                         KEY3_USERNAME + " TEXT PRIMARY KEY, " + KEY3_DATE_CREATED + " INTEGER, " +
-                         KEY3_POST_KARMA + " INTEGER, " + KEY3_COMMENT_KARMA + " INTEGER, " +
-                         KEY3_LAST_SCRAPED + " INTEGER" +
+                         KEY4_USERNAME + " TEXT PRIMARY KEY, " + KEY4_DATE_CREATED + " INTEGER, " +
+                         KEY4_POST_KARMA + " INTEGER, " + KEY4_COMMENT_KARMA + " INTEGER, " +
+                         KEY4_LAST_SCRAPED + " INTEGER" +
                          ")")
 
     # Create tables if needed
@@ -59,22 +63,25 @@ class Database:
         cur.execute(self.CREATE_ACCNT_INFO)
 
         # Create subreddit table if necessary
-        self.TABLE_SUB_INFO = sub_name
+        self.TABLE_SUB_INFO = sub_name + "_info"
         cur.execute("CREATE TABLE IF NOT EXISTS " + self.TABLE_SUB_INFO + " (" +
                     self.KEY1_USERNAME + " TEXT PRIMARY KEY, " + self.KEY1_RATELIMIT_START + " INTEGER, " +
                     self.KEY1_RATELIMIT_COUNT + " INTEGER, " + self.KEY1_FLAIR_TEXT + " TEXT, " +
                     self.KEY1_LAST_UPDATED + " INTEGER, " + self.KEY1_FLAIR_PERM + " INTEGER, " +
                     self.KEY1_CSS_PERM + " INTEGER, " + self.KEY1_CUSTOM_FLAIR_USED + " INTEGER, " +
-                    self.KEY1_NO_AUTO_FLAIR + " INTEGER"
-                                              ")")
+                    self.KEY1_NO_AUTO_FLAIR + " INTEGER)")
 
+        self.TABLE_SUB_ACTIVITY = sub_name + "_activity"
+        cur.execute("CREATE TABLE IF NOT EXISTS " + self.TABLE_SUB_ACTIVITY + " (" +
+                    self.KEY2_USERNAME + " TEXT, " + self.KEY2_SUB_NAME + " TEXT, " +
+                    self.KEY2_POSITIVE_QC + " INTEGER, " + self.KEY2_NEGATIVE_QC + " INTEGER)")
         cur.close()
 
     # Check if a user exists in the account info table
     def exists_in_accnt_info(self, username):
         cur = self.conn.cursor()
-        select_str = ("SELECT " + self.KEY3_USERNAME + " FROM " + self.TABLE_ACCNT_INFO
-                      + " WHERE " + self.KEY3_USERNAME + " = ?")
+        select_str = ("SELECT " + self.KEY4_USERNAME + " FROM " + self.TABLE_ACCNT_INFO
+                      + " WHERE " + self.KEY4_USERNAME + " = ?")
 
         cur.execute(select_str, (username,))
         data = cur.fetchone()
@@ -132,22 +139,30 @@ class Database:
     def insert_sub_activity(self, username, sub_comment_karma, sub_pos_comments, sub_neg_comments, sub_pos_qc,
                             sub_neg_qc, sub_post_karma, sub_pos_posts, sub_neg_posts):
         cur = self.conn.cursor()
-        insert_str = ("INSERT INTO " + self.TABLE_SUB_ACTIVITY + "("
-                      + self.KEY2_USERNAME + ", " + self.KEY2_SUB_NAME + ", "
-                      + self.KEY2_POSITIVE_POSTS + ", " + self.KEY2_NEGATIVE_POSTS + ", "
-                      + self.KEY2_POSITIVE_COMMENTS + ", " + self.KEY2_NEGATIVE_COMMENTS + ", "
-                      + self.KEY2_POSITIVE_QC + ", " + self.KEY2_NEGATIVE_QC + ", "
-                      + self.KEY2_POST_KARMA + ", " + self.KEY2_COMMENT_KARMA + ") "
-                      + "VALUES(?,?,?,?,?,?,?,?,?,?)")
+        insert_str_accnt = ("INSERT INTO " + self.TABLE_ACCNT_ACTIVITY + "("
+                      + self.KEY3_USERNAME + ", " + self.KEY3_SUB_NAME + ", "
+                      + self.KEY3_POSITIVE_POSTS + ", " + self.KEY3_NEGATIVE_POSTS + ", "
+                      + self.KEY3_POSITIVE_COMMENTS + ", " + self.KEY3_NEGATIVE_COMMENTS + ", "
+                      + self.KEY3_POST_KARMA + ", " + self.KEY3_COMMENT_KARMA + ") "
+                      + "VALUES(?,?,?,?,?,?,?,?)")
+
+        insert_str_sub = ("INSERT INTO " + self.TABLE_SUB_ACTIVITY + "("
+                          + self.KEY2_USERNAME + ", " + self.KEY2_SUB_NAME + ", "
+                          + self.KEY2_POSITIVE_QC + ", " + self.KEY2_NEGATIVE_QC + ") "
+                          + "VALUES(?,?,?,?)")
 
         # Union of all keys in both primary dictionaries
         all_subs = sub_comment_karma.keys() | sub_post_karma.keys()
         # Put data from dictionaries into a list of tuples
-        insert_data = [(username, sub, sub_pos_posts[sub], sub_neg_posts[sub], sub_pos_comments[sub],
-                        sub_neg_comments[sub], sub_pos_qc[sub], sub_neg_qc[sub],
-                        sub_post_karma[sub], sub_comment_karma[sub])
+        insert_data_accnt = [(username, sub, sub_pos_posts[sub], sub_neg_posts[sub], sub_pos_comments[sub],
+                        sub_neg_comments[sub], sub_post_karma[sub], sub_comment_karma[sub])
                        for sub in all_subs]
-        cur.executemany(insert_str, insert_data)
+
+        insert_data_sub = [(username, sub, sub_pos_qc[sub], sub_neg_qc[sub])
+                           for sub in all_subs]
+
+        cur.executemany(insert_str_accnt, insert_data_accnt)
+        cur.executemany(insert_str_sub, insert_data_sub)
         cur.close()
         logging.info("Sub activity inserted for " + username)
 
@@ -156,23 +171,31 @@ class Database:
                             sub_neg_qc, sub_post_karma, sub_pos_posts, sub_neg_posts):
 
         cur = self.conn.cursor()
-        update_str = ("UPDATE " + self.TABLE_SUB_ACTIVITY + " SET "
-                      + self.KEY2_COMMENT_KARMA + " = " + self.KEY2_COMMENT_KARMA + "+ ?, "
-                      + self.KEY2_POSITIVE_COMMENTS + " = " + self.KEY2_POSITIVE_COMMENTS + "+ ?, "
-                      + self.KEY2_NEGATIVE_COMMENTS + " = " + self.KEY2_NEGATIVE_COMMENTS + "+ ?, "
-                      + self.KEY2_POSITIVE_QC + " = " + self.KEY2_POSITIVE_QC + "+ ?, "
-                      + self.KEY2_NEGATIVE_QC + " = " + self.KEY2_NEGATIVE_QC + "+ ?, "
-                      + self.KEY2_POST_KARMA + " = " + self.KEY2_POST_KARMA + "+ ?, "
-                      + self.KEY2_POSITIVE_POSTS + " = " + self.KEY2_POSITIVE_POSTS + "+ ?, "
-                      + self.KEY2_NEGATIVE_POSTS + " = " + self.KEY2_NEGATIVE_POSTS + "+ ? "
-                      + "WHERE " + self.KEY2_USERNAME + " = ?")
+        update_str_accnt = ("UPDATE " + self.TABLE_ACCNT_ACTIVITY + " SET "
+                      + self.KEY3_COMMENT_KARMA + " = " + self.KEY3_COMMENT_KARMA + "+ ?, "
+                      + self.KEY3_POSITIVE_COMMENTS + " = " + self.KEY3_POSITIVE_COMMENTS + "+ ?, "
+                      + self.KEY3_NEGATIVE_COMMENTS + " = " + self.KEY3_NEGATIVE_COMMENTS + "+ ?, "
+                      + self.KEY3_POST_KARMA + " = " + self.KEY3_POST_KARMA + "+ ?, "
+                      + self.KEY3_POSITIVE_POSTS + " = " + self.KEY3_POSITIVE_POSTS + "+ ?, "
+                      + self.KEY3_NEGATIVE_POSTS + " = " + self.KEY3_NEGATIVE_POSTS + "+ ? "
+                      + "WHERE " + self.KEY3_USERNAME + " = ? "
+                        "AND " + self.KEY3_SUB_NAME + " ?")
+
+        update_str_sub = ("UPDATE " + self.TABLE_ACCNT_ACTIVITY + " SET "
+                          + self.KEY2_POSITIVE_QC + " = " + self.KEY2_POSITIVE_QC + "+ ?, "
+                          + self.KEY2_NEGATIVE_QC + " = " + self.KEY2_NEGATIVE_QC + "+ ? "
+                          + "WHERE " + self.KEY3_USERNAME + " = ? "
+                            "AND " + self.KEY3_SUB_NAME + " ?")
 
         # Union of all keys in both primary dictionaries
         all_subs = sub_comment_karma.keys() | sub_post_karma.keys()
         for sub in all_subs:
-            row_updated = cur.execute(update_str, (sub_comment_karma[sub], sub_pos_comments[sub], sub_neg_comments[sub],
-                                                   sub_pos_qc[sub], sub_neg_qc[sub], sub_post_karma[sub],
-                                                   sub_pos_posts[sub], sub_neg_posts[sub], username)).rowcount == 1
+            row_updated = cur.execute(update_str_accnt, (sub_comment_karma[sub], sub_pos_comments[sub],
+                                        sub_neg_comments[sub], sub_post_karma[sub],
+                                        sub_pos_posts[sub], sub_neg_posts[sub], username, sub))\
+                                        .rowcount == 1
+            cur.execute(update_str_sub, (sub_pos_qc[sub], sub_neg_qc[sub], username, sub))
+
             if not row_updated:
                 logging.debug("Row not updated - trying insert")
                 insert_data = [{sub: item[sub]} for item in [sub_comment_karma, sub_pos_comments, sub_neg_comments,
@@ -187,9 +210,9 @@ class Database:
     def insert_accnt_info(self, username, created, total_post_karma, total_comment_karma, last_scraped):
         cur = self.conn.cursor()
         insert_str = ("INSERT INTO " + self.TABLE_ACCNT_INFO + "("
-                      + self.KEY3_USERNAME + ", " + self.KEY3_DATE_CREATED + ", "
-                      + self.KEY3_POST_KARMA + ", " + self.KEY3_COMMENT_KARMA + ", "
-                      + self.KEY3_LAST_SCRAPED + ") "
+                      + self.KEY4_USERNAME + ", " + self.KEY4_DATE_CREATED + ", "
+                      + self.KEY4_POST_KARMA + ", " + self.KEY4_COMMENT_KARMA + ", "
+                      + self.KEY4_LAST_SCRAPED + ") "
                       + "VALUES(?,?,?,?,?)")
 
         cur.execute(insert_str, (username, created, total_post_karma, total_comment_karma, last_scraped))
@@ -199,9 +222,9 @@ class Database:
     def update_accnt_info(self, username, post_karma, comment_karma, last_scraped):
         cur = self.conn.cursor()
         update_str = ("UPDATE " + self.TABLE_ACCNT_INFO + " SET "
-                      + self.KEY3_POST_KARMA + " = ?, " + self.KEY3_COMMENT_KARMA + " = ?, "
-                      + self.KEY3_LAST_SCRAPED + " = ? "
-                      + "WHERE " + self.KEY3_USERNAME + " = ?")
+                      + self.KEY4_POST_KARMA + " = ?, " + self.KEY4_COMMENT_KARMA + " = ?, "
+                      + self.KEY4_LAST_SCRAPED + " = ? "
+                      + "WHERE " + self.KEY4_USERNAME + " = ?")
 
         cur.execute(update_str, (post_karma, comment_karma, last_scraped, username))
         cur.close()
@@ -221,13 +244,24 @@ class Database:
 
     # Generic getter method for Account History table
     def fetch_sub_activity(self, username, sub_list, key):
-        select_key = self.find_key(key, self.TABLE_SUB_ACTIVITY)
+        key = key.lower()
         cur = self.conn.cursor()
 
+        if "qc" in key:
+            select_key = self.find_key(key, self.TABLE_SUB_ACTIVITY)
+            from_table = self.TABLE_SUB_ACTIVITY
+            where_key1 = self.KEY2_USERNAME
+            where_key2 = self.KEY2_SUB_NAME
+        else:
+            select_key = self.find_key(key, self.TABLE_ACCNT_ACTIVITY)
+            from_table = self.TABLE_ACCNT_ACTIVITY
+            where_key1 = self.KEY3_USERNAME
+            where_key2 = self.KEY3_SUB_NAME
+
         # Sum only the specified rows (subreddits)
-        select_str = ("SELECT " + select_key + " FROM " + self.TABLE_SUB_ACTIVITY
-                      + " WHERE " + self.KEY2_USERNAME + " = ? AND "
-                      + self.KEY2_SUB_NAME + " = ?")
+        select_str = ("SELECT " + select_key + " FROM " + from_table
+                      + " WHERE " + where_key1 + " = ? AND "
+                      + where_key2 + " = ?")
 
         value = 0
         for name in sub_list:
@@ -247,28 +281,50 @@ class Database:
 
         if key == "net qc":
             user_select_str = "SELECT top_rank FROM (" + \
-                                "SELECT " + self.KEY2_USERNAME + ", RANK() OVER(ORDER BY summed DESC) AS 'top_rank' " \
+                                "SELECT ui." + self.KEY2_USERNAME + ", RANK() OVER(ORDER BY summed DESC) AS 'top_rank' " \
                                 "FROM (" \
                                     "SELECT SUM(" + self.KEY2_POSITIVE_QC + ") - SUM(" + self.KEY2_NEGATIVE_QC + ") " \
                                     "AS 'summed', " + self.KEY2_USERNAME + " " \
                                     "FROM " + self.TABLE_SUB_ACTIVITY + " " \
                                     "WHERE " + self.KEY2_SUB_NAME + " IN ('" + "', '".join(sub_list) + "')" \
                                     "GROUP BY " + self.KEY2_USERNAME + ") " \
-                                "ui) " \
+                                "ui " \
+                                "JOIN " + self.TABLE_SUB_INFO + " sub " \
+                                "ON sub." + self.KEY1_USERNAME + " = ui." + self.KEY2_USERNAME + ") " \
                               "uo WHERE " + self.KEY2_USERNAME + " = ?"
         else:
-            select_key = self.find_key(key, self.TABLE_SUB_ACTIVITY)
+            if "qc" in key:
+                select_key1 = self.KEY2_USERNAME
+                select_key2 = self.find_key(key, self.TABLE_SUB_ACTIVITY)
+                select_key3 = self.KEY2_USERNAME
+                from_table = self.TABLE_SUB_ACTIVITY
+                where_key1 = self.KEY2_SUB_NAME
+                group_key = self.KEY2_USERNAME
+                on_key = self.KEY2_USERNAME
+                where_key2 = self.KEY2_USERNAME
+
+            else:
+                select_key1 = self.KEY3_USERNAME
+                select_key2 = self.find_key(key, self.TABLE_SUB_ACTIVITY)
+                select_key3 = self.KEY3_USERNAME
+                from_table = self.TABLE_ACCNT_ACTIVITY
+                where_key1 = self.KEY3_SUB_NAME
+                group_key = self.KEY3_USERNAME
+                on_key = self.KEY3_USERNAME
+                where_key2 = self.KEY3_USERNAME
 
             user_select_str = "SELECT top_rank FROM (" + \
-                                "SELECT " + self.KEY2_USERNAME + ", RANK() OVER(ORDER BY summed DESC) AS 'top_rank' " \
+                                "SELECT ui." + select_key1 + ", RANK() OVER(ORDER BY summed DESC) AS 'top_rank' " \
                                 "FROM (" \
-                                    "SELECT SUM(" + select_key + ") " \
-                                    "AS 'summed', " + self.KEY2_USERNAME + " " \
-                                    "FROM " + self.TABLE_SUB_ACTIVITY + " " \
-                                    "WHERE " + self.KEY2_SUB_NAME + " IN ('" + "', '".join(sub_list) + "')" \
-                                    "GROUP BY " + self.KEY2_USERNAME + ") " \
-                                "ui) " \
-                              "uo WHERE " + self.KEY2_USERNAME + " = ?"
+                                    "SELECT SUM(" + select_key2 + ") " \
+                                    "AS 'summed', " + select_key3 + " " \
+                                    "FROM " + from_table + " " \
+                                    "WHERE " + where_key1 + " IN ('" + "', '".join(sub_list) + "')" \
+                                    "GROUP BY " + group_key + ") " \
+                                "ui " \
+                                "JOIN " + self.TABLE_SUB_INFO + " sub " \
+                                "ON sub." + self.KEY1_USERNAME + " = ui." + on_key + ") " \
+                              "uo WHERE " + where_key2 + " = ?"
 
         cur.execute(user_select_str, (username,))
         try:
@@ -284,7 +340,7 @@ class Database:
         cur = self.conn.cursor()
         select_key = self.find_key(key, self.TABLE_ACCNT_INFO)
         select_str = ("SELECT " + select_key + " FROM " + self.TABLE_ACCNT_INFO
-                      + " WHERE " + self.KEY3_USERNAME + " = ?")
+                      + " WHERE " + self.KEY4_USERNAME + " = ?")
 
         cur.execute(select_str, (username,))
         value = cur.fetchone()[0]
@@ -313,52 +369,56 @@ class Database:
         if table == self.TABLE_SUB_INFO:
             if key == "ratelimit start":
                 return self.KEY1_RATELIMIT_START
-            elif key == "ratelimit count":
+            if key == "ratelimit count":
                 return self.KEY1_RATELIMIT_COUNT
-            elif key == "flair text":
+            if key == "flair text":
                 return self.KEY1_FLAIR_TEXT
-            elif key == "last updated":
+            if key == "last updated":
                 return self.KEY1_LAST_UPDATED
-            elif key == "flair perm":
+            if key == "flair perm":
                 return self.KEY1_FLAIR_PERM
-            elif key == "css perm":
+            if key == "css perm":
                 return self.KEY1_CSS_PERM
-            elif key == "custom flair used":
+            if key == "custom flair used":
                 return self.KEY1_CUSTOM_FLAIR_USED
-            elif key == "no auto flair":
+            if key == "no auto flair":
                 return self.KEY1_NO_AUTO_FLAIR
 
         elif table == self.TABLE_SUB_ACTIVITY:
             if key == "sub name":
                 return self.KEY2_SUB_NAME
-            if key == "positive posts":
-                return self.KEY2_POSITIVE_POSTS
-            if key == "negative posts":
-                return self.KEY2_NEGATIVE_POSTS
-            if key == "positive comments":
-                return self.KEY2_POSITIVE_COMMENTS
-            if key == "negative comments":
-                return self.KEY2_NEGATIVE_COMMENTS
             if key == "positive qc":
                 return self.KEY2_POSITIVE_QC
             if key == "negative qc":
                 return self.KEY2_NEGATIVE_QC
+
+        elif table == self.TABLE_ACCNT_ACTIVITY:
+            if key == "sub name":
+                return self.KEY3_SUB_NAME
+            if key == "positive posts":
+                return self.KEY3_POSITIVE_POSTS
+            if key == "negative posts":
+                return self.KEY3_NEGATIVE_POSTS
+            if key == "positive comments":
+                return self.KEY3_POSITIVE_COMMENTS
+            if key == "negative comments":
+                return self.KEY3_NEGATIVE_COMMENTS
             if key == "post karma":
-                return self.KEY2_POST_KARMA
+                return self.KEY3_POST_KARMA
             if key == "comment karma":
-                return self.KEY2_COMMENT_KARMA
+                return self.KEY3_COMMENT_KARMA
 
         elif table == self.TABLE_ACCNT_INFO:
             if key == "date created":
-                return self.KEY3_DATE_CREATED
-            elif key == "total post karma":
-                return self.KEY3_POST_KARMA
-            elif key == "total comment karma":
-                return self.KEY3_COMMENT_KARMA
-            elif key == "last scraped":
-                return self.KEY3_LAST_SCRAPED
+                return self.KEY4_DATE_CREATED
+            if key == "total post karma":
+                return self.KEY4_POST_KARMA
+            if key == "total comment karma":
+                return self.KEY4_COMMENT_KARMA
+            if key == "last scraped":
+                return self.KEY4_LAST_SCRAPED
 
         else:
-            logging.warning("Could not find a match for key in the given table"
+            logging.critical("Could not find a match for key in the given table"
                             "\nKey: " + key + "\tTable:" + table)
             return None

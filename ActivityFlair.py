@@ -26,6 +26,7 @@ def make_activity_flair(username, sub):
             # Prepare vars to store result info
             and_result = True
             or_result = True
+            final_result = False
             setting_name_and = setting_name + " - AND"
             setting_name_or = setting_name + " - OR"
 
@@ -41,20 +42,22 @@ def make_activity_flair(username, sub):
                 if not main_result:
                     if setting_name_or in activity_settings:
                         or_result = check_sub_setting(activity_settings, setting_name_or, sub, username)
+                        if or_result:
+                            final_result = True
 
                 # If main result is True check AND and OR
-                else:
-                    if setting_name_or in activity_settings:
-                        or_result = check_sub_setting(activity_settings, setting_name_or, sub, username)
-                    elif setting_name_and in activity_settings:
-                        and_result = check_sub_setting(activity_settings, setting_name_and, sub, username)
+                elif setting_name_and in activity_settings:
+                    and_result = check_sub_setting(activity_settings, setting_name_and, sub, username)
+                    if and_result:
+                        final_result = True
 
                 logging.debug("Main result: " + str(main_result) +
                               "\n\tOR result: " + str(or_result) +
-                              "\n\tAND result: " + str(and_result))
+                              "\n\tAND result: " + str(and_result) +
+                              "\n\tFINAL result: " + str(final_result))
 
                 # Process results
-                if main_result and and_result and or_result:
+                if final_result:
                     pre_text = main_setting["pre text"]
                     post_text = main_setting["post text"]
                     display_value = main_setting.getboolean("display value")

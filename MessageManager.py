@@ -1,5 +1,4 @@
-# TODO: Implement PM Commands section in config file
-
+import logging
 import prawcore
 import DataCollector
 import FlairManager
@@ -27,6 +26,7 @@ def process_pm(message, sub_list, flair_queue, perm_queue, r):
                       "     !SubredditName !Command" +
                       message_footer)
         message.mark_read()
+        logging.info("PM Format Error: Message subject didn't have 2 parameters")
         return
     
     # Get the subreddit the PM is in reference to
@@ -42,6 +42,7 @@ def process_pm(message, sub_list, flair_queue, perm_queue, r):
     if target_sub is None:
         message.reply("The specified subreddit is not valid" + message_footer)
         message.mark_read()
+        logging.info("PM Format Error: Target subreddit does not exist")
         return
     
     if command == "!flair":
@@ -73,8 +74,7 @@ def process_pm(message, sub_list, flair_queue, perm_queue, r):
         update_user(message.author, target_sub, r, flair_queue, perm_queue)
         message.reply("Your data and flair have been updated" + message_footer)
         message.mark_read()
-        
-    # TODO: Consider adding a confirmation step to prevent accidental data loss
+
     elif command == "!wipe" and check_if_mod(author, target_sub, message):
         target_sub.db.wipe_sub_info()
         message.mark_read()
@@ -82,11 +82,14 @@ def process_pm(message, sub_list, flair_queue, perm_queue, r):
 
 # Check if the user is a mod in the target_sub
 def check_if_mod(author_name, target_sub, message):
+    logging.info("PM Info: Checking if " + author_name + " is a mod in " + target_sub.name)
     if author_name not in [str(mod).lower() for mod in target_sub.mods]:
         message.reply("This PM command is restricted to moderators only" + message_footer)
         message.mark_read()
+        logging.info("PM Info: " + author_name + " is not a mod in " + target_sub.name)
         return False
     else:
+        logging.info("PM Info: " + author_name + " is a mod in " + target_sub.name)
         return True
 
 
@@ -97,6 +100,7 @@ def user_in_db(username, target_sub, message):
                       "To fix this, you can use the !updatethem or !updateme PM command and then try again."
                       + message_footer)
         message.mark_read()
+        logging.info("PM Warning: User " + username + " does not exist in the database and has been notified")
         return False
     else:
         return True
@@ -107,6 +111,7 @@ def get_user(username, r):
     try:
         user.created
     except prawcore.NotFound:
+        logging.warning("PM Warning: User " + username + " does not exist")
         return None
     return user
     

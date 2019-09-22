@@ -3,6 +3,7 @@ import logging
 import shutil
 import os
 import time
+import sqlite3
 from os import path
 import praw
 from praw.models import Message
@@ -33,10 +34,13 @@ last_config_check = int(time.time())
 
 # Check inbox
 def read_pms():
-    logging.debug("Checking PMs...")
     for item in r.inbox.unread():
         if isinstance(item, Message):
+            logging.info("Found a PM")
             MessageManager.process_pm(item, sub_list, flair_queue, perm_queue, r)
+        else:
+            logging.info("Found a comment, marking as read")
+            item.mark_read()
     logging.debug("Done with PMs")
 
 
@@ -54,15 +58,17 @@ def get_multisub():
     return r.subreddit(multisub_str[:-1])
 
 
-#TODO: Fix backups on Linux
+# Handel daily, weekly, and monthly backups of database
 def check_backup():
     cur_time = int(time.time())
-    db_path = path.realpath("master_databank.db")
+    db_path = path.realpath("master_databank.db")   # Get path to database
     main_path, main_file = path.split(db_path)
-    backup_path = main_path + "/Backups/"
-    
+    backup_path = main_path + "/Backups/"           # Get path to backup folder from database path
+
+    # Parse all files in the Backups dir
     for root, dirs, files in os.walk(backup_path):
-        if len(files) == 0:
+        # If .keep is the only file, create initial backup
+        if len(files) == 1:
             # Initial daily backup
             first_daily_path = backup_path + "DAILY-" + str(cur_time) + ".db.bak"
             shutil.copy(db_path, first_daily_path)
@@ -75,11 +81,15 @@ def check_backup():
             first_monthly_path = backup_path + "MONTHLY-" + str(cur_time) + ".db.bak"
             shutil.copy(db_path, first_monthly_path)
             shutil.copystat(db_path, first_monthly_path)
-            return
+
+            return  # Don't need to check backups if they were just created
             
         for filename in files:
+            if filename == ".keep":
+                continue
+
             file_data = filename.split("-")
-            time_diff = cur_time - int(file_data[1][:-7])
+            time_diff = cur_time - int(file_data[1][:-7])   # Parse last backup time from file name
             old_path = None
             new_path = None
             
@@ -112,12 +122,15 @@ def flair_users():
         flair_txt = flair_data[1] if flair_data[1] else ""
         flair_css = flair_data[2] if flair_data[2] else ""
         target_sub = flair_data[3]
+
+        target_sub.sub.flair.set(username, flair_txt, flair_css)
         
         logging.info("Flair results"
                      + "\n\tUser: " + username
                      + "\n\tFlair: " + flair_txt
                      + "\n\tCSS: " + flair_css
                      + "\n\tSub: " + target_sub.name + "\n")
+
     logging.debug("Done flairing users")
 
 
@@ -168,7 +181,10 @@ def notify_permission_change():
             
             body = auto_perm_msg + target_sub.pm_messages["custom css body"] + message_footer
             subject = target_sub.pm_messages["custom css subj"]
-        
+
+        user = r.redditor(username)
+        user.message(subject, body)
+
         logging.info("Permissions updated:"
                      "\n\tUser: " + username +
                      "\n\tType: " + new_perm +
@@ -178,8 +194,10 @@ def notify_permission_change():
     logging.debug("Done updating permissions")
 
 
-# Get multisub
+# Get multisub so that all subreddits can be searched simultaneously
 all_subs = get_multisub()
+# Check if backups have already been created of if they need to be updated
+check_backup()
 
 # Create thread for processing comments
 process_thread = threading.Thread(target=ProcessComment.fetch_queue,
@@ -202,9 +220,12 @@ while True:
                 current_time = int(time.time())
                 if current_time - last_config_check < 3600:
                     for sub in sub_list:
-                        sub.read_config()
+                        try:
+                            sub.read_config()
+                        except sqlite3.OperationalError:
+                            logging.warning("Unable to update subreddit's config, database is locked")
                     last_config_check = current_time
-                    
+
                     # Create a backup of database file every day/week/month
                     check_backup()
                 
