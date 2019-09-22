@@ -9,7 +9,7 @@ class Subreddit:
         self.r = r
         self.name = name.lower()
         self.sub = r.subreddit(self.name)
-        self.db = None
+        self.db = Database(self.name)
         self.mods = None
         
         # Read settings from wiki page
@@ -35,8 +35,6 @@ class Subreddit:
         self.progression_tiers = self.load_nested_config("PROGRESSION TIER", config)
         self.sub_activity = self.load_nested_config("ACTIVITY TAG", config)
         self.sub_groups = self.load_nested_config("SUB GROUP", config)
-        # Setup the sub's database
-        self.db = Database(self.name)
         # Fetch the mod list
         self.mods = self.sub.moderator()
     

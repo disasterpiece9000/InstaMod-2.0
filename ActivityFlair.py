@@ -26,7 +26,6 @@ def make_activity_flair(username, sub):
             # Prepare vars to store result info
             and_result = True
             or_result = True
-            final_result = False
             setting_name_and = setting_name + " - AND"
             setting_name_or = setting_name + " - OR"
 
@@ -44,12 +43,20 @@ def make_activity_flair(username, sub):
                         or_result = check_sub_setting(activity_settings, setting_name_or, sub, username)
                         if or_result:
                             final_result = True
+                        else:
+                            final_result = False
+                    else:
+                        final_result = False
 
                 # If main result is True check AND and OR
                 elif setting_name_and in activity_settings:
                     and_result = check_sub_setting(activity_settings, setting_name_and, sub, username)
                     if and_result:
                         final_result = True
+                    else:
+                        final_result = False
+                else:
+                    final_result = True
 
                 logging.debug("Main result: " + str(main_result) +
                               "\n\tOR result: " + str(or_result) +
@@ -108,16 +115,26 @@ def make_activity_flair(username, sub):
                     if not main_result:
                         if setting_name_or in activity_settings:
                             or_result = check_sub_setting(activity_settings, setting_name_or, sub, username)
+                            if or_result:
+                                final_result = True
+                            else:
+                                final_result = False
+                        else:
+                            final_result = False
 
-                    # If main result is True check AND and OR
+                    # If main result is True check AND
+                    elif setting_name_and in activity_settings:
+                        and_result = check_sub_setting(activity_settings, setting_name_and, sub, username)
+                        if and_result:
+                            final_result = True
+                        else:
+                            final_result = False
+
                     else:
-                        if setting_name_or in activity_settings:
-                            or_result = check_sub_setting(activity_settings, setting_name_or, sub, username)
-                        elif setting_name_and in activity_settings:
-                            and_result = check_sub_setting(activity_settings, setting_name_and, sub, username)
+                        final_result = True
 
                     # Process results
-                    if main_result and and_result and or_result:
+                    if final_result:
                         flair_data[abbrev] = main_value
 
                 # Add data to lists unless they are None
@@ -246,11 +263,17 @@ def make_sub_list(setting, sub, username):
 
 # Get user value from a specific sub (and subs that share the same abbreviation)
 def check_activity(username, sub, sub_list, setting):
-    metric = setting["metric"]
+    metric = setting["metric"].lower()
     comparison = setting["comparison"]
 
     # Parse the target value out of the metric
-    target_value = comparison[2:] if ">=" in comparison or "<=" else comparison[1:]
+    if ">=" in comparison or "<=" in comparison:
+        target_value = comparison[2:]
+        comparison = comparison[:2]
+    else:
+        target_value = comparison[1:]
+        comparison = comparison[:1]
+
     target_value = target_value.strip()
 
     if "percent" in target_value:
@@ -298,7 +321,7 @@ def check_value(user_value, comparison, value):
     if comparison == ">":
         return user_value > value
     if comparison == "<":
-        return user_value > value
+        return user_value < value
     if comparison == ">=":
         return user_value >= value
     if comparison == "<=":

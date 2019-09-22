@@ -140,11 +140,11 @@ class Database:
                             sub_neg_qc, sub_post_karma, sub_pos_posts, sub_neg_posts):
         cur = self.conn.cursor()
         insert_str_accnt = ("INSERT INTO " + self.TABLE_ACCNT_ACTIVITY + "("
-                      + self.KEY3_USERNAME + ", " + self.KEY3_SUB_NAME + ", "
-                      + self.KEY3_POSITIVE_POSTS + ", " + self.KEY3_NEGATIVE_POSTS + ", "
-                      + self.KEY3_POSITIVE_COMMENTS + ", " + self.KEY3_NEGATIVE_COMMENTS + ", "
-                      + self.KEY3_POST_KARMA + ", " + self.KEY3_COMMENT_KARMA + ") "
-                      + "VALUES(?,?,?,?,?,?,?,?)")
+                            + self.KEY3_USERNAME + ", " + self.KEY3_SUB_NAME + ", "
+                            + self.KEY3_POSITIVE_POSTS + ", " + self.KEY3_NEGATIVE_POSTS + ", "
+                            + self.KEY3_POSITIVE_COMMENTS + ", " + self.KEY3_NEGATIVE_COMMENTS + ", "
+                            + self.KEY3_POST_KARMA + ", " + self.KEY3_COMMENT_KARMA + ") "
+                            + "VALUES(?,?,?,?,?,?,?,?)")
 
         insert_str_sub = ("INSERT INTO " + self.TABLE_SUB_ACTIVITY + "("
                           + self.KEY2_USERNAME + ", " + self.KEY2_SUB_NAME + ", "
@@ -155,8 +155,8 @@ class Database:
         all_subs = sub_comment_karma.keys() | sub_post_karma.keys()
         # Put data from dictionaries into a list of tuples
         insert_data_accnt = [(username, sub, sub_pos_posts[sub], sub_neg_posts[sub], sub_pos_comments[sub],
-                        sub_neg_comments[sub], sub_post_karma[sub], sub_comment_karma[sub])
-                       for sub in all_subs]
+                              sub_neg_comments[sub], sub_post_karma[sub], sub_comment_karma[sub])
+                             for sub in all_subs]
 
         insert_data_sub = [(username, sub, sub_pos_qc[sub], sub_neg_qc[sub])
                            for sub in all_subs]
@@ -172,28 +172,28 @@ class Database:
 
         cur = self.conn.cursor()
         update_str_accnt = ("UPDATE " + self.TABLE_ACCNT_ACTIVITY + " SET "
-                      + self.KEY3_COMMENT_KARMA + " = " + self.KEY3_COMMENT_KARMA + "+ ?, "
-                      + self.KEY3_POSITIVE_COMMENTS + " = " + self.KEY3_POSITIVE_COMMENTS + "+ ?, "
-                      + self.KEY3_NEGATIVE_COMMENTS + " = " + self.KEY3_NEGATIVE_COMMENTS + "+ ?, "
-                      + self.KEY3_POST_KARMA + " = " + self.KEY3_POST_KARMA + "+ ?, "
-                      + self.KEY3_POSITIVE_POSTS + " = " + self.KEY3_POSITIVE_POSTS + "+ ?, "
-                      + self.KEY3_NEGATIVE_POSTS + " = " + self.KEY3_NEGATIVE_POSTS + "+ ? "
-                      + "WHERE " + self.KEY3_USERNAME + " = ? "
-                        "AND " + self.KEY3_SUB_NAME + " ?")
+                            + self.KEY3_COMMENT_KARMA + " = " + self.KEY3_COMMENT_KARMA + " + ?, "
+                            + self.KEY3_POSITIVE_COMMENTS + " = " + self.KEY3_POSITIVE_COMMENTS + " + ?, "
+                            + self.KEY3_NEGATIVE_COMMENTS + " = " + self.KEY3_NEGATIVE_COMMENTS + " + ?, "
+                            + self.KEY3_POST_KARMA + " = " + self.KEY3_POST_KARMA + " + ?, "
+                            + self.KEY3_POSITIVE_POSTS + " = " + self.KEY3_POSITIVE_POSTS + " + ?, "
+                            + self.KEY3_NEGATIVE_POSTS + " = " + self.KEY3_NEGATIVE_POSTS + " + ? "
+                            + "WHERE " + self.KEY3_USERNAME + " = ? "
+                            + "AND " + self.KEY3_SUB_NAME + " ?")
 
         update_str_sub = ("UPDATE " + self.TABLE_ACCNT_ACTIVITY + " SET "
                           + self.KEY2_POSITIVE_QC + " = " + self.KEY2_POSITIVE_QC + "+ ?, "
                           + self.KEY2_NEGATIVE_QC + " = " + self.KEY2_NEGATIVE_QC + "+ ? "
                           + "WHERE " + self.KEY3_USERNAME + " = ? "
-                            "AND " + self.KEY3_SUB_NAME + " ?")
+                          + "AND " + self.KEY3_SUB_NAME + " ?")
 
         # Union of all keys in both primary dictionaries
         all_subs = sub_comment_karma.keys() | sub_post_karma.keys()
         for sub in all_subs:
             row_updated = cur.execute(update_str_accnt, (sub_comment_karma[sub], sub_pos_comments[sub],
-                                        sub_neg_comments[sub], sub_post_karma[sub],
-                                        sub_pos_posts[sub], sub_neg_posts[sub], username, sub))\
-                                        .rowcount == 1
+                                                         sub_neg_comments[sub], sub_post_karma[sub],
+                                                         sub_pos_posts[sub], sub_neg_posts[sub], username, sub)) \
+                              .rowcount == 1
             cur.execute(update_str_sub, (sub_pos_qc[sub], sub_neg_qc[sub], username, sub))
 
             if not row_updated:
@@ -275,23 +275,24 @@ class Database:
         cur = self.conn.cursor()
 
         total_select_str = "SELECT COUNT(" + self.KEY1_USERNAME + ") " \
-                           "FROM " + self.TABLE_SUB_INFO
+                                                                  "FROM " + self.TABLE_SUB_INFO
         cur.execute(total_select_str)
         total_num = cur.fetchone()[0]
 
         if key == "net qc":
             user_select_str = "SELECT top_rank FROM (" + \
-                                "SELECT ui." + self.KEY2_USERNAME + ", RANK() OVER(ORDER BY summed DESC) AS 'top_rank' " \
-                                "FROM (" \
-                                    "SELECT SUM(" + self.KEY2_POSITIVE_QC + ") - SUM(" + self.KEY2_NEGATIVE_QC + ") " \
-                                    "AS 'summed', " + self.KEY2_USERNAME + " " \
-                                    "FROM " + self.TABLE_SUB_ACTIVITY + " " \
-                                    "WHERE " + self.KEY2_SUB_NAME + " IN ('" + "', '".join(sub_list) + "')" \
-                                    "GROUP BY " + self.KEY2_USERNAME + ") " \
-                                "ui " \
-                                "JOIN " + self.TABLE_SUB_INFO + " sub " \
-                                "ON sub." + self.KEY1_USERNAME + " = ui." + self.KEY2_USERNAME + ") " \
-                              "uo WHERE " + self.KEY2_USERNAME + " = ?"
+                              "SELECT ui." + self.KEY2_USERNAME + ", RANK() OVER(ORDER BY summed DESC) AS 'top_rank' " \
+                                                                  "FROM (" \
+                                                                  "SELECT SUM(" + self.KEY2_POSITIVE_QC + ") - SUM(" + self.KEY2_NEGATIVE_QC + ") " \
+                                                                                                                                               "AS 'summed', " + self.KEY2_USERNAME + " " \
+                                                                                                                                                                                      "FROM " + self.TABLE_SUB_ACTIVITY + " " \
+                                                                                                                                                                                                                          "WHERE " + self.KEY2_SUB_NAME + " IN ('" + "', '".join(
+                sub_list) + "')" \
+                            "GROUP BY " + self.KEY2_USERNAME + ") " \
+                                                               "ui " \
+                                                               "JOIN " + self.TABLE_SUB_INFO + " sub " \
+                                                                                               "ON sub." + self.KEY1_USERNAME + " = ui." + self.KEY2_USERNAME + ") " \
+                                                                                                                                                                "uo WHERE " + self.KEY2_USERNAME + " = ?"
         else:
             if "qc" in key:
                 select_key1 = self.KEY2_USERNAME
@@ -314,17 +315,18 @@ class Database:
                 where_key2 = self.KEY3_USERNAME
 
             user_select_str = "SELECT top_rank FROM (" + \
-                                "SELECT ui." + select_key1 + ", RANK() OVER(ORDER BY summed DESC) AS 'top_rank' " \
-                                "FROM (" \
-                                    "SELECT SUM(" + select_key2 + ") " \
-                                    "AS 'summed', " + select_key3 + " " \
-                                    "FROM " + from_table + " " \
-                                    "WHERE " + where_key1 + " IN ('" + "', '".join(sub_list) + "')" \
-                                    "GROUP BY " + group_key + ") " \
-                                "ui " \
-                                "JOIN " + self.TABLE_SUB_INFO + " sub " \
-                                "ON sub." + self.KEY1_USERNAME + " = ui." + on_key + ") " \
-                              "uo WHERE " + where_key2 + " = ?"
+                              "SELECT ui." + select_key1 + ", RANK() OVER(ORDER BY summed DESC) AS 'top_rank' " \
+                                                           "FROM (" \
+                                                           "SELECT SUM(" + select_key2 + ") " \
+                                                                                         "AS 'summed', " + select_key3 + " " \
+                                                                                                                         "FROM " + from_table + " " \
+                                                                                                                                                "WHERE " + where_key1 + " IN ('" + "', '".join(
+                sub_list) + "')" \
+                            "GROUP BY " + group_key + ") " \
+                                                      "ui " \
+                                                      "JOIN " + self.TABLE_SUB_INFO + " sub " \
+                                                                                      "ON sub." + self.KEY1_USERNAME + " = ui." + on_key + ") " \
+                                                                                                                                           "uo WHERE " + where_key2 + " = ?"
 
         cur.execute(user_select_str, (username,))
         try:
@@ -420,5 +422,5 @@ class Database:
 
         else:
             logging.critical("Could not find a match for key in the given table"
-                            "\nKey: " + key + "\tTable:" + table)
+                             "\nKey: " + key + "\tTable:" + table)
             return None

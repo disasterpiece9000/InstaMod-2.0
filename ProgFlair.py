@@ -18,7 +18,6 @@ def make_prog_flair(user, sub):
             main_result = user_in_tier(main_tier, username, sub)
             and_result = True
             or_result = True
-            final_result = False
             tier_name_and = tier_name + " - AND"
             tier_name_or = tier_name + " - OR"
             
@@ -29,6 +28,10 @@ def make_prog_flair(user, sub):
                     or_result = user_in_tier(or_tier, username, sub)
                     if or_result:
                         final_result = True
+                    else:
+                        final_result = False
+                else:
+                    final_result = False
 
             # Only check AND
             elif tier_name_and in prog_tiers:
@@ -37,6 +40,11 @@ def make_prog_flair(user, sub):
                 and_result = user_in_tier(and_tier, username, sub)
                 if and_result:
                     final_result = True
+                else:
+                    final_result = False
+
+            else:
+                final_result = True
 
             logging.debug("Main result: " + str(main_result) +
                           "\n\tOR result: " + str(or_result) +
@@ -156,7 +164,7 @@ def check_value(user_value, comparison, value):
     if comparison == ">":
         return user_value > value
     if comparison == "<":
-        return user_value > value
+        return user_value < value
     if comparison == ">=":
         return user_value >= value
     if comparison == "<=":
