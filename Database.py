@@ -179,7 +179,7 @@ class Database:
                             + self.KEY3_POSITIVE_POSTS + " = " + self.KEY3_POSITIVE_POSTS + " + ?, "
                             + self.KEY3_NEGATIVE_POSTS + " = " + self.KEY3_NEGATIVE_POSTS + " + ? "
                             + "WHERE " + self.KEY3_USERNAME + " = ? "
-                            + "AND " + self.KEY3_SUB_NAME + " ?")
+                            + "AND " + self.KEY3_SUB_NAME + " = ?")
 
         update_str_sub = ("UPDATE " + self.TABLE_ACCNT_ACTIVITY + " SET "
                           + self.KEY2_POSITIVE_QC + " = " + self.KEY2_POSITIVE_QC + "+ ?, "

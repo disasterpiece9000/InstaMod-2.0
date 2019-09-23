@@ -26,6 +26,17 @@
  ## Editing the Settings
  
 The settings for InstaMod uses the .ini format and is read from a wiki page on the subreddit titled "instamodsettings". Here's the cheat-sheet for working with .ini files:
+
+**Example INI Format:**
+
+    [Section 1]
+    key1=value
+    key2 = value
+    
+    # This is a comment
+    [Section 2]
+    key1= value
+    key2 =  value
  
  **Keys**
  
@@ -46,17 +57,6 @@ The settings for InstaMod uses the .ini format and is read from a wiki page on t
   * False: false, no, or off
 * Lines can be commented out using a hashbang ( # )
 * Leading or trailing spaces do not matter
-
-**Example:**
-
-    [Section 1]
-    key1=value
-    key2 = value
-    
-    # This is a comment
-    [Section 2]
-    key1= value
-    key2 =  value
 
 
 ## Main Configuration
