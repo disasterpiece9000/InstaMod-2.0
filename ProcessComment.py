@@ -14,6 +14,11 @@ def fetch_queue(comment_queue, flair_queue, perm_queue, sub_list, r):
         comment_queue.task_done()
         user = comment.author
         
+        if user is None:
+            logging.warning("User is None\n"
+                            "Comment ID: " + comment.id)
+            continue
+        
         logging.info("Processing comment from " + str(user))
         
         # Find sub that the comment was placed in

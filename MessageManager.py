@@ -49,9 +49,17 @@ def process_pm(message, sub_list, flair_queue, perm_queue, r):
         flair_pm(message, target_sub)
     
     elif command == "!noautoflair" and check_if_mod(author_name, target_sub, message):
+        target_user = get_user(message.body, r)
+        if target_user is None:
+            message.reply("The user " + message.body + " does not exist" + message_footer)
+            message.mark_read()
         remove_auto_flair(message, target_sub)
         
     elif command == "!giveflairperm" and check_if_mod(author_name, target_sub, message):
+        target_user = get_user(message.body, r)
+        if target_user is None:
+            message.reply("The user " + message.body + " does not exist" + message_footer)
+            message.mark_read()
         give_flair_perm(message, target_sub, perm_queue)
         
     elif command == "!updatesettings" and check_if_mod(author_name, target_sub, message):
@@ -97,7 +105,8 @@ def check_if_mod(author_name, target_sub, message):
 def user_in_db(username, target_sub, message):
     if not target_sub.db.exists_in_sub_info(username):
         message.reply("This user has no entry in the database and cannot be modified. "
-                      "To fix this, you can use the !updatethem or !updateme PM command and then try again."
+                      "To fix this, you can use the !updateme PM command and then try again.\n\n"
+                      "If you are a moderator of the subreddit then you may use the !updatethem command."
                       + message_footer)
         message.mark_read()
         logging.info("PM Warning: User " + username + " does not exist in the database and has been notified")
@@ -168,7 +177,7 @@ def flair_pm(message, target_sub):
     target_sub.db.update_key_sub_info(username, "custom flair used", 1)
     message.reply("Your flair has been set!\n\n"
                   "Flair Text: " + flair_txt + "\n\n"
-                                               "Flair CSS:" + flair_css +
+                  "Flair CSS:" + flair_css +
                   message_footer)
     message.mark_read()
 
