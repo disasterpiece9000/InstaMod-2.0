@@ -1,5 +1,6 @@
 import logging
 import prawcore
+from praw import exceptions
 import DataCollector
 import FlairManager
 import ProcessComment
@@ -105,8 +106,9 @@ def check_if_mod(author_name, target_sub, message):
 def user_in_db(username, target_sub, message):
     if not target_sub.db.exists_in_sub_info(username):
         message.reply("This user has no entry in the database and cannot be modified. "
-                      "To fix this, you can use the !updateme PM command and then try again.\n\n"
-                      "If you are a moderator of the subreddit then you may use the !updatethem command."
+                      "To fix this, you can use the !updateme PM command and then try again."
+                      "Here is a [pre-formatted link](https://www.reddit.com/message/compose?to=InstaMod&subject="
+                      "!" + target_sub.name + "%20!updateme&message=) for that PM command\n\n"
                       + message_footer)
         message.mark_read()
         logging.info("PM Warning: User " + username + " does not exist in the database and has been notified")
@@ -147,7 +149,7 @@ def update_user(target_user, target_sub, r, flair_queue, perm_queue):
 # Handle custom flair requests
 def flair_pm(message, target_sub):
     user = message.author
-    username = str(user)
+    username = str(user).lower()
     message_lines = message.body.splitlines()
     
     # Return if the user is not in the database
@@ -163,6 +165,14 @@ def flair_pm(message, target_sub):
         message.mark_read()
         return
     
+    if not message_lines[0].lower().startswith("flair text:"):
+        message.reply("This PM is not in the correct format for flair assignment. Try using [this pre-formatted link]"
+                      "(https://www.reddit.com/message/compose?to=InstaMod&subject=!" + target_sub.name + "%20!flair&"
+                      "message=Flair%20Text:%0AFlair%20CSS:)."
+                      + message_footer)
+        message.mark_read()
+        return
+    
     # Pull flair and css data from PM text
     flair_txt = message_lines[0][11:]
     if len(message_lines) == 2:
@@ -173,7 +183,15 @@ def flair_pm(message, target_sub):
         flair_css = ""
     
     # Set the flair and notify the user
-    target_sub.sub.flair.set(username, flair_txt, flair_css)
+    try:
+        target_sub.sub.flair.set(username, flair_txt, flair_css)
+    except exceptions.APIException:
+        # Catch invalid flairs
+        message.reply("There was an error processing your message. Perhaps your flair text was too long or your "
+                      "flair CSS is invalid." + message_footer)
+        message.mark_read()
+        return
+        
     target_sub.db.update_key_sub_info(username, "custom flair used", 1)
     message.reply("Your flair has been set!\n\n"
                   "Flair Text: " + flair_txt + "\n\n"
