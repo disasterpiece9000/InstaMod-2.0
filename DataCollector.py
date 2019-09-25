@@ -1,7 +1,6 @@
 from collections import Counter
 from datetime import datetime
 import time
-import logging
 from psaw import PushshiftAPI
 
 
@@ -48,9 +47,6 @@ def load_data(user_in_accnt_info, user_in_sub_info, update_flair, author, sub, r
     
     # Account Activity Table
     # Comments
-    
-    # Sleep for 1 sec to avoid ratelimit
-    #time.sleep(2)
     comment_results = ps.search_comments(author=author,
                                          after=after_time,
                                          filter=["id", "score", "subreddit", "body"],)
@@ -117,8 +113,6 @@ def load_data(user_in_accnt_info, user_in_sub_info, update_flair, author, sub, r
             if neg_qc_words or neg_qc_score:
                 sub_neg_qc[subreddit] += 1
     
-    # Sleep for 1 sec to avoid ratelimit
-    #time.sleep(2)
     # Posts
     post_results = ps.search_submissions(author=author,
                                          after=after_time,

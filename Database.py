@@ -281,18 +281,16 @@ class Database:
 
         if key == "net qc":
             user_select_str = "SELECT top_rank FROM (" + \
-                              "SELECT ui." + self.KEY2_USERNAME + ", RANK() OVER(ORDER BY summed DESC) AS 'top_rank' " \
-                                                                  "FROM (" \
-                                                                  "SELECT SUM(" + self.KEY2_POSITIVE_QC + ") - SUM(" + self.KEY2_NEGATIVE_QC + ") " \
-                                                                                                                                               "AS 'summed', " + self.KEY2_USERNAME + " " \
-                                                                                                                                                                                      "FROM " + self.TABLE_SUB_ACTIVITY + " " \
-                                                                                                                                                                                                                          "WHERE " + self.KEY2_SUB_NAME + " IN ('" + "', '".join(
-                sub_list) + "')" \
-                            "GROUP BY " + self.KEY2_USERNAME + ") " \
-                                                               "ui " \
-                                                               "JOIN " + self.TABLE_SUB_INFO + " sub " \
-                                                                                               "ON sub." + self.KEY1_USERNAME + " = ui." + self.KEY2_USERNAME + ") " \
-                                                                                                                                                                "uo WHERE " + self.KEY2_USERNAME + " = ?"
+                                "SELECT ui." + self.KEY2_USERNAME + ", RANK() OVER(ORDER BY summed DESC) AS 'top_rank' " \
+                                "FROM (" \
+                                    "SELECT SUM(" + self.KEY2_POSITIVE_QC + ") - SUM(" + self.KEY2_NEGATIVE_QC + ") " \
+                                    "AS 'summed', " + self.KEY2_USERNAME + " " \
+                                    "FROM " + self.TABLE_SUB_ACTIVITY + " " \
+                                    "WHERE " + self.KEY2_SUB_NAME + " IN ('" + "', '".join(sub_list) + "')" \
+                                    "GROUP BY " + self.KEY2_USERNAME + ") ui " \
+                                "JOIN " + self.TABLE_SUB_INFO + " sub " \
+                                "ON sub." + self.KEY1_USERNAME + " = ui." + self.KEY2_USERNAME + ") uo " \
+                              "WHERE " + self.KEY2_USERNAME + " = ?"
         else:
             if "qc" in key:
                 select_key1 = self.KEY2_USERNAME
@@ -315,18 +313,15 @@ class Database:
                 where_key2 = self.KEY3_USERNAME
 
             user_select_str = "SELECT top_rank FROM (" + \
-                              "SELECT ui." + select_key1 + ", RANK() OVER(ORDER BY summed DESC) AS 'top_rank' " \
-                                                           "FROM (" \
-                                                           "SELECT SUM(" + select_key2 + ") " \
-                                                                                         "AS 'summed', " + select_key3 + " " \
-                                                                                                                         "FROM " + from_table + " " \
-                                                                                                                                                "WHERE " + where_key1 + " IN ('" + "', '".join(
-                sub_list) + "')" \
-                            "GROUP BY " + group_key + ") " \
-                                                      "ui " \
-                                                      "JOIN " + self.TABLE_SUB_INFO + " sub " \
-                                                                                      "ON sub." + self.KEY1_USERNAME + " = ui." + on_key + ") " \
-                                                                                                                                           "uo WHERE " + where_key2 + " = ?"
+                                "SELECT ui." + select_key1 + ", RANK() OVER(ORDER BY summed DESC) AS 'top_rank' " \
+                                "FROM (" \
+                                    "SELECT SUM(" + select_key2 + ") AS 'summed', " + select_key3 + " " \
+                                    "FROM " + from_table + " " \
+                                    "WHERE " + where_key1 + " IN ('" + "', '".join(sub_list) + "')" \
+                                    "GROUP BY " + group_key + ") ui " \
+                                "JOIN " + self.TABLE_SUB_INFO + " sub " \
+                                "ON sub." + self.KEY1_USERNAME + " = ui." + on_key + ") uo " \
+                              "WHERE " + where_key2 + " = ?"
 
         cur.execute(user_select_str, (username,))
         try:

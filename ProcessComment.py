@@ -3,7 +3,6 @@ import FlairManager
 import prawcore
 import time
 import logging
-import queue
 
 
 # Get new comments as they are added to the queue by the producer thread

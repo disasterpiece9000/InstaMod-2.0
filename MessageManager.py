@@ -49,25 +49,57 @@ def process_pm(message, sub_list, flair_queue, perm_queue, r):
     if command == "!flair":
         flair_pm(message, target_sub)
     
-    elif command == "!noautoflair" and check_if_mod(author_name, target_sub, message):
+    elif command == "!noautoflair":
+        if not check_if_mod(author_name, target_sub, message):
+            message.reply("This PM command is restricted to moderators only" + message_footer)
+            message.mark_read()
+            logging.info("PM Privileges Error: User " + author_name + " tried to use !noautoflair "
+                         "but is not a moderator of " + target_sub.name)
+            return
+        
         target_user = get_user(message.body, r)
         if target_user is None:
             message.reply("The user " + message.body + " does not exist" + message_footer)
             message.mark_read()
+            return
         remove_auto_flair(message, target_sub)
+    
+    elif command == "!giveflairperm":
+        if not check_if_mod(author_name, target_sub, message):
+            message.reply("This PM command is restricted to moderators only" + message_footer)
+            message.mark_read()
+            logging.info("PM Privileges Error: User " + author_name + " tried to use !giveflairperm "
+                         "but is not a moderator of " + target_sub.name)
+            return
         
-    elif command == "!giveflairperm" and check_if_mod(author_name, target_sub, message):
         target_user = get_user(message.body, r)
         if target_user is None:
             message.reply("The user " + message.body + " does not exist" + message_footer)
             message.mark_read()
+            return
+        
         give_flair_perm(message, target_sub, perm_queue)
+    
+    elif command == "!updatesettings":
+        if not check_if_mod(author_name, target_sub, message):
+            message.reply("This PM command is restricted to moderators only" + message_footer)
+            message.mark_read()
+            logging.info("PM Privileges Error: User " + author_name + " tried to use !updatesettings "
+                         "but is not a moderator of " + target_sub.name)
+            return
         
-    elif command == "!updatesettings" and check_if_mod(author_name, target_sub, message):
         target_sub.read_config()
+        message.reply("The settings have been updated" + message_footer)
         message.mark_read()
+    
+    elif command == "!updatethem":
+        if not check_if_mod(author_name, target_sub, message):
+            message.reply("This PM command is restricted to moderators only" + message_footer)
+            message.mark_read()
+            logging.info("PM Privileges Error: User " + author_name + " tried to use !updatethem "
+                         "but is not a moderator of " + target_sub.name)
+            return
         
-    elif command == "!updatethem" and check_if_mod(author_name, target_sub, message):
         # Get user from username and verify that they exist
         target_user = get_user(message.body, r)
         if target_user is None:
@@ -78,44 +110,42 @@ def process_pm(message, sub_list, flair_queue, perm_queue, r):
         update_user(target_user, target_sub, r, flair_queue, perm_queue)
         message.reply("The user " + str(target_user) + " has had their data and flair updated" + message_footer)
         message.mark_read()
-        
+    
     elif command == "!updateme":
         update_user(message.author, target_sub, r, flair_queue, perm_queue)
         message.reply("Your data and flair have been updated" + message_footer)
         message.mark_read()
-
-    elif command == "!wipe" and check_if_mod(author, target_sub, message):
+    
+    elif command == "!wipe":
+        if not check_if_mod(author, target_sub, message):
+            message.reply("This PM command is restricted to moderators only" + message_footer)
+            message.mark_read()
+            logging.info("PM Privileges Error: User " + author_name + " tried to use !wipe "
+                         "but is not a moderator of " + target_sub.name)
+            return
+        
         target_sub.db.wipe_sub_info()
         message.mark_read()
+        message.reply("The subreddit's data has been wiped" + message_footer)
 
 
 # Check if the user is a mod in the target_sub
 def check_if_mod(author_name, target_sub, message):
     logging.info("PM Info: Checking if " + author_name + " is a mod in " + target_sub.name)
     if author_name not in [str(mod).lower() for mod in target_sub.mods]:
-        message.reply("This PM command is restricted to moderators only" + message_footer)
-        message.mark_read()
-        logging.info("PM Info: " + author_name + " is not a mod in " + target_sub.name)
         return False
     else:
-        logging.info("PM Info: " + author_name + " is a mod in " + target_sub.name)
         return True
 
 
 # Check if the target user exists in the database
 def user_in_db(username, target_sub, message):
     if not target_sub.db.exists_in_sub_info(username):
-        message.reply("This user has no entry in the database and cannot be modified. "
-                      "To fix this, you can use the !updateme PM command and then try again."
-                      "Here is a [pre-formatted link](https://www.reddit.com/message/compose?to=InstaMod&subject="
-                      "!" + target_sub.name + "%20!updateme&message=) for that PM command\n\n"
-                      + message_footer)
-        message.mark_read()
         logging.info("PM Warning: User " + username + " does not exist in the database and has been notified")
         return False
     else:
         return True
-    
+
 
 def get_user(username, r):
     user = r.redditor(username)
@@ -125,7 +155,7 @@ def get_user(username, r):
         logging.warning("PM Warning: User " + username + " does not exist")
         return None
     return user
-    
+
 
 # Handle !updatethem and !updateme
 def update_user(target_user, target_sub, r, flair_queue, perm_queue):
@@ -137,13 +167,15 @@ def update_user(target_user, target_sub, r, flair_queue, perm_queue):
     
     # Collect new data
     DataCollector.load_data(user_in_accnt_info, user_in_sub_info, update_flair, target_user, target_sub, r)
-
+    
     # Update flair with new data
     prog_flair_enabled = target_sub.main_config.getboolean("progression tier")
     new_accnt_flair_enabled = target_sub.main_config.getboolean("young account tag")
     activity_flair_enabled = target_sub.main_config.getboolean("activity tag")
     FlairManager.update_flair(flair_queue, perm_queue, target_user, target_sub,
                               prog_flair_enabled, new_accnt_flair_enabled, activity_flair_enabled)
+    
+    logging.debug("PM: User " + str(target_user) + " has had their data and flair updated")
 
 
 # Handle custom flair requests
@@ -155,22 +187,33 @@ def flair_pm(message, target_sub):
     # Return if the user is not in the database
     in_db = user_in_db(username, target_sub, message)
     if not in_db:
+        message.reply("This user cannot be modified because they have no entry in the database. "
+                      "To fix this, you can use the !updateme PM command and then try again."
+                      "Here is a [pre-formatted link](https://www.reddit.com/message/compose?to=InstaMod&subject="
+                      "!" + target_sub.name + "%20!updateme&message=) for that PM command\n\n"
+                      + message_footer)
+        message.mark_read()
+        logging.info("PM Error: User " + username + " tried to update flair but doesn't exist in database")
         return
-
+    
     # Return if the user doesn't have proper permissions
     flair_perm = target_sub.db.fetch_sub_info(username, "flair perm") == 1
     if not flair_perm:
         message.reply("You have not met the requirements for custom flair. You will be notified via a PM"
                       "from /u/InstaMod once your account is eligible." + message_footer)
         message.mark_read()
+        logging.info("PM Privileges Error: User " + username + " tried to update flair "
+                     "but doesn't have custom flair permissions")
         return
     
     if not message_lines[0].lower().startswith("flair text:"):
         message.reply("This PM is not in the correct format for flair assignment. Try using [this pre-formatted link]"
-                      "(https://www.reddit.com/message/compose?to=InstaMod&subject=!" + target_sub.name + "%20!flair&"
-                      "message=Flair%20Text:%0AFlair%20CSS:)."
+                      "(https://www.reddit.com/message/compose?to=InstaMod&subject=!" + target_sub.name +
+                      "%20!flair&message=Flair%20Text:%0AFlair%20CSS:)."
                       + message_footer)
         message.mark_read()
+        logging.info("PM Format Error: User " + username + " tried to update flair "
+                     "but the message doesn't start with Flair Text:")
         return
     
     # Pull flair and css data from PM text
@@ -190,14 +233,16 @@ def flair_pm(message, target_sub):
         message.reply("There was an error processing your message. Perhaps your flair text was too long or your "
                       "flair CSS is invalid." + message_footer)
         message.mark_read()
+        logging.info("PM Format Error: User " + username + " tried to update flair but it threw an APIException")
         return
-        
+    
     target_sub.db.update_key_sub_info(username, "custom flair used", 1)
-    message.reply("Your flair has been set!\n\n"
+    message.reply("Your flair has been set!\n\n\n\n"
                   "Flair Text: " + flair_txt + "\n\n"
-                  "Flair CSS:" + flair_css +
+                                               "Flair CSS:" + flair_css +
                   message_footer)
     message.mark_read()
+    logging.info("PM: User " + username + " had their flair updated successfully")
 
 
 # Prevents a user from having flair assigned by InstaMod
@@ -206,12 +251,22 @@ def remove_auto_flair(message, target_sub):
     # Return if the user doesn't exist in the database
     in_db = user_in_db(target_username, target_sub, message)
     if not in_db:
+        message.reply("This user cannot be modified because they have no entry in the database. "
+                      "To fix this, you can use the !updatethem PM command and then try again."
+                      "Here is a [pre-formatted link](https://www.reddit.com/message/compose?to=InstaMod&subject="
+                      "!" + target_sub.name + "%20!updatethem&message=) for that PM command\n\n"
+                      + message_footer)
+        message.mark_read()
+        logging.info("PM Error: User " + str(message.author) + " tried to revoke " + target_username + "'s "
+                     "flair but that user doesn't exist in database")
         return
     
     target_sub.db.update_key_sub_info(target_username, "no auto flair", 1)
     message.reply("The user " + target_username + " will no longer receive flair from InstaMod. " +
                   "Their user data will continue to be updated." + message_footer)
     message.mark_read()
+    logging.info("PM: User " + target_username +
+                 " had their custom flair permissions revoked by " + str(message.author))
 
 
 # Grant a user the ability to assign themselves custom flair
@@ -220,6 +275,14 @@ def give_flair_perm(message, target_sub, perm_queue):
     # Return if the user doesn't exist in the database
     in_db = user_in_db(target_username, target_sub, message)
     if not in_db:
+        message.reply("This user cannot be modified because they have no entry in the database. "
+                      "To fix this, you can use the !updatethem PM command and then try again."
+                      "Here is a [pre-formatted link](https://www.reddit.com/message/compose?to=InstaMod&subject="
+                      "!" + target_sub.name + "%20!updatethem&message=) for that PM command\n\n"
+                      + message_footer)
+        message.mark_read()
+        logging.info("PM Error: User " + str(message.author) + " tried to grant " + target_username +
+                     " custom flair permissions but that user doesn't exist in database")
         return
     
     target_sub.db.update_key_sub_info(target_username, "flair perm", 1)
@@ -227,3 +290,5 @@ def give_flair_perm(message, target_sub, perm_queue):
                   + message_footer)
     message.mark_read()
     perm_queue.put([target_username, "flair perm", target_sub])
+    logging.info("PM: User " + target_username +
+                 " was given custom flair permissions by " + str(message.author))
