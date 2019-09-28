@@ -181,11 +181,11 @@ class Database:
                             + "WHERE " + self.KEY3_USERNAME + " = ? "
                             + "AND " + self.KEY3_SUB_NAME + " = ?")
 
-        update_str_sub = ("UPDATE " + self.TABLE_ACCNT_ACTIVITY + " SET "
+        update_str_sub = ("UPDATE " + self.TABLE_SUB_ACTIVITY + " SET "
                           + self.KEY2_POSITIVE_QC + " = " + self.KEY2_POSITIVE_QC + "+ ?, "
                           + self.KEY2_NEGATIVE_QC + " = " + self.KEY2_NEGATIVE_QC + "+ ? "
                           + "WHERE " + self.KEY3_USERNAME + " = ? "
-                          + "AND " + self.KEY3_SUB_NAME + " ?")
+                          + "AND " + self.KEY3_SUB_NAME + " = ?")
 
         # Union of all keys in both primary dictionaries
         all_subs = sub_comment_karma.keys() | sub_post_karma.keys()
