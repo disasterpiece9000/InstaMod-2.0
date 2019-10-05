@@ -6,7 +6,6 @@ To get a better idea of the customization options available, please check out th
 * [/r/CryptoCurrency](https://www.reddit.com/r/CryptoCurrency)
 * [/r/CryptoTechnology](https://www.reddit.com/r/CryptoTechnology)
 * [/r/CryptoMarkets](https://www.reddit.com/r/CryptoMarkets)
-* [/r/CollectingDragonBall](https://www.reddit.com/r/CollectingDragonBall)
 
 ## Features - Flair Management
 
