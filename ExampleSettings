@@ -21,17 +21,30 @@ negative criteria type = AND
 [PROGRESSION TIER 1]
 metric = net QC
 target subs = SUB GROUP 1
+comparison = >= 90 percent
+flair text = Tin
+flair css = Warning-level2
+permissions =
+
+[PROGRESSION TIER 1 - OR]
+metric = net QC
+comparison = < 10
+target subs = SUB GROUP 1
+
+[PROGRESSION TIER 2]
+metric = net QC
+target subs = SUB GROUP 1
 comparison = >= 50 percent
 flair text = Bronze
 flair css = Warning-level1
 permissions =
 
-[PROGRESSION TIER 1 - OR]
+[PROGRESSION TIER 2 - OR]
 metric = net QC
-comparison = < 50
+comparison = <= 25
 target subs = SUB GROUP 1
 
-[PROGRESSION TIER 2]
+[PROGRESSION TIER 3]
 metric = net QC
 target subs = SUB GROUP 1
 comparison = >= 25 percent
@@ -39,33 +52,33 @@ flair text = Silver
 flair CSS =
 permissions =
 
-[PROGRESSION TIER 2 - AND]
-metric = net QC
-comparison = >= 50
-target subs = SUB GROUP 1
-
-[PROGRESSION TIER 3]
-metric = net QC
-target subs = SUB GROUP 1
-comparison = >= 15 percent
-flair text = Gold
-flair CSS =
-permissions =
-
 [PROGRESSION TIER 3 - AND]
 metric = net QC
-comparison = >= 100
+comparison = >= 25
 target subs = SUB GROUP 1
 
 [PROGRESSION TIER 4]
 metric = net QC
 target subs = SUB GROUP 1
-comparison = < 5 percent
+comparison = >= 10 percent
+flair text = Gold
+flair CSS =
+permissions =
+
+[PROGRESSION TIER 4 - AND]
+metric = net QC
+comparison = >= 100
+target subs = SUB GROUP 1
+
+[PROGRESSION TIER 5]
+metric = net QC
+target subs = SUB GROUP 1
+comparison = < 10 percent
 flair text = Platinum
 flair CSS =
 permissions = CUSTOM FLAIR
 
-[PROGRESSION TIER 4 - AND]
+[PROGRESSION TIER 5 - AND]
 metric = net QC
 comparison = >= 200
 target subs = SUB GROUP 1
@@ -95,10 +108,22 @@ post text = critic
 permissions =
 
 [ACTIVITY TAG 3] 
+metric = net QC
+target subs = SUB GROUP 2
+group subs = False 
+comparison = >= 5
+display value = True 
+sort = MOST COMMON 
+sub cap = 1 
+pre text = 
+post text = 
+permissions =
+
+[ACTIVITY TAG 4] 
 metric = net QC 
 target subs = SUB GROUP 3 
 group subs = False 
-comparison = <= 10 
+comparison = >= 10 
 display value = True 
 sort = MOST COMMON 
 sub cap = 1 
@@ -108,9 +133,9 @@ permissions =
 
 [PM Messages]
 custom flair subj = You have been granted custom flair permissions on /r/CryptoCurrency
-custom flair body = Do not use this flair for:\n\n* Self promotion\n* Referral links\n* Impersonating a moderator or Reddit Admin\n\nThis action was preformed automatically by /u/InstaMod on behalf of the /r/CryptoCurrency moderators. For assistance, please PM /u/shimmyjimmy97
-custom css subj =
-custom css body =
+custom flair body = **Available CSS:** Bitcoin, BitcoinShares, Dogecoin, Ethereum, Litecoin, Monero, Dash, NEM, ETC, Ripple, Factom, NEO, OMG, ARK, SIA, Peercoin, Nxt, Namecoin, Waves, Iota, ZCASH, Altcoiner, Developer, Miner, Trader, Investor, Observer, Student, Entrepreneur, Analyst, Moon, Gentleman, Fan
+custom css subj = 
+custom css body = 
 
 [SUB GROUP 1]
 CRYPTOCURRENCY = CC
@@ -128,7 +153,7 @@ ETHEREUM = ETH
 ETHTRADER = ETH
 RIPPLE = XRP
 STELLAR = XLM
-VECHAIN = VEN
+VECHAIN = VET
 VERTCOIN = VTC
 VERTCOINTRADER = VTC
 DASHPAY = Dashpay
@@ -153,7 +178,7 @@ NEM = XEM
 MYRIADCOIN = XMY
 NAVCOIN = NAV
 NXT = NXT
-POETPROJECM = poetproject
+POETPROJECM = POET
 ZEC = ZEC
 GOLEMPROJECM = GNT
 FACMOM = FCM
@@ -161,7 +186,7 @@ QTUM = QTUM
 AUGUR = AU
 CHAINLINK = LINK
 LINKTRADER = LINK
-TRONIX = Tronix
+TRONIX = TRX
 EOS = EOS
 0XPROJECM = ZRX
 ZRXTRADER = ZRX
@@ -195,7 +220,7 @@ AETERNITY = AE
 SIACOIN = SC
 SIATRADER = SC
 STORJ = STORJ
-SAFENETWORK = Safe
+SAFENETWORK = SAFE
 PEERCOIN = PPC
 NAMECOIN = NMC
 STEEM = STEEM
@@ -232,7 +257,7 @@ WTCMARKETS = WTC
 VECHAINTRADER = VEN
 
 [SUB GROUP 2]
-BUTTCOIN = BUTT
+BUTTCOIN = r/Buttcoin
 FREEKARMA4U = Karma Farming
 FREE_KARMA = Karma Farming
 FREEKARMA4ALL = Karma Farming
@@ -311,3 +336,5 @@ BUSINESS : r/Business
 PERSONALFINANCE : r/PersonalFinance 
 SECURITYANALYSIS : r/SecurityAnalysis 
 ACCOUNTING : r/Accounting
+POLITICS: r/Politics 
+SCIENCE: r/Science
