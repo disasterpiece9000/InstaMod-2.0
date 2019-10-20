@@ -3,10 +3,14 @@ import FlairManager
 import prawcore
 import time
 import logging
+import praw
+
+# PRAW instance for comment processing thread
+r = praw.Reddit("InstaMod")
 
 
 # Get new comments as they are added to the queue by the producer thread
-def fetch_queue(comment_queue, flair_queue, perm_queue, sub_list, r):
+def fetch_queue(comment_queue, flair_queue, perm_queue, sub_list):
     # Loop continuously checking for new comments
     while True:
         comment = comment_queue.get()

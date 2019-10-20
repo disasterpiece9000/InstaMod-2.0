@@ -200,7 +200,7 @@ read_pms()
 
 # Create thread for processing comments
 process_thread = threading.Thread(target=ProcessComment.fetch_queue,
-                                  args=(comment_queue, flair_queue, perm_queue, sub_list, r))
+                                  args=(comment_queue, flair_queue, perm_queue, sub_list))
 process_thread.setDaemon(False)
 process_thread.start()
 
@@ -231,7 +231,7 @@ while True:
                 continue
             comment_queue.put(comment)
             logging.info("Comment added to queue from " + str(comment.author))
-    except prawcore.ServerError:
+    except (prawcore.ServerError, prawcore.RequestException):
         logging.warning("Server Error: Sleeping for 1 min")
         time.sleep(60)
         continue
