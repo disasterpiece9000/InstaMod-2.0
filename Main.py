@@ -155,11 +155,11 @@ def notify_permission_change():
         
         # Notify user of flair perm via PM
         if new_perm == "flair perm":
-            auto_perm_msg = "Your contributions to /r/" + target_sub.name + \
+            auto_perm_msg = "Your contributions to /r/" + target_sub.sub.name + \
                             " have granted you access to custom flair options. You will continue to receive " \
                             "automatic flair until you apply a custom flair. In order to apply your desired " \
                             "flair, please click on [this pre-formatted link.](https://www.reddit.com/message/" \
-                            "compose?to=InstaMod&subject=!CryptoCurrency%20!flair" \
+                            "compose?to=InstaMod&subject=!" + target_sub.sub.name + "%20!flair" \
                             "&message=Flair%20Text:%0AFlair%20CSS:)" \
                             "\n\n**Note:** This link will not work on mobile and it can be used to change your flair" \
                             " as many times as you want.\n\n"
@@ -169,10 +169,10 @@ def notify_permission_change():
             subject = target_sub.pm_messages["custom flair subj"]
         
         elif new_perm == "css perm":
-            auto_perm_msg = "Your contributions to /r/" + target_sub.name + " have granted you access to custom " \
+            auto_perm_msg = "Your contributions to /r/" + target_sub.sub.name + " have granted you access to custom " \
                             "flair icons. Your flair will still be updated automatically. " \
                             "In order to apply your desired flair icon, please click on [this pre-formatted link.](" \
-                            "https://www.reddit.com/message/compose?to=InstaMod&subject=!CryptoCurrency%20!css" \
+                            "https://www.reddit.com/message/compose?to=InstaMod&subject=!" + target_sub.sub.name + "%20!css" \
                             "&message=Flair%20CSS:)" \
                             "\n\n**Note:** This link will not work on mobile and it can be used to change your flair" \
                             " icon as many times as you want.\n\n"
