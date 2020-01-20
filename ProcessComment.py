@@ -53,7 +53,7 @@ def fetch_queue(comment_queue, flair_queue, perm_queue, sub_list):
             logging.info("Collecting data...")
             try:
                 DataCollector.load_data(user_in_accnt_info, user_in_sub_info, update_flair, user, target_sub, r)
-            except (prawcore.NotFound, prawcore.RequestException) as e:
+            except (prawcore.NotFound, prawcore.RequestException, prawcore.ServerError) as e:
                 logging.warning("\nError in DataCollector: \n" + str(e) + "\n")
                 continue
         
