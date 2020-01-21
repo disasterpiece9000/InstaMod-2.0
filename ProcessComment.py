@@ -108,8 +108,10 @@ def check_user(user, target_sub):
             current_time = int(time.time())
             day_diff = int((current_time - last_updated) / 86400)
     
-            # If the user has used custom flair, only update data and not flair
-            if custom_flair_used or no_auto_flair:
+            # If the user has used custom flair, is designated to not receive auto flair, or flair is not enabled,
+            # only update data and not flair
+            if custom_flair_used or no_auto_flair or \
+                    (len(target_sub.progression_tiers) == 0 and len(target_sub.sub_activity) == 0):
                 update_flair = False
             # Check if flair is expired
             elif day_diff >= target_sub.flair_config.getint("flair expiration"):

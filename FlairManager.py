@@ -72,6 +72,8 @@ def make_new_accnt_flair(username, sub):
     month_diff = int((current_time - user_created) / 2629746)
     
     if month_diff <= min_accnt_age:
+        if month_diff == 1:
+            return "1 month old"
         return str(month_diff) + " months old"
     else:
         return None
