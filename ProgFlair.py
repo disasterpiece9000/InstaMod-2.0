@@ -99,11 +99,17 @@ def user_in_tier(tier, username, sub):
                 sub_list.append(sub_name)
 
     # Turn Sub Group into list if all subs option not selected
-    elif target_subs != "ALL":
-        sub_list = list(sub.sub_groups[target_subs].keys())
-
-    else:
+    elif target_subs == "ALL":
         sub_list = sub.db.get_all_subs(username)
+    
+    # Sub Group used
+    elif "sub group" in target_subs.lower():
+        sub_list = list(sub.sub_groups[target_subs].keys())
+    
+    # Single subreddit used
+    else:
+        sub_list = [target_subs]
+    
 
     metric = tier["metric"].lower()
     comparison = tier["comparison"]

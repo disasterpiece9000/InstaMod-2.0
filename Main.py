@@ -122,8 +122,10 @@ def flair_users():
         flair_txt = flair_data[1] if flair_data[1] else ""
         flair_css = flair_data[2] if flair_data[2] else ""
         target_sub = flair_data[3]
-
-        target_sub.sub.flair.set(username, flair_txt, flair_css)
+        
+        # TODO: Add toggle to overwrite flair or not
+        if flair_txt != "":
+            target_sub.sub.flair.set(username, flair_txt, flair_css)
         
         logging.info("Flair results"
                      + "\n\tUser: " + username
@@ -155,7 +157,7 @@ def notify_permission_change():
         
         # Notify user of flair perm via PM
         if new_perm == "flair perm":
-            auto_perm_msg = "Your contributions to /r/" + target_sub.sub.name + \
+            auto_perm_msg = "Your contributions to /r/" + str(target_sub.sub) + \
                             " have granted you access to custom flair options. You will continue to receive " \
                             "automatic flair until you apply a custom flair. In order to apply your desired " \
                             "flair, please click on [this pre-formatted link.](https://www.reddit.com/message/" \
@@ -169,7 +171,7 @@ def notify_permission_change():
             subject = target_sub.pm_messages["custom flair subj"]
         
         elif new_perm == "css perm":
-            auto_perm_msg = "Your contributions to /r/" + target_sub.sub.name + " have granted you access to custom " \
+            auto_perm_msg = "Your contributions to /r/" + str(target_sub.sub) + " have granted you access to custom " \
                             "flair icons. Your flair will still be updated automatically. " \
                             "In order to apply your desired flair icon, please click on [this pre-formatted link.](" \
                             "https://www.reddit.com/message/compose?to=InstaMod&subject=!" + target_sub.sub.name + "%20!css" \
