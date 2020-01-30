@@ -1,6 +1,8 @@
+import logging
+import time
 from configparser import ConfigParser
 from Database import Database
-
+import prawcore
 
 class Subreddit:
     # Load settings from wiki page
@@ -25,7 +27,18 @@ class Subreddit:
     # Check wiki page for settings
     def read_config(self):
         config = ConfigParser(allow_no_value=True, interpolation=None)
-        config.read_string(self.sub.wiki["InstaModSettings"].content_md)
+        
+        # Catch connection errors when reading wiki page
+        read_wiki = False
+        while not read_wiki:
+            try:
+                config.read_string(self.sub.wiki["InstaModSettings"].content_md)
+            except (prawcore.ServerError, prawcore.RequestException, prawcore.ResponseException):
+                logging.warning("Server Error: Sleeping for 1 min")
+                time.sleep(60)
+                continue
+            read_wiki = True
+            
         self.main_config = config["MAIN CONFIG"]
         self.flair_config = config["FLAIR"]
         self.qc_config = config["QUALITY COMMENTS"]

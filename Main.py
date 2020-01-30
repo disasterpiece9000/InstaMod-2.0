@@ -193,7 +193,6 @@ def notify_permission_change():
                      "\n\tMessage Body: " + body + "\n")
     logging.debug("Done updating permissions")
 
-
 # Get multisub so that all subreddits can be searched simultaneously
 all_subs = get_multisub()
 # Check if backups have already been created of if they need to be updated
@@ -233,7 +232,7 @@ while True:
                 continue
             comment_queue.put(comment)
             logging.info("Comment added to queue from " + str(comment.author))
-    except (prawcore.ServerError, prawcore.RequestException):
+    except (prawcore.ServerError, prawcore.RequestException, prawcore.ResponseException):
         logging.warning("Server Error: Sleeping for 1 min")
         time.sleep(60)
         continue
