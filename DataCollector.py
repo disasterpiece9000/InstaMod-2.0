@@ -11,7 +11,14 @@ def load_data(user_in_accnt_info, user_in_sub_info, update_flair, author, sub, r
     
     # General account info
     username = str(author).lower()
-    created = author.created_utc
+    
+    # TODO: Figure out why/how this happens and catch it earlier on
+    try:
+        created = author.created_utc
+    except AttributeError:
+        logging.warning("The user " + username + " could not have their account info gathered")
+        return
+    
     total_post_karma = author.link_karma
     total_comment_karma = author.comment_karma
     flair_txt = next(sub.sub.flair(username))["flair_text"]

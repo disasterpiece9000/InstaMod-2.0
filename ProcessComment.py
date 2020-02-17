@@ -1,3 +1,5 @@
+import traceback
+
 import DataCollector
 import FlairManager
 import prawcore
@@ -13,63 +15,70 @@ r = praw.Reddit("InstaMod")
 def fetch_queue(comment_queue, flair_queue, perm_queue, sub_list):
     # Loop continuously checking for new comments
     while True:
-        comment = comment_queue.get()
-        comment_queue.task_done()
-        user = comment.author
-        
-        if user is None:
-            logging.warning("User is None\n"
-                            "Comment ID: " + comment.id)
-            continue
-        
-        logging.info("Processing comment from " + str(user))
-        
-        # Find sub that the comment was placed in
-        target_sub = None
-        comment_sub = str(comment.subreddit).lower()
-        for sub in sub_list:
-            if sub.name.lower() == comment_sub:
-                target_sub = sub
-                break
-        if target_sub is None:
-            logging.warning("Target sub not found: " + comment_sub)
-            continue
-        
-        logging.info("Target sub found: " + comment_sub)
-        
-        # Check if the user data should be updated
-        check_data = check_user(user, target_sub)
-        update_flair = check_data[0]  # Does user's flair need to be updated
-        scrape_data = check_data[1]  # Does user's data need to be updated
-        user_in_accnt_info = check_data[2]  # Does the user's data need to be updated or inserted
-        user_in_sub_info = check_data[3]
-        logging.info("Check User: " + str(user) +
-                     "\n\tUpdate flair: " + str(update_flair) +
-                     "\n\tScrape data: " + str(scrape_data) +
-                     "\n\tIn accnt_info: " + str(user_in_accnt_info) +
-                     "\n\tIn sub_info: " + str(user_in_sub_info))
-        
-        if scrape_data:
-            logging.info("Collecting data...")
-            try:
-                DataCollector.load_data(user_in_accnt_info, user_in_sub_info, update_flair, user, target_sub, r)
-            except (prawcore.NotFound, prawcore.RequestException, prawcore.ServerError) as e:
-                logging.warning("\nError in DataCollector: \n" + str(e) + "\n")
-                continue
-        
-        if update_flair:
-            # Read flair toggles from sub config
-            prog_flair_enabled = target_sub.main_config.getboolean("progression tier")
-            new_accnt_flair_enabled = target_sub.main_config.getboolean("young account tag")
-            activity_flair_enabled = target_sub.main_config.getboolean("activity tag")
+        try:
+            comment = comment_queue.get()
+            comment_queue.task_done()
+            user = comment.author
             
-            # If at least one flair toggle is enabled, update user flair
-            if prog_flair_enabled or new_accnt_flair_enabled or activity_flair_enabled:
-                logging.info("Updating flair...")
-                FlairManager.update_flair(flair_queue, perm_queue, comment.author, target_sub, prog_flair_enabled,
-                                          new_accnt_flair_enabled, activity_flair_enabled)
-            else:
-                logging.debug("All flair settings disabled")
+            if user is None:
+                logging.warning("User is None\n"
+                                "Comment ID: " + comment.id)
+                continue
+            
+            logging.info("Processing comment from " + str(user))
+            
+            # Find sub that the comment was placed in
+            target_sub = None
+            comment_sub = str(comment.subreddit).lower()
+            for sub in sub_list:
+                if sub.name.lower() == comment_sub:
+                    target_sub = sub
+                    break
+            if target_sub is None:
+                logging.warning("Target sub not found: " + comment_sub)
+                continue
+            
+            logging.info("Target sub found: " + comment_sub)
+            
+            # Check if the user data should be updated
+            check_data = check_user(user, target_sub)
+            update_flair = check_data[0]  # Does user's flair need to be updated
+            scrape_data = check_data[1]  # Does user's data need to be updated
+            user_in_accnt_info = check_data[2]  # Does the user's data need to be updated or inserted
+            user_in_sub_info = check_data[3]
+            logging.info("Check User: " + str(user) +
+                         "\n\tUpdate flair: " + str(update_flair) +
+                         "\n\tScrape data: " + str(scrape_data) +
+                         "\n\tIn accnt_info: " + str(user_in_accnt_info) +
+                         "\n\tIn sub_info: " + str(user_in_sub_info))
+            
+            if scrape_data:
+                logging.info("Collecting data...")
+                try:
+                    DataCollector.load_data(user_in_accnt_info, user_in_sub_info, update_flair, user, target_sub, r)
+                except (prawcore.NotFound, prawcore.RequestException, prawcore.ServerError) as e:
+                    logging.warning("\nError in DataCollector: \n" + str(e) + "\n")
+                    continue
+            
+            if update_flair:
+                # Read flair toggles from sub config
+                prog_flair_enabled = target_sub.main_config.getboolean("progression tier")
+                new_accnt_flair_enabled = target_sub.main_config.getboolean("young account tag")
+                activity_flair_enabled = target_sub.main_config.getboolean("activity tag")
+                
+                # If at least one flair toggle is enabled, update user flair
+                if prog_flair_enabled or new_accnt_flair_enabled or activity_flair_enabled:
+                    logging.info("Updating flair...")
+                    FlairManager.update_flair(flair_queue, perm_queue, comment.author, target_sub, prog_flair_enabled,
+                                              new_accnt_flair_enabled, activity_flair_enabled)
+                else:
+                    logging.debug("All flair settings disabled")
+                    
+        except:
+            tb = traceback.format_exc()
+            logging.warning("Error while processing comment: " + tb)
+            r.redditor("shimmyjimmy97").message("InstaMod Error", "Stacktrace: \n\n" + tb)
+            continue
 
 
 # Check if user should be skipped and if their data needs to be updated or inserted

@@ -4,6 +4,7 @@ from configparser import ConfigParser
 from Database import Database
 import prawcore
 
+
 class Subreddit:
     # Load settings from wiki page
     def __init__(self, name, r):
