@@ -5,7 +5,7 @@ import logging
 from psaw import PushshiftAPI
 
 
-def load_data(user_in_accnt_info, user_in_sub_info, update_flair, author, sub, r):
+def load_data(user_in_accnt_info, user_in_sub_info, update_flair, author, sub, insert_sub_activity, r):
     # PushShift Instance
     ps = PushshiftAPI(r)
     
@@ -27,7 +27,12 @@ def load_data(user_in_accnt_info, user_in_sub_info, update_flair, author, sub, r
     # Temp values for postponed ratelimit feature
     ratelimit_count = 0
     ratelimit_start = int(time.time())
-    
+
+    # TODO: Update QC in separate interval from general account info across all subreddits, not just target sub
+    #       If user is seen in new subreddit, re-insert all their accnt info
+    #       If user has info updated, also update all other subs QC based on their criteria
+    #       Separate insertion of sub and accnt info into database to facilitate in updating only QC for other subs
+
     if user_in_sub_info:
         # Flair will be updated now
         if update_flair:
@@ -60,7 +65,7 @@ def load_data(user_in_accnt_info, user_in_sub_info, update_flair, author, sub, r
     #time.sleep(2)
     comment_results = ps.search_comments(author=author,
                                          after=after_time,
-                                         filter=["id", "score", "subreddit", "body"],)
+                                         filter=["id", "score", "subreddit", "body", "is_submitter"],)
     
     sub_comment_karma = Counter()
     sub_pos_comments = Counter()
@@ -73,7 +78,8 @@ def load_data(user_in_accnt_info, user_in_sub_info, update_flair, author, sub, r
         score = ps_comment.score
         subreddit = str(ps_comment.subreddit).lower()
         body = ps_comment.body
-        
+        is_submitter = ps_comment.is_submitter
+
         sub_comment_karma[subreddit] += score
         if score > 0:
             sub_pos_comments[subreddit] += 1
@@ -81,6 +87,10 @@ def load_data(user_in_accnt_info, user_in_sub_info, update_flair, author, sub, r
             sub_neg_comments[subreddit] += 1
         
         # Quality Comments
+
+        # Skip if author is OP
+        if sub.qc_config.getboolean("exclude when op") and is_submitter:
+            continue
         
         # Positive QC
         # Positive QC: Score
@@ -99,6 +109,7 @@ def load_data(user_in_accnt_info, user_in_sub_info, update_flair, author, sub, r
         if sub.qc_config["positive criteria type"] == "AND":
             if pos_qc_words and pos_qc_score:
                 sub_pos_qc[subreddit] += 1
+
         else:
             if pos_qc_words or pos_qc_score:
                 sub_pos_qc[subreddit] += 1
@@ -123,9 +134,7 @@ def load_data(user_in_accnt_info, user_in_sub_info, update_flair, author, sub, r
         else:
             if neg_qc_words or neg_qc_score:
                 sub_neg_qc[subreddit] += 1
-    
-    # Sleep for 1 sec to avoid ratelimit
-    #time.sleep(2)
+
     # Posts
     post_results = ps.search_submissions(author=author,
                                          after=after_time,

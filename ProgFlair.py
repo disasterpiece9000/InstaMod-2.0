@@ -57,18 +57,14 @@ def make_prog_flair(user, sub):
                 flair_css = main_tier["flair css"]
                 permissions = main_tier["permissions"].lower()
 
-                flair_perm = False
-                css_perm = False
-                if permissions == "custom flair":
-                    flair_perm = True
-                elif permissions == "custom css":
-                    css_perm = True
+                if permissions == "":
+                    permissions = None
 
                 logging.debug("Flair text: " + flair_text +
                               "\n\tFlair css: " + flair_css +
-                              "\n\tFlair perm: " + str(flair_perm) +
-                              "\n\tCSS perm: " + str(css_perm))
-                return [flair_text, flair_css, flair_perm, css_perm]
+                              "\n\tPermission: " + str(permissions))
+
+                return [flair_text, flair_css, permissions]
 
         # Last tier was discovered
         else:

@@ -8,6 +8,7 @@ def make_activity_flair(username, sub):
     full_flair_text = []
     flair_perm = False
     css_perm = False
+    text_perm = False
 
     # Loop through settings in order
     setting_count = 1
@@ -88,6 +89,9 @@ def make_activity_flair(username, sub):
                     elif permission == "custom css":
                         css_perm = True
                         logging.debug("CSS perm = True")
+                    elif permission == "custom text":
+                        text_perm = True
+                        logging.debug("Text perm = True")
 
             # Handle individual subs
             else:
@@ -151,17 +155,30 @@ def make_activity_flair(username, sub):
                 elif processed_data[2]:
                     css_perm = True
                     logging.debug("CSS perm = True")
+                elif processed_data[3]:
+                    text_perm = True
+                    logging.debug("Text perm = True")
 
         # No more settings activity tags to discover
         else:
             break
 
+    # Only one permission can be granted so grant highest perm earned
+    perm = None
+    if flair_perm:
+        perm = "custom flair"
+    elif text_perm:
+        perm = "custom css"
+    elif css_perm:
+        perm = "custom css"
+
     logging.debug("Final results:" +
                   "\n\tFull text: " + str(full_flair_text) +
                   "\n\tFlair perm: " + str(flair_perm) +
-                  "\n\tCSS perm: " + str(css_perm))
+                  "\n\tCSS perm: " + str(css_perm) +
+                  "\n\tText perm: " + str(text_perm))
 
-    return [full_flair_text, flair_perm, css_perm]
+    return [full_flair_text, perm]
 
 
 # Process combined sub flair data
@@ -210,12 +227,16 @@ def process_flair_data(setting, flair_data):
     # Process updated permissions
     flair_perm = False
     css_perm = False
+    text_perm = False
+
     if permission == "custom flair":
         flair_perm = True
     elif permission == "custom css":
         css_perm = True
+    elif permission == "custom text":
+        text_perm = True
 
-    return [flair_text, flair_perm, css_perm]
+    return [flair_text, flair_perm, css_perm, text_perm]
 
 
 # Check result of secondary criteria

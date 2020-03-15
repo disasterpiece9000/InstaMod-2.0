@@ -12,6 +12,7 @@ class Database:
     KEY1_LAST_UPDATED = "last_updated"
     KEY1_FLAIR_PERM = "flair_perm"
     KEY1_CSS_PERM = "css_perm"
+    KEY1_TEXT_PERM = "text_perm"
     KEY1_CUSTOM_FLAIR_USED = "custom_flair_used"
     KEY1_NO_AUTO_FLAIR = "no_auto_flair"
 
@@ -68,8 +69,8 @@ class Database:
                     self.KEY1_USERNAME + " TEXT PRIMARY KEY, " + self.KEY1_RATELIMIT_START + " INTEGER, " +
                     self.KEY1_RATELIMIT_COUNT + " INTEGER, " + self.KEY1_FLAIR_TEXT + " TEXT, " +
                     self.KEY1_LAST_UPDATED + " INTEGER, " + self.KEY1_FLAIR_PERM + " INTEGER, " +
-                    self.KEY1_CSS_PERM + " INTEGER, " + self.KEY1_CUSTOM_FLAIR_USED + " INTEGER, " +
-                    self.KEY1_NO_AUTO_FLAIR + " INTEGER)")
+                    self.KEY1_CSS_PERM + " INTEGER, " + self.KEY1_TEXT_PERM + "INTEGER, " +
+                    self.KEY1_CUSTOM_FLAIR_USED + " INTEGER, " + self.KEY1_NO_AUTO_FLAIR + " INTEGER)")
 
         self.TABLE_SUB_ACTIVITY = sub_name + "_activity"
         cur.execute("CREATE TABLE IF NOT EXISTS " + self.TABLE_SUB_ACTIVITY + " (" +
@@ -376,6 +377,8 @@ class Database:
                 return self.KEY1_FLAIR_PERM
             if key == "css perm":
                 return self.KEY1_CSS_PERM
+            if key == "text perm":
+                return self.KEY1_TEXT_PERM
             if key == "custom flair used":
                 return self.KEY1_CUSTOM_FLAIR_USED
             if key == "no auto flair":
