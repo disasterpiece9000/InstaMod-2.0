@@ -103,6 +103,7 @@ The settings for InstaMod uses the .ini format and is read from a wiki page on t
 | negative score | Comments with a score <= this meet the score criteria | Any integer |
 | negative word count | Comments with a word count <= this meet the word count criteria | Any integer > 0 or leave blank to disable |
 | negative criteria type | Combination of criteria required to earn 1 negative QC | And (all of them) or Or (at least one of them) |
+| exclude when op | Prevent user from gaining or losing QC from comments where they are also OP | True or False <br> **This overrides positive/negative criteria type** |
 
 ## Progression Tiers
 
@@ -120,7 +121,7 @@ The settings for InstaMod uses the .ini format and is read from a wiki page on t
 | comparison | Criteria to determine if the user belongs in the tier | \>, <, >=, or <= followed by any integer <br />Put "percent" after the integer to restrict the tier to users in the top X% |
 | flair text | Flair text assigned if the user meets the criteria | Any text with no more than 64 characters or leave blank for none |
 | flair css | Flair CSS assigned if the user meets the criteria | Any valid flair CSS ID or leave blank for none |
-| permissions | Permission granted if the user meets the criteria | CUSTOM FLAIR, CUSTOM CSS, or leave blank for none |
+| permissions | Permission granted if the user meets the criteria | CUSTOM FLAIR, CUSTOM CSS, CUSTOM TEXTor leave blank for none |
 
 ### Secondary Progression Tier Criteria
 
@@ -156,7 +157,7 @@ The settings for InstaMod uses the .ini format and is read from a wiki page on t
 | sub cap | The maximum number of subreddits listed for the tag's text. This option is disabled if group subs is set to True | Any positive integer
 | pre text | Text that comes before the activity tag. If group subs is set to True, then there is no abbreviation added to the tag | Any text or leave empty for none |
 | post text | Text that comes after the activity tag. If group subs is set to True, then their is no abbreviation added to the tag | Any text or leave empty for none |
-| permissions | Permission granted if the user meets the criteria | CUSTOM FLAIR, CUSTOM CSS, or leave blank for none |
+| permissions | Permission granted if the user meets the criteria | CUSTOM FLAIR, CUSTOM CSS, CUSTOM TEXT, or leave blank for none |
 
 
 ### Secondary Activity Tag Criteria
