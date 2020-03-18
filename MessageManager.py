@@ -132,7 +132,7 @@ def process_pm(message, sub_list, flair_queue, perm_queue, r):
 # Check if the user is a mod in the target_sub
 def check_if_mod(author_name, target_sub, message):
     logging.info("PM Info: Checking if " + author_name + " is a mod in " + target_sub.name)
-    if author_name not in [str(mod).lower() for mod in target_sub.mods]:
+    if author_name.lower() not in [str(mod).lower() for mod in target_sub.mods]:
         return False
     else:
         return True
@@ -199,7 +199,7 @@ def flair_pm(message, target_sub):
     # Return if the user doesn't have proper permissions
     flair_perm = target_sub.db.fetch_sub_info(username, "flair perm") == 1
     if not flair_perm:
-        message.reply("You have not met the requirements for custom flair. You will be notified via a PM"
+        message.reply("You have not met the requirements for custom flair. You will be notified via a PM "
                       "from /u/InstaMod once your account is eligible." + message_footer)
         message.mark_read()
         logging.info("PM Privileges Error: User " + username + " tried to update flair "

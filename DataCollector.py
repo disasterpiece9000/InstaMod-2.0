@@ -5,7 +5,7 @@ import logging
 from psaw import PushshiftAPI
 
 
-def load_data(user_in_accnt_info, user_in_sub_info, update_flair, author, sub, insert_sub_activity, r):
+def load_data(user_in_accnt_info, user_in_sub_info, update_flair, author, sub, r):
     # PushShift Instance
     ps = PushshiftAPI(r)
     
