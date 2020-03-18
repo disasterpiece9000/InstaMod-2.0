@@ -185,7 +185,7 @@ def make_activity_flair(username, sub):
 def process_flair_data(setting, flair_data):
     # If no subreddits meet criteria then no flair text or permissions are added
     if len(flair_data) == 0:
-        return [None, False, False]
+        return [None, False, False, False]
 
     sort = setting["sort"]
     sub_cap = setting.getint("sub cap")

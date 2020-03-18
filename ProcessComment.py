@@ -41,11 +41,12 @@ def fetch_queue(comment_queue, flair_queue, perm_queue, sub_list):
             logging.info("Target sub found: " + comment_sub)
             
             # Check if the user data should be updated
-            check_data = check_user(user, target_sub)
-            update_flair = check_data[0]  # Does user's flair need to be updated
-            scrape_data = check_data[1]  # Does user's data need to be updated
+            check_data = check_user(user, target_sub, sub_list)
+            update_flair = check_data[0]        # Does user's flair need to be updated
+            scrape_data = check_data[1]         # Does user's data need to be updated
             user_in_accnt_info = check_data[2]  # Does the user's data need to be updated or inserted
-            user_in_sub_info = check_data[3]
+            user_in_sub_info = check_data[3]    # Does the user have data for the target sub
+
             logging.info("Check User: " + str(user) +
                          "\n\tUpdate flair: " + str(update_flair) +
                          "\n\tScrape data: " + str(scrape_data) +
@@ -55,7 +56,8 @@ def fetch_queue(comment_queue, flair_queue, perm_queue, sub_list):
             if scrape_data:
                 logging.info("Collecting data...")
                 try:
-                    DataCollector.load_data(user_in_accnt_info, user_in_sub_info, update_flair, user, target_sub, r)
+                    DataCollector.load_data(user_in_accnt_info, user_in_sub_info, update_flair,
+                                            user, target_sub, sub_list, r)
                 except (prawcore.NotFound, prawcore.RequestException, prawcore.ServerError) as e:
                     logging.warning("\nError in DataCollector: \n" + str(e) + "\n")
                     continue
@@ -82,7 +84,7 @@ def fetch_queue(comment_queue, flair_queue, perm_queue, sub_list):
 
 
 # Check if user should be skipped and if their data needs to be updated or inserted
-def check_user(user, target_sub):
+def check_user(user, target_sub, sub_list):
     # Turn comma delimited string into a list of whitelisted usernames
     whitelist = target_sub.flair_config["user whitelist"].lower().replace(" ", "").split(",")
     username = str(user).lower()
@@ -137,4 +139,4 @@ def check_user(user, target_sub):
         update_flair = True
         scrape_data = True
     
-    return [update_flair, scrape_data, user_in_accnt_info, user_in_sub_info]
+    return [update_flair, scrape_data, user_in_accnt_info, user_in_sub_info, exists_in_sub, not_exists_in_sub]

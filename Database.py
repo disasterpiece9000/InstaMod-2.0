@@ -230,6 +230,23 @@ class Database:
         cur.execute(update_str, (post_karma, comment_karma, last_scraped, username))
         cur.close()
 
+    # Drop all user data
+    def total_drop_user(self, username):
+        cur = self.conn.cursor()
+
+        # Get list of all tables
+        select_str = ("SELECT name FROM sqlite_master "
+                      "WHERE type='table';")
+
+        cur.execute(select_str)
+        tables = cur.fetchall()
+
+        # Delete user data in each table
+        delete_str = "DELETE FROM ? WHERE username = ?"
+        for table_name in tables:
+            cur.execute(delete_str, (table_name, username))
+
+
     # Generic getter method for Account Info table
     def fetch_sub_info(self, username, key):
         select_key = self.find_key(key, self.TABLE_SUB_INFO)
