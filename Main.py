@@ -163,7 +163,7 @@ def notify_permission_change():
                             "flair, please click on [this pre-formatted link.](https://www.reddit.com/message/" \
                             "compose?to=InstaMod&subject=!" + str(target_sub.sub) + "%20!flair" \
                             "&message=Flair%20Text:%0AFlair%20CSS:)" \
-                            "\n\n**Note:** This link will not work on mobile and it can be used to change your flair" \
+                            "\n\n**Note:** This link will not work on mobile and can be used to change your flair" \
                             " as many times as you want.\n\n"
             
             # Concatenate message body with custom text from subreddit settings
@@ -172,13 +172,25 @@ def notify_permission_change():
         
         elif new_perm == "css perm":
             auto_perm_msg = "Your contributions to /r/" + str(target_sub.sub) + " have granted you access to custom " \
-                            "flair icons. Your flair will still be updated automatically. " \
-                            "In order to apply your desired flair icon, please click on [this pre-formatted link.](" \
-                            "https://www.reddit.com/message/compose?to=InstaMod&subject=!" + str(target_sub.sub) + "%20!css" \
-                            "&message=Flair%20CSS:)" \
-                            "\n\n**Note:** This link will not work on mobile and it can be used to change your flair" \
-                            " icon as many times as you want.\n\n"
+                            "flair styling options. Your flair text will still be updated automatically. " \
+                            "In order to apply your desired flair styling, please click on [this pre-formatted link.]("\
+                            "https://www.reddit.com/message/compose?to=InstaMod&subject=!" + str(target_sub.sub) + \
+                            "%20!css&message=Flair%20CSS:)" \
+                            "\n\n**Note:** This link will not work on mobile and can be used to change your flair" \
+                            " styling as many times as you want.\n\n"
             
+            body = auto_perm_msg + target_sub.pm_messages["custom css body"] + message_footer
+            subject = target_sub.pm_messages["custom css subj"]
+
+        elif new_perm == "text perm":
+            auto_perm_msg = "Your contributions to /r/" + str(target_sub.sub) + " have granted you access to custom " \
+                            "flair text. You will continue to receive automatic flair until you apply a custom flair. "\
+                            "In order to apply your desired flair text, please click on [this pre-formatted link.](" \
+                            "https://www.reddit.com/message/compose?to=InstaMod&subject=!" + str(target_sub.sub) + \
+                            "%20!text&message=Flair%20Text:)" \
+                            "\n\n**Note:** This link will not work on mobile and it can be used to change your flair" \
+                            " text as many times as you want.\n\n"
+
             body = auto_perm_msg + target_sub.pm_messages["custom css body"] + message_footer
             subject = target_sub.pm_messages["custom css subj"]
 

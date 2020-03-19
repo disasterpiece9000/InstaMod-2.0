@@ -3,12 +3,13 @@ from datetime import datetime
 import time
 import logging
 from psaw import PushshiftAPI
+from datetime import timedelta
 
 
 def load_data(user_in_accnt_info, user_in_sub_info, update_flair, author, target_sub, sub_list, r):
     # PushShift Instance
     ps = PushshiftAPI(r)
-    
+
     # General info
     username = str(author).lower()
     total_post_karma = author.link_karma
@@ -16,17 +17,20 @@ def load_data(user_in_accnt_info, user_in_sub_info, update_flair, author, target
     flair_txt = next(target_sub.sub.flair(username))["flair_text"]
     last_scraped = int(time.time())
 
+    # Skip comments and posts that are not at least 1 week old
+    before_time = int((datetime.today() - timedelta(days=7)).timestamp())
+
     # Temp values for postponed ratelimit feature
     ratelimit_count = 0
     ratelimit_start = int(time.time())
-    
+
     # TODO: Figure out why/how this happens and catch it earlier on
     try:
         created = author.created_utc
     except AttributeError:
         logging.warning("The user " + username + " could not have their account info gathered")
         return
-    
+
     # Get list of subreddits that the user does/doesn't exist in
     exists_in_sub = []
     not_exists_in_sub = []
@@ -68,7 +72,7 @@ def load_data(user_in_accnt_info, user_in_sub_info, update_flair, author, target
         # Flair is not expired yet - keep old "last updated" value
         else:
             last_updated = target_sub.db.fetch_sub_info(username, "last updated")
-        
+
         target_sub.db.update_row_sub_info(username, ratelimit_start, ratelimit_count, flair_txt, last_updated)
     # Insert user data in to target sub info
     else:
@@ -79,7 +83,8 @@ def load_data(user_in_accnt_info, user_in_sub_info, update_flair, author, target
 
     comment_results = ps.search_comments(author=author,
                                          after=after_time,
-                                         filter=["id", "score", "subreddit", "body", "is_submitter"],)
+                                         before=before_time,
+                                         filter=["id", "score", "subreddit", "body", "is_submitter"], )
 
     # Account Activity Table
     sub_comment_karma = Counter()
@@ -94,9 +99,9 @@ def load_data(user_in_accnt_info, user_in_sub_info, update_flair, author, target
     for sub in sub_list:
         all_neg_qc[sub.name] = Counter()
         all_pos_qc[sub.name] = Counter()
-    
+
     for ps_comment in comment_results:
-            
+
         score = ps_comment.score
         subreddit = str(ps_comment.subreddit).lower()
         body = ps_comment.body
@@ -107,7 +112,7 @@ def load_data(user_in_accnt_info, user_in_sub_info, update_flair, author, target
             sub_pos_comments[subreddit] += 1
         else:
             sub_neg_comments[subreddit] += 1
-        
+
         # Quality Comments
 
         # Calculate each subreddit's unique QC value
@@ -164,28 +169,31 @@ def load_data(user_in_accnt_info, user_in_sub_info, update_flair, author, target
     # Posts
     post_results = ps.search_submissions(author=author,
                                          after=after_time,
-                                         filter=["id", "score", "subreddit"],)
+                                         before=before_time,
+                                         filter=["id", "score", "subreddit"], )
     sub_post_karma = Counter()
     sub_pos_posts = Counter()
     sub_neg_posts = Counter()
-    
+
     for ps_post in post_results:
         score = ps_post.score
         subreddit = str(ps_post.subreddit).lower()
-        
+
         sub_post_karma[subreddit] += score
         if score > 0:
             sub_pos_posts[subreddit] += 1
         else:
             sub_neg_posts[subreddit] += 1
 
-    # TODO: Rework table update methods to have seperate update/insert for sub activity
-    if user_in_accnt_info:
-        sub.db.update_sub_activity(username, sub_comment_karma, sub_pos_comments, sub_neg_comments,
-                                   sub_pos_qc, sub_neg_qc, sub_post_karma, sub_pos_posts, sub_neg_posts)
+    # Insert data if all subs aren't in sync
+    if len(not_exists_in_sub) > 0:
+        target_sub.db.insert_sub_activity(username, all_pos_qc, all_neg_qc)
+        target_sub.db.insert_accnt_activity(username, sub_comment_karma, sub_pos_comments, sub_neg_comments,
+                                            sub_post_karma, sub_pos_posts, sub_neg_posts)
     else:
-        sub.db.insert_sub_activity(username, sub_comment_karma, sub_pos_comments, sub_neg_comments,
-                                   sub_pos_qc, sub_neg_qc, sub_post_karma, sub_pos_posts, sub_neg_posts)
+        target_sub.db.update_sub_activity(username, all_pos_qc, all_neg_qc)
+        target_sub.db.update_accnt_activity(username, sub_comment_karma, sub_pos_comments, sub_neg_comments,
+                                            sub_post_karma, sub_pos_posts, sub_neg_posts)
 
 
 def count_words(body):

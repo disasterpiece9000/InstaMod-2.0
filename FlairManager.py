@@ -68,7 +68,11 @@ def update_flair(flair_queue, perm_queue, user, sub, prog_flair_enabled,
         logging.info("User granted flair perm")
         sub.db.update_key_sub_info(username, "flair perm", int(flair_perm))
         perm_queue.put([username, "flair perm", sub])
-    if css_perm and not old_css_perm:
+    elif text_perm and not old_text_perm:
+        logging.info("User granted text perm")
+        sub.db.update_key_sub_info(username, "text perm", int(flair_perm))
+        perm_queue.put([username, "text perm", sub])
+    elif css_perm and not old_css_perm:
         logging.info("User granted css permissions")
         sub.db.update_key_sub_info(username, "flair perm", int(css_perm))
         perm_queue.put([username, "css perm", sub])
