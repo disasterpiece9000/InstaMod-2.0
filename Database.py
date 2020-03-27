@@ -1,9 +1,7 @@
-import sqlite3
 import logging
+import sqlite3
 from collections import Counter
 
-# TODO: Add columns for custom css used and custom text used
-# TODO: Make sure table creation statements are up to date with new schema
 
 class Database:
     # Subreddit Info Table
@@ -17,6 +15,8 @@ class Database:
     KEY1_CSS_PERM = "css_perm"
     KEY1_TEXT_PERM = "text_perm"
     KEY1_CUSTOM_FLAIR_USED = "custom_flair_used"
+    KEY1_CUSTOM_TEXT_USED = "custom_text_used"
+    KEY1_CUSTOM_CSS_USED = "custom_css_used"
     KEY1_NO_AUTO_FLAIR = "no_auto_flair"
 
     # Subreddit Activity Table
@@ -73,7 +73,8 @@ class Database:
                     self.KEY1_RATELIMIT_COUNT + " INTEGER, " + self.KEY1_FLAIR_TEXT + " TEXT, " +
                     self.KEY1_LAST_UPDATED + " INTEGER, " + self.KEY1_FLAIR_PERM + " INTEGER, " +
                     self.KEY1_CSS_PERM + " INTEGER, " + self.KEY1_TEXT_PERM + "INTEGER, " +
-                    self.KEY1_CUSTOM_FLAIR_USED + " INTEGER, " + self.KEY1_NO_AUTO_FLAIR + " INTEGER)")
+                    self.KEY1_CUSTOM_FLAIR_USED + " INTEGER, " + self.KEY1_CUSTOM_TEXT_USED + " INTEGER, " +
+                    self.KEY1_CUSTOM_CSS_USED + " INTEGER, " + self.KEY1_NO_AUTO_FLAIR + " INTEGER)")
 
         self.TABLE_SUB_ACTIVITY = sub_name + "_activity"
         cur.execute("CREATE TABLE IF NOT EXISTS " + self.TABLE_SUB_ACTIVITY + " (" +
@@ -141,21 +142,22 @@ class Database:
 
     def insert_sub_activity(self, username, all_pos_qc, all_neg_qc):
         cur = self.conn.cursor()
-        insert_str = ("INSERT INTO ? ("
-                      + self.KEY2_USERNAME + ", " + self.KEY2_SUB_NAME + ", "
-                      + self.KEY2_POSITIVE_QC + ", " + self.KEY2_NEGATIVE_QC + ") "
-                      + "VALUES(?,?,?,?,?)")
+        insert_str_end = (" ("
+                          + self.KEY2_USERNAME + ", " + self.KEY2_SUB_NAME + ", "
+                          + self.KEY2_POSITIVE_QC + ", " + self.KEY2_NEGATIVE_QC + ") "
+                          + "VALUES(?,?,?,?)")
 
         # Insert QC for all subreddits in database
         for target_sub in all_pos_qc:
             target_sub_pos = all_pos_qc[target_sub]
             target_sub_neg = all_neg_qc[target_sub]
             target_sub_table = target_sub + "_activity"
+            insert_str = "INSERT INTO " + target_sub_table + insert_str_end
 
             # Loop through all subreddits with new QC values
             all_subs = target_sub_pos.keys() | target_sub_neg.keys()
             # Put data from dictionaries into a list of tuples
-            insert_data_sub = [(target_sub_table, username, sub, target_sub_pos[sub], target_sub_neg[sub])
+            insert_data_sub = [(username, sub, target_sub_pos[sub], target_sub_neg[sub])
                                for sub in all_subs]
             cur.executemany(insert_str, insert_data_sub)
 
@@ -269,7 +271,7 @@ class Database:
         cur.close()
 
     # Drop all user data
-    def total_drop_user(self, username):
+    def partial_drop_user(self, username):
         cur = self.conn.cursor()
 
         # Get list of all tables
@@ -279,10 +281,13 @@ class Database:
         cur.execute(select_str)
         tables = cur.fetchall()
 
-        # Delete user data in each table
-        delete_str = "DELETE FROM ? WHERE username = ?"
+        # Delete user data in each activity table
+        delete_str_start = "DELETE FROM "
+        delete_str_end = " WHERE username = ?"
         for table_name in tables:
-            cur.execute(delete_str, (table_name, username))
+            if not table_name[0].endswith("_info") or table_name[0] == "accnt_info":
+                delete_str = delete_str_start + table_name[0] + delete_str_end
+                cur.execute(delete_str, (username,))
 
     # Generic getter method for Account Info table
     def fetch_sub_info(self, username, key):
@@ -337,16 +342,15 @@ class Database:
         if key == "net qc":
             user_select_str = "SELECT top_rank FROM (" + \
                               "SELECT ui." + self.KEY2_USERNAME + ", RANK() OVER(ORDER BY summed DESC) AS 'top_rank' " \
-                                                                  "FROM (" \
-                                                                  "SELECT SUM(" + self.KEY2_POSITIVE_QC + ") - SUM(" + self.KEY2_NEGATIVE_QC + ") " \
-                                                                                                                                               "AS 'summed', " + self.KEY2_USERNAME + " " \
-                                                                                                                                                                                      "FROM " + self.TABLE_SUB_ACTIVITY + " " \
-                                                                                                                                                                                                                          "WHERE " + self.KEY2_SUB_NAME + " IN ('" + "', '".join(
-                sub_list) + "')" \
-                            "GROUP BY " + self.KEY2_USERNAME + ") ui " \
-                                                               "JOIN " + self.TABLE_SUB_INFO + " sub " \
-                                                                                               "ON sub." + self.KEY1_USERNAME + " = ui." + self.KEY2_USERNAME + ") uo " \
-                                                                                                                                                                "WHERE " + self.KEY2_USERNAME + " = ?"
+                              "FROM (" \
+                                "SELECT SUM(" + self.KEY2_POSITIVE_QC + ") - SUM(" + self.KEY2_NEGATIVE_QC + ") " \
+                                "AS 'summed', " + self.KEY2_USERNAME + " " \
+                                "FROM " + self.TABLE_SUB_ACTIVITY + " " \
+                                "WHERE " + self.KEY2_SUB_NAME + " IN ('" + "', '".join(sub_list) + "')" \
+                                "GROUP BY " + self.KEY2_USERNAME + ") ui " \
+                              "JOIN " + self.TABLE_SUB_INFO + " sub " \
+                              "ON sub." + self.KEY1_USERNAME + " = ui." + self.KEY2_USERNAME + ") uo " \
+                              "WHERE " + self.KEY2_USERNAME + " = ?"
         else:
             if "qc" in key:
                 select_key1 = self.KEY2_USERNAME
@@ -370,15 +374,14 @@ class Database:
 
             user_select_str = "SELECT top_rank FROM (" + \
                               "SELECT ui." + select_key1 + ", RANK() OVER(ORDER BY summed DESC) AS 'top_rank' " \
-                                                           "FROM (" \
-                                                           "SELECT SUM(" + select_key2 + ") AS 'summed', " + select_key3 + " " \
-                                                                                                                           "FROM " + from_table + " " \
-                                                                                                                                                  "WHERE " + where_key1 + " IN ('" + "', '".join(
-                sub_list) + "')" \
-                            "GROUP BY " + group_key + ") ui " \
-                                                      "JOIN " + self.TABLE_SUB_INFO + " sub " \
-                                                                                      "ON sub." + self.KEY1_USERNAME + " = ui." + on_key + ") uo " \
-                                                                                                                                           "WHERE " + where_key2 + " = ?"
+                              "FROM (" \
+                                "SELECT SUM(" + select_key2 + ") AS 'summed', " + select_key3 + " " \
+                                "FROM " + from_table + " " \
+                                "WHERE " + where_key1 + " IN ('" + "', '".join(sub_list) + "')" \
+                                "GROUP BY " + group_key + ") ui " \
+                              "JOIN " + self.TABLE_SUB_INFO + " sub " \
+                              "ON sub." + self.KEY1_USERNAME + " = ui." + on_key + ") uo " \
+                              "WHERE " + where_key2 + " = ?"
 
         cur.execute(user_select_str, (username,))
         try:
@@ -437,6 +440,10 @@ class Database:
                 return self.KEY1_TEXT_PERM
             if key == "custom flair used":
                 return self.KEY1_CUSTOM_FLAIR_USED
+            if key == "custom text used":
+                return self.KEY1_CUSTOM_TEXT_USED
+            if key == "custom css used":
+                return self.KEY1_CUSTOM_CSS_USED
             if key == "no auto flair":
                 return self.KEY1_NO_AUTO_FLAIR
 

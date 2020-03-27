@@ -1,14 +1,14 @@
 import logging
+
 import prawcore
 from praw import exceptions
+
 import DataCollector
 import FlairManager
 import ProcessComment
 
 message_footer = ("\n\n-----\n\nThis is an automated message. "
                   "Please contact /u/shimmyjimmy97 with any questions, comments, or issues that you have.")
-
-# TODO: Add section in config for CUSTOM TEXT PM message customization
 
 # Main method for responding to PM commands
 def process_pm(message, sub_list, flair_queue, perm_queue, r):
@@ -108,7 +108,7 @@ def process_pm(message, sub_list, flair_queue, perm_queue, r):
             message.mark_read()
             return
 
-        update_user(target_user, target_sub, r, flair_queue, perm_queue)
+        update_user(target_user, target_sub, r, flair_queue, perm_queue, sub_list)
         message.reply("The user " + str(target_user) + " has had their data and flair updated" + message_footer)
         message.mark_read()
 
@@ -159,7 +159,7 @@ def get_user(username, r):
 
 
 # Handle !updatethem and !updateme
-def update_user(target_user, target_sub, r, flair_queue, perm_queue):
+def update_user(target_user, target_sub, r, flair_queue, perm_queue, sub_list):
     # Check existing data
     check_data = ProcessComment.check_user(target_user, target_sub)
     update_flair = True
@@ -167,7 +167,7 @@ def update_user(target_user, target_sub, r, flair_queue, perm_queue):
     user_in_sub_info = check_data[3]
 
     # Collect new data
-    DataCollector.load_data(user_in_accnt_info, user_in_sub_info, update_flair, target_user, target_sub, r)
+    DataCollector.load_data(user_in_accnt_info, user_in_sub_info, update_flair, target_user, target_sub, sub_list, r)
 
     # Update flair with new data
     prog_flair_enabled = target_sub.main_config.getboolean("progression tier")

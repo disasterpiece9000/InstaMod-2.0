@@ -1,5 +1,5 @@
-from collections import defaultdict
 import logging
+from collections import defaultdict
 
 
 # Activity flair main method
@@ -143,7 +143,7 @@ def make_activity_flair(username, sub):
 
                 # Add data to lists unless they are None
                 processed_data = process_flair_data(main_setting, flair_data)
-                if len(processed_data) != 3:
+                if len(processed_data) != 4:
                     logging.critical("process_flair_data didn't return all data")
                 if processed_data[0]:
                     full_flair_text.append(processed_data[0])

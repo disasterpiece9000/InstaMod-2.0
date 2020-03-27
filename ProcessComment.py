@@ -1,11 +1,12 @@
+import logging
+import time
 import traceback
+
+import praw
+import prawcore
 
 import DataCollector
 import FlairManager
-import prawcore
-import time
-import logging
-import praw
 
 # PRAW instance for comment processing thread
 r = praw.Reddit("InstaMod")
@@ -41,7 +42,7 @@ def fetch_queue(comment_queue, flair_queue, perm_queue, sub_list):
             logging.info("Target sub found: " + comment_sub)
             
             # Check if the user data should be updated
-            check_data = check_user(user, target_sub, sub_list)
+            check_data = check_user(user, target_sub)
             update_flair = check_data[0]        # Does user's flair need to be updated
             scrape_data = check_data[1]         # Does user's data need to be updated
             user_in_accnt_info = check_data[2]  # Does the user's data need to be updated or inserted
@@ -84,7 +85,7 @@ def fetch_queue(comment_queue, flair_queue, perm_queue, sub_list):
 
 
 # Check if user should be skipped and if their data needs to be updated or inserted
-def check_user(user, target_sub, sub_list):
+def check_user(user, target_sub):
     # Turn comma delimited string into a list of whitelisted usernames
     whitelist = target_sub.flair_config["user whitelist"].lower().replace(" ", "").split(",")
     username = str(user).lower()
@@ -139,4 +140,4 @@ def check_user(user, target_sub, sub_list):
         update_flair = True
         scrape_data = True
     
-    return [update_flair, scrape_data, user_in_accnt_info, user_in_sub_info, exists_in_sub, not_exists_in_sub]
+    return [update_flair, scrape_data, user_in_accnt_info, user_in_sub_info]

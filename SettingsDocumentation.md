@@ -103,7 +103,7 @@ The settings for InstaMod uses the .ini format and is read from a wiki page on t
 | negative score | Comments with a score <= this meet the score criteria | Any integer |
 | negative word count | Comments with a word count <= this meet the word count criteria | Any integer > 0 or leave blank to disable |
 | negative criteria type | Combination of criteria required to earn 1 negative QC | And (all of them) or Or (at least one of them) |
-| exclude when op | Prevent user from gaining or losing QC from comments where they are also OP | True or False <br> **This overrides positive/negative criteria type** |
+| exclude when op | Prevent user from gaining or losing QC from comments where they are also OP | True or False <br> **This overrides all other QC requirements** |
 
 ## Progression Tiers
 
@@ -189,7 +189,8 @@ The settings for InstaMod uses the .ini format and is read from a wiki page on t
 | custom flair body | Body of the PM sent when InstaMod notifies a user that they have been granted the custom flair permission | Any text that fits in a body |
 | custom css subj | Subject of the PM sent when InstaMod notifies a user that they have been granted the custom css permission | Any text that fits in a subject line |
 | custom css body | Body of the PM sent when InstaMod notifies a user that they have been granted the custom css permission | Any text that fits in a body |
-
+| custom text subj | Subject of the PM sent when InstaMod notifies a user that they have been granted the custom text permission | Any text that fits in a subject line |
+| custom text body | Body of the PM sent when InstaMod notifies a user that they have been granted the custom text permission | Any text that fits in a body |
 
 ## Subreddit Groups
 

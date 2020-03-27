@@ -1,18 +1,19 @@
-import threading
 import logging
-import shutil
 import os
-import time
+import shutil
 import sqlite3
+import threading
+import time
 from os import path
-import praw
-from praw.models import Message
 from queue import Queue
-import prawcore
 
-from Subreddit import Subreddit
-import ProcessComment
+import praw
+import prawcore
+from praw.models import Message
+
 import MessageManager
+import ProcessComment
+from Subreddit import Subreddit
 
 # PRAW Instance
 r = praw.Reddit("InstaMod")
@@ -122,10 +123,18 @@ def flair_users():
         flair_txt = flair_data[1] if flair_data[1] else ""
         flair_css = flair_data[2] if flair_data[2] else ""
         target_sub = flair_data[3]
-        
-        # TODO: Add toggle to overwrite flair or not
-        if flair_txt != "":
-            target_sub.sub.flair.set(username, flair_txt, flair_css)
+
+        # Check if custom text/css perms were used
+        if target_sub.db.fetch_sub_info(username, "custom text used") == 1:
+            flair_txt = target_sub.db.fetch_sub_info(username, "flair text")
+        if target_sub.db.fetch_sub_info(username, "custom css used") == 1:
+            flair_css = next(target_sub.sub.flair(username))["flair_css_class"]
+
+        # TODO: Add toggle to overwrite existing flair
+        if flair_txt == "":
+            flair_txt = target_sub.db.fetch_sub_info(username, "flair text")
+
+        target_sub.sub.flair.set(username, flair_txt, flair_css)
         
         logging.info("Flair results"
                      + "\n\tUser: " + username
@@ -191,8 +200,8 @@ def notify_permission_change():
                             "\n\n**Note:** This link will not work on mobile and it can be used to change your flair" \
                             " text as many times as you want.\n\n"
 
-            body = auto_perm_msg + target_sub.pm_messages["custom css body"] + message_footer
-            subject = target_sub.pm_messages["custom css subj"]
+            body = auto_perm_msg + target_sub.pm_messages["custom text body"] + message_footer
+            subject = target_sub.pm_messages["custom text subj"]
 
         user = r.redditor(username)
         user.message(subject, body)

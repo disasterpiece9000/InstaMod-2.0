@@ -1,9 +1,10 @@
+import logging
+import time
 from collections import Counter
 from datetime import datetime
-import time
-import logging
-from psaw import PushshiftAPI
 from datetime import timedelta
+
+from psaw import PushshiftAPI
 
 
 def load_data(user_in_accnt_info, user_in_sub_info, update_flair, author, target_sub, sub_list, r):
@@ -46,11 +47,18 @@ def load_data(user_in_accnt_info, user_in_sub_info, update_flair, author, target
             # Get all available comments/posts (up to 1,000 each)
             after_time = int(datetime(2000, 1, 1).timestamp())
 
-            # Drop all current user info to prepare for re-insert
-            target_sub.db.total_drop_user(username)
+            # Drop all user activity info to prepare for re-insert
+            target_sub.db.partial_drop_user(username)
 
             # Re-insert accnt info
             target_sub.db.insert_accnt_info(username, created, total_post_karma, total_comment_karma, last_scraped)
+
+            # Re-insert sub info for subs that do not have user
+            user_in_sub_info = True
+            for sub in sub_list:
+                if not sub.db.exists_in_sub_info(username):
+                    info_flair_txt = next(sub.sub.flair(username))["flair_text"]
+                    sub.db.insert_sub_info(username, ratelimit_start, ratelimit_count, info_flair_txt, after_time)
 
         else:
             # Get comments/posts that occurred after the last scrape
