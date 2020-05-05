@@ -113,7 +113,7 @@ def process_pm(message, sub_list, flair_queue, perm_queue, r):
         message.mark_read()
 
     elif command == "!updateme":
-        update_user(message.author, target_sub, r, flair_queue, perm_queue)
+        update_user(message.author, target_sub, r, flair_queue, perm_queue, sub_list)
         message.reply("Your data and flair have been updated" + message_footer)
         message.mark_read()
 
