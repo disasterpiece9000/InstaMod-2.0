@@ -120,8 +120,8 @@ def flair_users():
         flair_queue.task_done()
         
         username = flair_data[0]
-        flair_txt = flair_data[1] if flair_data[1] else ""
-        flair_css = flair_data[2] if flair_data[2] else ""
+        flair_txt = flair_data[1]
+        flair_css = flair_data[2]
         target_sub = flair_data[3]
 
         # Check if custom text/css perms were used
@@ -129,10 +129,6 @@ def flair_users():
             flair_txt = target_sub.db.fetch_sub_info(username, "flair text")
         if target_sub.db.fetch_sub_info(username, "custom css used") == 1:
             flair_css = next(target_sub.sub.flair(username))["flair_css_class"]
-
-        # TODO: Add toggle to overwrite existing flair
-        if flair_txt == "":
-            flair_txt = target_sub.db.fetch_sub_info(username, "flair text")
 
         target_sub.sub.flair.set(username, flair_txt, flair_css)
         

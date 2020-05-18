@@ -1,8 +1,9 @@
 import logging
 import time
 from configparser import ConfigParser
-from Database import Database
 import prawcore
+
+from Database import Database
 
 
 class Subreddit:

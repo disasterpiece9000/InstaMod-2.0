@@ -1,5 +1,4 @@
 import logging
-
 import prawcore
 from praw import exceptions
 
