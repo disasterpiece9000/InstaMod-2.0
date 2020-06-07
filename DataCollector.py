@@ -1,4 +1,5 @@
 import logging
+import re
 import time
 from collections import Counter
 from datetime import datetime
@@ -125,54 +126,42 @@ def load_data(user_in_accnt_info, user_in_sub_info, update_flair, author, target
 
         # Calculate each subreddit's unique QC value
         for qc_sub in sub_list:
-            # Skip if author is OP
-            if qc_sub.qc_config.getboolean("exclude when op") and is_submitter:
-                continue
+            qc_config_count = 1
+            while True:
+                config_name = "QUALITY COMMENTS " + str(qc_config_count)
 
-            # Positive QC
-            # Positive QC: Score
-            if qc_sub.qc_config["positive score"] != "None":
-                pos_qc_score = score >= int(qc_sub.qc_config["positive score"])
-            else:
-                pos_qc_score = True
+                # Check if we've already passed the last tier
+                if config_name not in qc_sub.qc_config:
+                    break
 
-            # Positive QC: Word Count
-            if qc_sub.qc_config["positive word count"] != "":
-                pos_qc_words = count_words(body) >= int(qc_sub.qc_config["positive word count"])
-            else:
-                pos_qc_words = True
+                else:
+                    qc_config = qc_sub.qc_config[config_name]
 
-            # Positive QC: Result
-            # AND criteria
-            if qc_sub.qc_config["positive criteria type"] == "AND":
-                if pos_qc_words and pos_qc_score:
-                    all_pos_qc[qc_sub.name][subreddit] += 1
+                    if qc_config["score"] != "None":
+                        qc_score = qc_comparison(score, qc_config["score"])
+                    else:
+                        qc_score = True
 
-            # OR criteria
-            else:
-                if pos_qc_words or pos_qc_score:
-                    all_pos_qc[qc_sub.name][subreddit] += 1
+                    # Word Count
+                    if qc_sub.qc_config["word count"] != "":
+                        qc_words = qc_comparison(count_words(body), qc_config["word count"])
+                    else:
+                        qc_words = True
 
-            # Negative QC
-            # Negative QC: Score
-            if qc_sub.qc_config["negative score"] != "":
-                neg_qc_score = score <= int(qc_sub.qc_config["negative score"])
-            else:
-                neg_qc_score = True
+                    # Determine if criteria is met
+                    if (((qc_config["criteria type"] == "AND" and qc_words and qc_score)
+                            or
+                            (qc_config["criteria type"] == "OR" and (qc_words or qc_score)))
+                            and
+                            (qc_config.getboolean("exclude when op") and not is_submitter)):
 
-            # Negative QC: Word Count
-            if qc_sub.qc_config["negative word count"] != "":
-                neg_qc_words = count_words(body) >= int(qc_sub.qc_config["negative word count"])
-            else:
-                neg_qc_words = True
+                        if int(qc_config["point value"]) < 0:
+                            all_pos_qc[qc_sub.name][subreddit] += int(qc_config["point value"])
+                        else:
+                            all_neg_qc[qc_sub.name][subreddit] += int(qc_config["point value"])
+                        break
 
-            # Negative QC: Result
-            if qc_sub.qc_config["negative criteria type"] == "AND":
-                if neg_qc_words and neg_qc_score:
-                    all_neg_qc[qc_sub.name][subreddit] += 1
-            else:
-                if neg_qc_words or neg_qc_score:
-                    all_neg_qc[qc_sub.name][subreddit] += 1
+                qc_config_count += 1
 
     # Posts
     post_results = ps.search_submissions(author=author,
@@ -207,3 +196,27 @@ def load_data(user_in_accnt_info, user_in_sub_info, update_flair, author, target
 def count_words(body):
     body_list = body.split()
     return len(body_list)
+
+
+# Make comparison for QC requirements
+def qc_comparison(user_value, requirement):
+    # Seperate out the equality operator and the requirement's value
+    num_search = re.search(r"\d", requirement)
+    if num_search is None:
+        return False
+
+    first_num_index = num_search.start()
+    if requirement[first_num_index - 1] == '-':
+        first_num_index = first_num_index - 1
+
+    requirement_value = int(requirement[first_num_index:])
+    requirement_comparison = requirement[:first_num_index]
+
+    if requirement_comparison == "<":
+        return user_value < requirement_value
+    elif requirement_comparison == ">":
+        return user_value > requirement_value
+    elif requirement_comparison == "<=":
+        return user_value <= requirement_value
+    elif requirement_comparison == ">=":
+        return user_value >= requirement_value

@@ -1,6 +1,7 @@
 import logging
 import time
-from configparser import ConfigParser
+from configparser import RawConfigParser
+
 import prawcore
 
 from Database import Database
@@ -28,7 +29,7 @@ class Subreddit:
     
     # Check wiki page for settings
     def read_config(self):
-        config = ConfigParser(allow_no_value=True, interpolation=None)
+        config = RawConfigParser(allow_no_value=True, interpolation=None)
         
         # Catch connection errors when reading wiki page
         read_wiki = False
@@ -46,6 +47,7 @@ class Subreddit:
         self.qc_config = config["QUALITY COMMENTS"]
         self.pm_messages = config["PM Messages"]
         # Process sections with secondary criteria
+        self.qc_config = self.load_nested_config("QUALITY COMMENTS", config)
         self.progression_tiers = self.load_nested_config("PROGRESSION TIER", config)
         self.sub_activity = self.load_nested_config("ACTIVITY TAG", config)
         self.sub_groups = self.load_nested_config("SUB GROUP", config)

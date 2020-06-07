@@ -306,6 +306,7 @@ class Database:
     def fetch_sub_activity(self, username, sub_list, key):
         key = key.lower()
         cur = self.conn.cursor()
+        sub_list_str = ", ".join(sub_list)
 
         if "qc" in key:
             select_key = self.find_key(key, self.TABLE_SUB_ACTIVITY)
@@ -319,17 +320,16 @@ class Database:
             where_key2 = self.KEY3_SUB_NAME
 
         # Sum only the specified rows (subreddits)
-        select_str = ("SELECT " + select_key + " FROM " + from_table
+        select_str = ("SELECT SUM(" + select_key + ") FROM " + from_table
                       + " WHERE " + where_key1 + " = ? AND "
-                      + where_key2 + " = ?")
+                      + where_key2 + " IN (" + sub_list_str + ")")
 
-        value = 0
-        for name in sub_list:
-            cur.execute(select_str, (username, name))
-            data = cur.fetchone()
-            if data is not None:
-                value += data[0]
-        return value
+        cur.execute(select_str, (username,))
+        data = cur.fetchone()
+        if data is not None:
+            return data[0]
+        else:
+            return 0
 
     def fetch_sub_activity_perc(self, username, sub_list, key):
         cur = self.conn.cursor()
