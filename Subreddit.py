@@ -44,7 +44,6 @@ class Subreddit:
             
         self.main_config = config["MAIN CONFIG"]
         self.flair_config = config["FLAIR"]
-        self.qc_config = config["QUALITY COMMENTS"]
         self.pm_messages = config["PM Messages"]
         # Process sections with secondary criteria
         self.qc_config = self.load_nested_config("QUALITY COMMENTS", config)

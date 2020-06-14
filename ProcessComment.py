@@ -1,6 +1,7 @@
 import logging
 import time
 import traceback
+
 import praw
 import prawcore
 
@@ -27,7 +28,7 @@ def fetch_queue(comment_queue, flair_queue, perm_queue, sub_list):
                 
             try:
                 user.link_karma
-            except AttributeError:
+            except (AttributeError, prawcore.NotFound):
                 logging.warning("User: " + user.username + "is None\n"
                                 "Comment ID: " + comment.id)
                 continue

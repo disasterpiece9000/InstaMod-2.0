@@ -137,29 +137,30 @@ def load_data(user_in_accnt_info, user_in_sub_info, update_flair, author, target
                 else:
                     qc_config = qc_sub.qc_config[config_name]
 
-                    if qc_config["score"] != "None":
+                    if qc_config["score"] not in ("None", ''):
                         qc_score = qc_comparison(score, qc_config["score"])
                     else:
                         qc_score = True
 
                     # Word Count
-                    if qc_sub.qc_config["word count"] != "":
+                    if qc_config["word count"] not in ("None", ''):
                         qc_words = qc_comparison(count_words(body), qc_config["word count"])
                     else:
                         qc_words = True
 
                     # Determine if criteria is met
-                    if (((qc_config["criteria type"] == "AND" and qc_words and qc_score)
+                    if ((qc_config["criteria type"] == "AND" and qc_words and qc_score)
                             or
-                            (qc_config["criteria type"] == "OR" and (qc_words or qc_score)))
-                            and
-                            (qc_config.getboolean("exclude when op") and not is_submitter)):
+                            (qc_config["criteria type"] == "OR" and (qc_words or qc_score))):
+                        if ((qc_config.getboolean("exclude when op") and not is_submitter)
+                                or
+                                qc_config.getboolean("exclude when op") is False):
 
-                        if int(qc_config["point value"]) < 0:
-                            all_pos_qc[qc_sub.name][subreddit] += int(qc_config["point value"])
-                        else:
-                            all_neg_qc[qc_sub.name][subreddit] += int(qc_config["point value"])
-                        break
+                            if int(qc_config["point value"]) > 0:
+                                all_pos_qc[qc_sub.name][subreddit] += int(qc_config["point value"])
+                            else:
+                                all_neg_qc[qc_sub.name][subreddit] += int(qc_config["point value"])
+                            break
 
                 qc_config_count += 1
 
