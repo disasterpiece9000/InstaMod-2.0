@@ -15,22 +15,17 @@ import MessageManager
 import ProcessComment
 from Subreddit import Subreddit
 
-# PRAW Instance
-r = praw.Reddit("InstaMod")
-# List of subreddits
-sub_list = []
-# Queue for users to be analyzed
-comment_queue = Queue()
-# Queue for users to be flaired
-flair_queue = Queue()
-# Queue for notifying users of new permissions
-perm_queue = Queue()
-# Lock for shared resources
-lock = threading.Lock()
-# Logging
-logging.basicConfig(filename="info.log", filemode="w", level=logging.INFO)
-# Store times for re-checking sub config
-last_config_check = int(time.time())
+r = praw.Reddit("InstaMod")             # PRAW Instance
+sub_list = []                           # List of subreddits
+comment_queue = Queue()                 # Queue for users to be analyzed
+flair_queue = Queue()                   # Queue for users to be flaired
+perm_queue = Queue()                    # Queue for notifying users of new permissions
+lock = threading.Lock()                 # Lock for shared resources
+last_config_check = int(time.time())    # Store times for re-checking sub config
+
+logging.basicConfig(filename="info.log",
+                    filemode="w",
+                    level=logging.INFO)
 
 
 # Check inbox
@@ -214,6 +209,23 @@ def notify_permission_change():
     logging.debug("Done updating permissions")
 
 
+def run_idle_tasks(last_check):
+    flair_users()               # Process flair_queue
+    notify_permission_change()  # Process perm_queue
+    read_pms()                  # Check for PM commands
+    check_backup()              # Create a backup of database file every day/week/month
+
+    # Re-read each subreddit's config file each hour
+    current_time = int(time.time())
+    if current_time - last_check < 3600:
+        for sub in sub_list:
+            try:
+                sub.read_config()
+            except sqlite3.OperationalError:
+                logging.warning("Unable to update subreddit's config, database is locked")
+        return current_time
+
+
 # Get multisub so that all subreddits can be searched simultaneously
 all_subs = get_multisub()
 # Check if backups have already been created of if they need to be updated
@@ -229,30 +241,17 @@ process_thread.start()
 while True:
     try:
         # Grab any comments made in subreddits using InstaMod
-        for comment in all_subs.stream.comments(pause_after=3, skip_existing=True):
+        for comment in all_subs.stream.comments(pause_after=0, skip_existing=True):
             # If no new comments are found after 3 checks do other stuff
             if comment is None:
                 logging.debug("No new comments found")
-                flair_users()
-                notify_permission_change()
-                read_pms()
-                
-                # Re-read each subreddit's config file each hour
-                current_time = int(time.time())
-                if current_time - last_config_check < 3600:
-                    for sub in sub_list:
-                        try:
-                            sub.read_config()
-                        except sqlite3.OperationalError:
-                            logging.warning("Unable to update subreddit's config, database is locked")
-                    last_config_check = current_time
-                    
-                    # Create a backup of database file every day/week/month
-                    check_backup()
-                
+                run_idle_tasks(last_config_check)
                 continue
+
             comment_queue.put(comment)
             logging.info("Comment added to queue from " + str(comment.author))
+            logging.info("Queue size: " + str(comment_queue.qsize()))
+
     except (prawcore.ServerError, prawcore.RequestException, prawcore.ResponseException):
         logging.warning("Server Error: Sleeping for 1 min")
         time.sleep(60)

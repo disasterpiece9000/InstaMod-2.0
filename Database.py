@@ -306,7 +306,7 @@ class Database:
     def fetch_sub_activity(self, username, sub_list, key):
         key = key.lower()
         cur = self.conn.cursor()
-        sub_list_str = ", ".join(sub_list)
+        sub_list_str = "'" + "', '".join(sub_list) + "'"
 
         if "qc" in key:
             select_key = self.find_key(key, self.TABLE_SUB_ACTIVITY)

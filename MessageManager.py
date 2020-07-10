@@ -1,4 +1,5 @@
 import logging
+
 import prawcore
 from praw import exceptions
 
@@ -8,6 +9,7 @@ import ProcessComment
 
 message_footer = ("\n\n-----\n\nThis is an automated message. "
                   "Please contact /u/shimmyjimmy97 with any questions, comments, or issues that you have.")
+
 
 # Main method for responding to PM commands
 def process_pm(message, sub_list, flair_queue, perm_queue, r):
@@ -108,12 +110,14 @@ def process_pm(message, sub_list, flair_queue, perm_queue, r):
             return
 
         update_user(target_user, target_sub, r, flair_queue, perm_queue, sub_list)
-        message.reply("The user " + str(target_user) + " has had their data and flair updated" + message_footer)
+        message.reply("The user " + str(target_user) + " has had their data and flair queued for update."
+                      + message_footer)
         message.mark_read()
 
     elif command == "!updateme":
         update_user(message.author, target_sub, r, flair_queue, perm_queue, sub_list)
-        message.reply("Your data and flair have been updated" + message_footer)
+        message.reply("Your data and flair have been queued for updating. "
+                      "This process may not be instantaneous so please be patient." + message_footer)
         message.mark_read()
 
     elif command == "!wipe":
@@ -365,9 +369,9 @@ def flair_pm(message, target_sub):
         return
 
     target_sub.db.update_key_sub_info(username, "custom flair used", 1)
-    message.reply("Your flair has been set!\n\n\n\n"
+    message.reply("Your flair has been set on " + target_sub.name + "!\n\n\n\n"
                   "Flair Text: " + flair_txt + "\n\n"
-                                               "Flair CSS:" + flair_css +
+                  "Flair CSS:" + flair_css +
                   message_footer)
     message.mark_read()
     logging.info("PM: User " + username + " had their flair updated successfully")
