@@ -159,7 +159,7 @@ def load_data(user_in_accnt_info, user_in_sub_info, update_flair, author, target
                             if int(qc_config["point value"]) > 0:
                                 all_pos_qc[qc_sub.name][subreddit] += int(qc_config["point value"])
                             else:
-                                all_neg_qc[qc_sub.name][subreddit] += int(qc_config["point value"])
+                                all_neg_qc[qc_sub.name][subreddit] += abs(int(qc_config["point value"]))
                             break
 
                 qc_config_count += 1

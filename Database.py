@@ -184,9 +184,8 @@ class Database:
 
     def update_sub_activity(self, username, all_pos_qc, all_neg_qc):
         cur = self.conn.cursor()
-        update_str = ("UPDATE ? SET "
-                      + self.KEY2_POSITIVE_QC + " = " + self.KEY2_POSITIVE_QC + "+ ?, "
-                      + self.KEY2_NEGATIVE_QC + " = " + self.KEY2_NEGATIVE_QC + "+ ? "
+        temp_update_str = (self.KEY2_POSITIVE_QC + " = " + self.KEY2_POSITIVE_QC + " + ?, "
+                      + self.KEY2_NEGATIVE_QC + " = " + self.KEY2_NEGATIVE_QC + " + ? "
                       + "WHERE " + self.KEY3_USERNAME + " = ? "
                       + "AND " + self.KEY3_SUB_NAME + " = ?")
 
@@ -195,6 +194,7 @@ class Database:
             target_sub_pos = all_pos_qc[target_sub]
             target_sub_neg = all_neg_qc[target_sub]
             target_sub_table = target_sub + "_activity"
+            update_str = "UPDATE " + target_sub_table + " SET " + temp_update_str
 
             # Union of all keys in both dictionaries
             all_subs = target_sub_pos.keys() | target_sub_neg.keys()
@@ -202,8 +202,7 @@ class Database:
             # Loop through all subreddits with new QC values
             for sub in all_subs:
                 # Attempt to update row
-                row_updated = cur.execute(update_str, (target_sub_table, target_sub_pos[sub],
-                                                       target_sub_neg[sub], username, sub)
+                row_updated = cur.execute(update_str, (target_sub_pos[sub], target_sub_neg[sub], username, sub)
                                           ).rowcount == 1
 
                 # Insert row if update failed
@@ -306,7 +305,6 @@ class Database:
     def fetch_sub_activity(self, username, sub_list, key):
         key = key.lower()
         cur = self.conn.cursor()
-        sub_list_str = "'" + "', '".join(sub_list) + "'"
 
         if "qc" in key:
             select_key = self.find_key(key, self.TABLE_SUB_ACTIVITY)
@@ -322,11 +320,11 @@ class Database:
         # Sum only the specified rows (subreddits)
         select_str = ("SELECT SUM(" + select_key + ") FROM " + from_table
                       + " WHERE " + where_key1 + " = ? AND "
-                      + where_key2 + " IN (" + sub_list_str + ")")
+                      + where_key2 + " IN ('" + "', '".join(sub_list) + "')")
 
         cur.execute(select_str, (username,))
         data = cur.fetchone()
-        if data is not None:
+        if data[0] is not None:
             return data[0]
         else:
             return 0
