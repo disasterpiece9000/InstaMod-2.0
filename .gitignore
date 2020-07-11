@@ -1,0 +1,6 @@
+*.db
+.idea/
+venv/
+*.log
+praw.ini
+master_databank.db

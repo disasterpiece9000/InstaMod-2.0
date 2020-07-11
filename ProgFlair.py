@@ -57,18 +57,14 @@ def make_prog_flair(user, sub):
                 flair_css = main_tier["flair css"]
                 permissions = main_tier["permissions"].lower()
 
-                flair_perm = False
-                css_perm = False
-                if permissions == "custom flair":
-                    flair_perm = True
-                elif permissions == "custom css":
-                    css_perm = True
+                if permissions == "":
+                    permissions = None
 
                 logging.debug("Flair text: " + flair_text +
                               "\n\tFlair css: " + flair_css +
-                              "\n\tFlair perm: " + str(flair_perm) +
-                              "\n\tCSS perm: " + str(css_perm))
-                return [flair_text, flair_css, flair_perm, css_perm]
+                              "\n\tPermission: " + str(permissions))
+
+                return [flair_text, flair_css, permissions]
 
         # Last tier was discovered
         else:
@@ -99,11 +95,17 @@ def user_in_tier(tier, username, sub):
                 sub_list.append(sub_name)
 
     # Turn Sub Group into list if all subs option not selected
-    elif target_subs != "ALL":
-        sub_list = list(sub.sub_groups[target_subs].keys())
-
-    else:
+    elif target_subs == "ALL":
         sub_list = sub.db.get_all_subs(username)
+    
+    # Sub Group used
+    elif "sub group" in target_subs.lower():
+        sub_list = list(sub.sub_groups[target_subs].keys())
+    
+    # Single subreddit used
+    else:
+        sub_list = [target_subs]
+    
 
     metric = tier["metric"].lower()
     comparison = tier["comparison"]
@@ -150,11 +152,11 @@ def get_user_value(metric, sub_list, username, sub):
 
     # Get data from accnt_history table
     elif metric in ("comment karma", "post karma", "positive comments", "negative comments",
-                    "positive posts", "negative posts", "positive QC", "negative QC"):
+                    "positive posts", "negative posts", "positive qc", "negative qc"):
         user_value = sub.db.fetch_sub_activity(username, sub_list, metric)
     elif metric == "net qc":
-        user_value = sub.db.fetch_sub_activity(username, sub_list, "positive QC") - \
-                     sub.db.fetch_sub_activity(username, sub_list, "negative QC")
+        user_value = sub.db.fetch_sub_activity(username, sub_list, "positive qc") - \
+                     sub.db.fetch_sub_activity(username, sub_list, "negative qc")
 
     return user_value
 

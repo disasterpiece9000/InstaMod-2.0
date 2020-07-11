@@ -89,7 +89,8 @@ The settings for InstaMod uses the .ini format and is read from a wiki page on t
 
 ## Quality Comments
 
-**Section Name:** [Quality Comments]
+**Section Name:** [Quality Comments 1] 
+* **Note:** Each subsequent section must increment the number at the end. If a number is skipped then the tier will not be seen.
 
 **Description:** Quality comments is a criteria that you can define based on a comment's score and word count. Positive QC defines what a good comment consists of and Negative QC defines what a bad comment consists of. This can be used as a metric in the Progression and Activity section.
 
@@ -97,12 +98,11 @@ The settings for InstaMod uses the .ini format and is read from a wiki page on t
 
 | Key | Description | Values |
 | ----------- | ----------- | ----------- |
-| positive score | Comments with a score >= this meet the score criteria | Any integer |
-| positive word count | Comments with a word count >= this meet the word count criteria | Any integer > 0 or leave blank to disable |
-| positive criteria type | Combination of criteria required to earn 1 positive QC | And (all of them) or Or (at least one of them) |
-| negative score | Comments with a score <= this meet the score criteria | Any integer |
-| negative word count | Comments with a word count <= this meet the word count criteria | Any integer > 0 or leave blank to disable |
-| negative criteria type | Combination of criteria required to earn 1 negative QC | And (all of them) or Or (at least one of them) |
+| point value | The number of points that comments matching this criteria receive | Any integer |
+| score | The score, along with a logical operator (<, >, <=, >=), that a comments must have to satisfy the score requirement | </li><li>A logical operator (<, >, <=, >=) followed by any integer </li><li>Set to None or leave blank to disable |
+| word count | The number of words, along with a logical operator (<, >, <=, >=), that a comments must have to satisfy the word count requirement | </li><li>A logical operator (<, >, <=, >=) followed by any integer</li><li>Set to None or leave blank to disable |
+| criteria type | Combination of criteria required to earn 1 negative QC | <ul><li>AND (score and word count)</li><li>OR (score or word count) |
+| exclude when op | Prevent user from gaining or losing QC from comments where they are also OP | True or False <br> **This overrides all other QC requirements** |
 
 ## Progression Tiers
 
@@ -120,7 +120,7 @@ The settings for InstaMod uses the .ini format and is read from a wiki page on t
 | comparison | Criteria to determine if the user belongs in the tier | \>, <, >=, or <= followed by any integer <br />Put "percent" after the integer to restrict the tier to users in the top X% |
 | flair text | Flair text assigned if the user meets the criteria | Any text with no more than 64 characters or leave blank for none |
 | flair css | Flair CSS assigned if the user meets the criteria | Any valid flair CSS ID or leave blank for none |
-| permissions | Permission granted if the user meets the criteria | CUSTOM FLAIR, CUSTOM CSS, or leave blank for none |
+| permissions | Permission granted if the user meets the criteria | CUSTOM FLAIR, CUSTOM CSS, CUSTOM TEXTor leave blank for none |
 
 ### Secondary Progression Tier Criteria
 
@@ -156,7 +156,7 @@ The settings for InstaMod uses the .ini format and is read from a wiki page on t
 | sub cap | The maximum number of subreddits listed for the tag's text. This option is disabled if group subs is set to True | Any positive integer
 | pre text | Text that comes before the activity tag. If group subs is set to True, then there is no abbreviation added to the tag | Any text or leave empty for none |
 | post text | Text that comes after the activity tag. If group subs is set to True, then their is no abbreviation added to the tag | Any text or leave empty for none |
-| permissions | Permission granted if the user meets the criteria | CUSTOM FLAIR, CUSTOM CSS, or leave blank for none |
+| permissions | Permission granted if the user meets the criteria | CUSTOM FLAIR, CUSTOM CSS, CUSTOM TEXT, or leave blank for none |
 
 
 ### Secondary Activity Tag Criteria
@@ -188,7 +188,8 @@ The settings for InstaMod uses the .ini format and is read from a wiki page on t
 | custom flair body | Body of the PM sent when InstaMod notifies a user that they have been granted the custom flair permission | Any text that fits in a body |
 | custom css subj | Subject of the PM sent when InstaMod notifies a user that they have been granted the custom css permission | Any text that fits in a subject line |
 | custom css body | Body of the PM sent when InstaMod notifies a user that they have been granted the custom css permission | Any text that fits in a body |
-
+| custom text subj | Subject of the PM sent when InstaMod notifies a user that they have been granted the custom text permission | Any text that fits in a subject line |
+| custom text body | Body of the PM sent when InstaMod notifies a user that they have been granted the custom text permission | Any text that fits in a body |
 
 ## Subreddit Groups
 

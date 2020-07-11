@@ -6,6 +6,7 @@ To get a better idea of the customization options available, please check out th
 * [/r/CryptoCurrency](https://www.reddit.com/r/CryptoCurrency)
 * [/r/CryptoTechnology](https://www.reddit.com/r/CryptoTechnology)
 * [/r/CryptoMarkets](https://www.reddit.com/r/CryptoMarkets)
+* [/r/HomeworkHelp](https://www.reddit.com/r/HomeworkHelp/)
 
 ## Features - Flair Management
 
@@ -26,7 +27,6 @@ PM commands allow users and moderators to quickly and easily interact with Insta
 | !noautoflair | Prevents InstaMod from assigning automatic flair to the specified user. This allows moderators to assign a user flair without InstaMod overwriting it and without that user getting full custom flair permissions. | Moderators |
 | !giveflairperm | Gives the specified user custom flair permissions. The user will be automatically notified after the command is processed. | Moderators |
 | !updatesettings | Re-read the wiki settings page so that settings changes can take place instantly. InstaMod automatically re-checks settings each hour | Moderators |
-| !wipe | Remove all stored flair data and reanalyze every users flair. This will only delete the subreddit's data | Moderators |
 | !updatethem| Update the specified user's account data and flair, regardless of if their information is out of date | Moderators |
 | !updateme | Update the senders account data and flair, regardless of if their information is out of date | All users |
 | !flair | Change the user's flair text and CSS to whatever they specify | Users with custom flair permissions |
@@ -39,25 +39,14 @@ _____
 Unlike most bots, InstaMod is designed to simultaneously support multiple subreddits. This means that adding it to your subreddit doesn't require any technical knowledge or hosting capability! If you are interested in incorporating it into your subreddit all you need to do is create a wiki page called "InstaModSettings", fill it with the information specified in the [settings documentation](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/SettingsDocumentation.md), and [contact me](https://www.reddit.com/message/compose?to=shimmyjimmy97&subject=InstaMod&message=) so that I can import your subreddit.
 
 If you would like to run your own version of InstaMod, here are the required components:
-* Python 3.7.4
+* Python 3.7.4 or higher
 * SQLite 3.25.0 or higher
-* PRAW 6.3.2
+* PRAW
+* PSAW
 * Fill in your Reddit account credentials in the praw.ini file
 * Fill in all the subreddits the bot will run on (delimited by new lines) in the subreddit_master_list.txt file
 
-## Upcomming Features - Content Moderation
+Once the above steps have been completed, run this command to start the bot:
+> python3 Main.py
 
-### Toxicity Report
-
-Using the [Perspective API](https://www.perspectiveapi.com/#/home), InstaMod can instantly identify toxic comments and take action before anyone even reads it. Depending on how confident the API is that the comment is toxic, it can either be reported, marked as spam, or outright removed. This is a powerful tool for improving the quality and civility of conversations in a community.
-
-
-### Custom Ratelimiting
-
-Reddit has a built in rate-limit system to prevent spam, but with InstaMod this can be expanded and customized to ensure that users in your subreddit cannot spam comments and posts. For example, moderators could configure this to prevent new accounts from posting more than one submission a day, limit everyone to no more than 3 posts a week, or even limit trolls to one comment per hour.
-
-### Advanced Thread Locking
-
-Traditional thread locking is inherently all-or-nothing. With InstaMod, a post's comment section can be filtered to disallow certain types of comments or users. This allows users to have a conversation, while still containing the reason the thread was locked in the first place. It could be used to prevent brigades, block toxic comments, or restrict a thread to only long-time community members.
-
-If a user doesn't meet the requirements, then their comment can either be removed or marked spam. There is also an option to automatically notify the user of their comment's deletion. Moderators simply have to assign a post a specific flair for it to be locked.
+**Note:** This bot requires you run it with Python 3.7.4 or higher so make sure that the version of Python you run the script with is correct or the bot will not function properly.

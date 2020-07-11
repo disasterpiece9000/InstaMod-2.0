@@ -13,18 +13,24 @@ def update_flair(flair_queue, perm_queue, user, sub, prog_flair_enabled,
     new_accnt_flair = None
     activity_flair = None
     css = ""
+    permission = None
     flair_perm = False
     css_perm = False
+    text_perm = False
     
     # Progression Flair
     if prog_flair_enabled:
         prog_data = make_prog_flair(user, sub)
         prog_flair = prog_data[0]
         css = prog_data[1]
-        if prog_data[2]:
+        permission = prog_data[2]
+
+        if permission == "custom flair":
             flair_perm = True
-        elif prog_data[3]:
+        elif permission == "custom css":
             css_perm = True
+        elif permission == "custom text":
+            text_perm = True
             
     # New Account Flair
     if new_accnt_flair_enabled:
@@ -34,10 +40,14 @@ def update_flair(flair_queue, perm_queue, user, sub, prog_flair_enabled,
     if activity_flair_enabled:
         activity_data = make_activity_flair(username, sub)
         activity_flair = activity_data[0]
-        if activity_data[1]:
+        permission = activity_data[1]
+
+        if permission == "custom flair":
             flair_perm = True
-        elif activity_data[2]:
+        elif permission == "custom css":
             css_perm = True
+        elif permission == "custom text":
+            text_perm = True
         
     # Check if the user's flair has been changed
     new_flair_txt = concat_flair(prog_flair, new_accnt_flair, activity_flair)
@@ -52,12 +62,17 @@ def update_flair(flair_queue, perm_queue, user, sub, prog_flair_enabled,
     # Check if the user has earned any new permissions
     old_flair_perm = sub.db.fetch_sub_info(username, "flair perm")
     old_css_perm = sub.db.fetch_sub_info(username, "css perm")
+    old_text_perm = sub.db.fetch_sub_info(username, "text perm")
     
     if flair_perm and not old_flair_perm:
         logging.info("User granted flair perm")
         sub.db.update_key_sub_info(username, "flair perm", int(flair_perm))
         perm_queue.put([username, "flair perm", sub])
-    if css_perm and not old_css_perm:
+    elif text_perm and not old_text_perm:
+        logging.info("User granted text perm")
+        sub.db.update_key_sub_info(username, "text perm", int(flair_perm))
+        perm_queue.put([username, "text perm", sub])
+    elif css_perm and not old_css_perm:
         logging.info("User granted css permissions")
         sub.db.update_key_sub_info(username, "flair perm", int(css_perm))
         perm_queue.put([username, "css perm", sub])
