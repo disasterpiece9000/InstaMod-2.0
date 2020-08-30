@@ -1,9 +1,8 @@
 import logging
 
 
-# Get progression tier flair
-def make_prog_flair(user, sub):
-    username = str(user).lower()
+def make_prog_flair(user_data, sub):
+    username = user_data.username
     prog_tiers = sub.progression_tiers
 
     # Loop through tiers in order
@@ -15,7 +14,7 @@ def make_prog_flair(user, sub):
         if tier_name in prog_tiers:
             
             main_tier = prog_tiers[tier_name]
-            main_result = user_in_tier(main_tier, username, sub)
+            main_result = user_in_tier(main_tier, user_data, sub)
             and_result = True
             or_result = True
             tier_name_and = tier_name + " - AND"
@@ -25,7 +24,7 @@ def make_prog_flair(user, sub):
             if not main_result:
                 if tier_name_or in prog_tiers:
                     or_tier = prog_tiers[tier_name_or]
-                    or_result = user_in_tier(or_tier, username, sub)
+                    or_result = user_in_tier(or_tier, user_data, sub)
                     if or_result:
                         final_result = True
                     else:
@@ -37,7 +36,7 @@ def make_prog_flair(user, sub):
             elif tier_name_and in prog_tiers:
                 logging.debug("Checking AND")
                 and_tier = prog_tiers[tier_name_and]
-                and_result = user_in_tier(and_tier, username, sub)
+                and_result = user_in_tier(and_tier, user_data, sub)
                 if and_result:
                     final_result = True
                 else:
@@ -73,7 +72,8 @@ def make_prog_flair(user, sub):
 
 
 # Check if the user belongs in the given tier
-def user_in_tier(tier, username, sub):
+def user_in_tier(tier, user_data, sub):
+    username = user_data.username
     target_subs = tier["target subs"]
     # If an abbreviation is specified make a list of all subs with a matching abbreviation
     if "-" in target_subs:
@@ -105,7 +105,6 @@ def user_in_tier(tier, username, sub):
     # Single subreddit used
     else:
         sub_list = [target_subs]
-    
 
     metric = tier["metric"].lower()
     comparison = tier["comparison"]
@@ -124,7 +123,7 @@ def user_in_tier(tier, username, sub):
         user_value = get_user_perc(metric, sub_list, username, sub)
         target_value = int(target_value.split()[0])
     else:
-        user_value = get_user_value(metric, sub_list, username, sub)
+        user_value = get_user_value(metric, sub_list, user_data, sub)
         target_value = int(target_value)
 
     return check_value(user_value, comparison, target_value)
@@ -140,23 +139,23 @@ def get_user_perc(metric, sub_list, username, sub):
 
 
 # Fetch the user_value from the database
-def get_user_value(metric, sub_list, username, sub):
+def get_user_value(metric, sub_list, user_data, sub):
     user_value = 0
 
     # Get data from accnt_info table
-    if metric in ("total comment karma", "total post karma"):
-        user_value = sub.db.fetch_accnt_info(username, metric)
-    elif metric == "total karma":
-        user_value = sub.db.fetch_accnt_info(username, "total post karma") + \
-                     sub.db.fetch_accnt_info(username, "total comment karma")
+    if metric in (sub.db.KEY4_POST_KARMA, sub.db.KEY4_COMMENT_KARMA):
+        user_value = user_data.user_info[metric]
 
-    # Get data from accnt_history table
-    elif metric in ("comment karma", "post karma", "positive comments", "negative comments",
-                    "positive posts", "negative posts", "positive qc", "negative qc"):
-        user_value = sub.db.fetch_sub_activity(username, sub_list, metric)
+    elif metric == "total karma":
+        user_value = user_data.total_post_karma + user_data.total_comment_karma
+
+    # Get data from activity tables
+    elif metric in (sub.db.SUB_ACTIVITY_KEY_LIST + sub.db.ACCNT_ACTIVITY_KEY_LIST):
+        user_value = user_data.fetch_sub_activity(sub_list, metric)
+
     elif metric == "net qc":
-        user_value = sub.db.fetch_sub_activity(username, sub_list, "positive qc") - \
-                     sub.db.fetch_sub_activity(username, sub_list, "negative qc")
+        user_value = user_data.fetch_sub_activity(sub_list, sub.db.KEY2_POSITIVE_QC) - \
+                     user_data.fetch_sub_activity(sub_list, sub.db.KEY2_NEGATIVE_QC)
 
     return user_value
 

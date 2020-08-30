@@ -241,7 +241,7 @@ process_thread.start()
 while True:
     try:
         # Grab any comments made in subreddits using InstaMod
-        for comment in all_subs.stream.comments(pause_after=0, skip_existing=True):
+        for comment in all_subs.stream.comments(pause_after=0, skip_existing=False):
             # If no new comments are found after 3 checks do other stuff
             if comment is None:
                 logging.debug("No new comments found")

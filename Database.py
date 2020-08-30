@@ -18,6 +18,9 @@ class Database:
     KEY1_CUSTOM_TEXT_USED = "custom_text_used"
     KEY1_CUSTOM_CSS_USED = "custom_css_used"
     KEY1_NO_AUTO_FLAIR = "no_auto_flair"
+    SUB_INFO_KEY_LIST = [KEY1_USERNAME, KEY1_RATELIMIT_START, KEY1_RATELIMIT_COUNT, KEY1_FLAIR_TEXT, KEY1_LAST_UPDATED,
+                         KEY1_FLAIR_PERM, KEY1_CSS_PERM, KEY1_CUSTOM_FLAIR_USED, KEY1_NO_AUTO_FLAIR, KEY1_TEXT_PERM,
+                         KEY1_CUSTOM_TEXT_USED, KEY1_CUSTOM_CSS_USED]
 
     # Subreddit Activity Table
     TABLE_SUB_ACTIVITY = ""
@@ -25,6 +28,7 @@ class Database:
     KEY2_SUB_NAME = "sub_name"
     KEY2_POSITIVE_QC = "positive_qc"
     KEY2_NEGATIVE_QC = "negative_qc"
+    SUB_ACTIVITY_KEY_LIST = [KEY2_USERNAME, KEY2_SUB_NAME, KEY2_POSITIVE_QC, KEY2_NEGATIVE_QC]
 
     # Account Activity Table
     TABLE_ACCNT_ACTIVITY = "accnt_activity"
@@ -36,6 +40,8 @@ class Database:
     KEY3_NEGATIVE_COMMENTS = "negative_comments"
     KEY3_POST_KARMA = "post_karma"
     KEY3_COMMENT_KARMA = "comment_karma"
+    ACCNT_ACTIVITY_KEY_LIST = [KEY3_USERNAME, KEY3_SUB_NAME, KEY3_POSITIVE_POSTS, KEY3_NEGATIVE_POSTS,
+                               KEY3_POSITIVE_COMMENTS, KEY3_NEGATIVE_COMMENTS, KEY3_POST_KARMA, KEY3_COMMENT_KARMA]
     CREATE_SUB_ACTIVITY = ("CREATE TABLE IF NOT EXISTS " + TABLE_ACCNT_ACTIVITY + " (" +
                            KEY3_USERNAME + " TEXT, " + KEY3_SUB_NAME + " TEXT, " +
                            KEY3_POSITIVE_POSTS + " INTEGER, " + KEY3_NEGATIVE_POSTS + " INTEGER, " +
@@ -50,6 +56,7 @@ class Database:
     KEY4_POST_KARMA = "total_post_karma"
     KEY4_COMMENT_KARMA = "total_comment_karma"
     KEY4_LAST_SCRAPED = "last_scraped"
+    ACCNT_INFO_KEY_LIST = [KEY4_USERNAME, KEY4_DATE_CREATED, KEY4_POST_KARMA, KEY4_COMMENT_KARMA, KEY4_LAST_SCRAPED]
     CREATE_ACCNT_INFO = ("CREATE TABLE IF NOT EXISTS " + TABLE_ACCNT_INFO + " (" +
                          KEY4_USERNAME + " TEXT PRIMARY KEY, " + KEY4_DATE_CREATED + " INTEGER, " +
                          KEY4_POST_KARMA + " INTEGER, " + KEY4_COMMENT_KARMA + " INTEGER, " +
@@ -288,6 +295,42 @@ class Database:
                 delete_str = delete_str_start + table_name[0] + delete_str_end
                 cur.execute(delete_str, (username,))
 
+    # Fetch all data for user on specified Subreddit
+    def load_user_data(self, username, subreddit):
+        cur = self.conn.cursor()
+
+        select_info_keys = [self.TABLE_SUB_INFO + "." + key for key in self.SUB_INFO_KEY_LIST] \
+                            + \
+                            [self.TABLE_ACCNT_INFO + "." + key for key in self.ACCNT_INFO_KEY_LIST]
+
+        select_info_str = ("SELECT " + ",".join(select_info_keys) +
+                           " FROM " + self.TABLE_SUB_INFO + " INNER JOIN " + self.TABLE_ACCNT_INFO +
+                                " ON " + self.TABLE_SUB_INFO + ".username = " + self.TABLE_ACCNT_INFO + ".username "
+                            "WHERE " + self.TABLE_SUB_INFO + ".username = ?")
+
+        cur.execute(select_info_str, (username,))
+        select_info_data = dict(zip(self.SUB_INFO_KEY_LIST + self.ACCNT_INFO_KEY_LIST, cur.fetchone()))
+
+        select_activity_keys = [self.TABLE_SUB_ACTIVITY + "." + key for key in self.SUB_ACTIVITY_KEY_LIST] \
+                                + \
+                                [self.TABLE_ACCNT_ACTIVITY + "." + key for key in self.ACCNT_ACTIVITY_KEY_LIST]
+
+        select_activity_str = ("SELECT " + ",".join(select_activity_keys) + " FROM " +
+                               self.TABLE_SUB_ACTIVITY + " INNER JOIN " + self.TABLE_ACCNT_ACTIVITY +
+                                    " ON " + self.TABLE_SUB_ACTIVITY + ".username = " + self.TABLE_ACCNT_ACTIVITY + ".username "
+                                    "AND " + self.TABLE_SUB_ACTIVITY + ".sub_name = " + self.TABLE_ACCNT_ACTIVITY + ".sub_name "
+                               "WHERE " + self.TABLE_SUB_ACTIVITY + ".username = ?")
+
+        print(select_activity_str)
+        cur.execute(select_activity_str, (username,))
+        select_activity_data = cur.fetchall()
+        select_activity_dict = {}
+        for data in select_activity_data:
+            sub_activity_data = dict(zip(self.SUB_ACTIVITY_KEY_LIST + self.ACCNT_ACTIVITY_KEY_LIST, data))
+            select_activity_dict[sub_activity_data.pop(self.KEY2_SUB_NAME)] = sub_activity_data
+
+        return [select_info_data, select_activity_dict]
+
     # Generic getter method for Account Info table
     def fetch_sub_info(self, username, key):
         select_key = self.find_key(key, self.TABLE_SUB_INFO)
@@ -410,12 +453,6 @@ class Database:
         update_str = ("UPDATE " + self.TABLE_SUB_INFO + " SET " + update_key + " = ? "
                       + " WHERE " + self.KEY1_USERNAME + " = ?")
         cur.execute(update_str, (value, username))
-        cur.close()
-
-    def wipe_sub_info(self):
-        cur = self.conn.cursor()
-        delete_str = "DELETE FROM " + self.TABLE_SUB_INFO
-        cur.execute(delete_str)
         cur.close()
 
     # Turn string from INI file into a key

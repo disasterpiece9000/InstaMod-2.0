@@ -9,6 +9,8 @@ from psaw import PushshiftAPI
 
 
 def load_data(user_in_accnt_info, user_in_sub_info, update_flair, author, target_sub, sub_list, r):
+    load_start = time.time()
+
     # PushShift Instance
     ps = PushshiftAPI(r)
 
@@ -183,15 +185,23 @@ def load_data(user_in_accnt_info, user_in_sub_info, update_flair, author, target
         else:
             sub_neg_posts[subreddit] += 1
 
+    print("Fetch data: " + str(time.time() - load_start) + " sec\tUser: " + username + "\n")
+
     # Insert data if all subs aren't in sync
     if len(not_exists_in_sub) > 0:
+        start = time.time()
         target_sub.db.insert_sub_activity(username, all_pos_qc, all_neg_qc)
         target_sub.db.insert_accnt_activity(username, sub_comment_karma, sub_pos_comments, sub_neg_comments,
                                             sub_post_karma, sub_pos_posts, sub_neg_posts)
+        print("Insert data: " + str(time.time() - start) + " sec\tUser: " + username + "\n")
     else:
+        start = time.time()
         target_sub.db.update_sub_activity(username, all_pos_qc, all_neg_qc)
         target_sub.db.update_accnt_activity(username, sub_comment_karma, sub_pos_comments, sub_neg_comments,
                                             sub_post_karma, sub_pos_posts, sub_neg_posts)
+        print("Update data: " + str(time.time() - start) + " sec\tUser: " + username + "\n")
+
+    target_sub.db.load_user_data(username, target_sub.name)
 
 
 def count_words(body):

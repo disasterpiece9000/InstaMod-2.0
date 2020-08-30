@@ -3,12 +3,14 @@ import logging
 
 from ActivityFlair import make_activity_flair
 from ProgFlair import make_prog_flair
+from User import User
 
 
 # Get new flair for all enabled options
 def update_flair(flair_queue, perm_queue, user, sub, prog_flair_enabled,
                  new_accnt_flair_enabled, activity_flair_enabled):
     username = str(user).lower()
+    user_data = User(username, sub)
     prog_flair = None
     new_accnt_flair = None
     activity_flair = None
@@ -20,7 +22,9 @@ def update_flair(flair_queue, perm_queue, user, sub, prog_flair_enabled,
     
     # Progression Flair
     if prog_flair_enabled:
-        prog_data = make_prog_flair(user, sub)
+        prog_start = time.time()
+        prog_data = make_prog_flair(user_data, sub)
+        print("Prog: " + str(time.time() - prog_start) + " sec\tUser: " + username + "\n")
         prog_flair = prog_data[0]
         css = prog_data[1]
         permission = prog_data[2]
@@ -38,7 +42,9 @@ def update_flair(flair_queue, perm_queue, user, sub, prog_flair_enabled,
         
     # Activity Flair
     if activity_flair_enabled:
+        activity_start = time.time()
         activity_data = make_activity_flair(username, sub)
+        print("Activity: " + str(time.time() - activity_start) + " sec\tUser: " + username + "\n")
         activity_flair = activity_data[0]
         permission = activity_data[1]
 
