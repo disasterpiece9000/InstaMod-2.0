@@ -243,17 +243,14 @@ def process_flair_data(setting, flair_data):
 
 # Check result of secondary criteria
 def check_sub_setting(activity_settings, setting_name, parent_sub, user_data):
-    start = time.time()
     setting = activity_settings[setting_name]
     sub_list = make_sub_list(setting, parent_sub, user_data.username)
     data = check_activity(user_data, parent_sub, sub_list, setting)
-    print("Check Sub Settings: " + str(time.time() - start) + "sec\tUser: " + user_data.username + "\n")
     return data[0]
 
 
 # Make a list of subreddit names and abbrevs based on section settings
 def make_sub_list(setting, sub, username):
-    start = time.time()
     target_subs = setting["target subs"]
 
     # Create a list of all subs with info in the database
@@ -284,7 +281,6 @@ def make_sub_list(setting, sub, username):
         sub_group = sub.sub_groups[target_subs]
         sub_list = [[name, abbrev] for name, abbrev in sub_group.items()]
 
-    print("Sub List: " + str(time.time() - start) + "sec\tUser: " + username + "\n")
     return sub_list
 
 
@@ -314,42 +310,33 @@ def check_activity(user_data, sub, sub_list, setting):
 
     activity_result = check_value(user_value, comparison, target_value)
 
-    print("Check Activity: " + str(time.time() - start) + "sec\tUser: " + username + "\n")
     return [activity_result, user_value]
 
 
 # Handel % in progression tier
 def get_user_perc(metric, sub_list, username, sub):
-    start = time.time()
     user_pos, total = sub.db.fetch_sub_activity_perc(username, sub_list, metric)
-    print("Get User Perc: " + str(time.time() - start) + "sec\tUser: " + username + "\n")
     return int((user_pos / total) * 100)
 
 
 # Fetch the user_value from the database
 def get_user_value(metric, sub_list, user_data, sub):
-    username = user_data.username
-    start = time.time()
     user_value = 0
 
     # Get data from accnt_info table
     if metric in (sub.db.KEY4_POST_KARMA, sub.db.KEY4_COMMENT_KARMA):
         user_value = user_data.user_info[metric]
-        print("Get User Value (Info): " + str(time.time() - start) + "sec\tUser: " + username + "\n")
 
     elif metric == "total karma":
         user_value = user_data.total_post_karma + user_data.total_comment_karma
-        print("Get User Value (Info): " + str(time.time() - start) + "sec\tUser: " + username + "\n")
 
     # Get data from activity tables
     elif metric in (sub.db.SUB_ACTIVITY_KEY_LIST + sub.db.ACCNT_ACTIVITY_KEY_LIST):
         user_value = user_data.fetch_sub_activity(sub_list, metric)
-        print("Get User Value (Activity): " + str(time.time() - start) + "sec\tUser: " + username + "\n")
 
     elif metric == "net qc":
         user_value = user_data.fetch_sub_activity(sub_list, sub.db.KEY2_POSITIVE_QC) - \
                      user_data.fetch_sub_activity(sub_list, sub.db.KEY2_NEGATIVE_QC)
-        print("Get User Value (Activity): " + str(time.time() - start) + "sec\tUser: " + username + "\n")
 
     return user_value
 

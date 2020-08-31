@@ -300,8 +300,8 @@ class Database:
         cur = self.conn.cursor()
 
         select_info_keys = [self.TABLE_SUB_INFO + "." + key for key in self.SUB_INFO_KEY_LIST] \
-                            + \
-                            [self.TABLE_ACCNT_INFO + "." + key for key in self.ACCNT_INFO_KEY_LIST]
+                           + \
+                           [self.TABLE_ACCNT_INFO + "." + key for key in self.ACCNT_INFO_KEY_LIST]
 
         select_info_str = ("SELECT " + ",".join(select_info_keys) +
                            " FROM " + self.TABLE_SUB_INFO + " INNER JOIN " + self.TABLE_ACCNT_INFO +
@@ -321,7 +321,6 @@ class Database:
                                     "AND " + self.TABLE_SUB_ACTIVITY + ".sub_name = " + self.TABLE_ACCNT_ACTIVITY + ".sub_name "
                                "WHERE " + self.TABLE_SUB_ACTIVITY + ".username = ?")
 
-        print(select_activity_str)
         cur.execute(select_activity_str, (username,))
         select_activity_data = cur.fetchall()
         select_activity_dict = {}
