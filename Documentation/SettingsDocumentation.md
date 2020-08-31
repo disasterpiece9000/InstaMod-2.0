@@ -7,21 +7,21 @@
  This document details the options and requirements for the settings wiki page.
  
  If you are just getting started, here are some resources that may help:
- * [Completed settings page from /r/CryptoCurrency](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/ExampleSettings)
- * [Blank settings template](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/SettingsTemplate.ini)
+ * [Completed settings page from /r/CryptoCurrency](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/Documentation/ExampleSettings)
+ * [Blank settings template](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/Documentation/SettingsTemplate.ini)
  
  ### Index
  
-* **[Editing the Settings](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/SettingsDocumentation.md#editing-the-settings)**
-* **[Main Configuration](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/SettingsDocumentation.md#main-configuration)**
-* **[Flair](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/SettingsDocumentation.md#flair)**
-* **[Quality Comments](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/SettingsDocumentation.md#quality-comments)**
-* **[Progression Tiers](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/SettingsDocumentation.md#progression-tiers)**
-  * [Secondary Progression Tier Criteria](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/SettingsDocumentation.md#secondary-progression-tier-criteria)
-* **[Subreddit Activity Tags](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/SettingsDocumentation.md#subreddit-activity-tags)**
-  * [Secondary Activity Tag Criteria](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/SettingsDocumentation.md#secondary-activity-tag-criteria)
-* **[Subreddit Groups](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/SettingsDocumentation.md#subreddit-groups)**
-* **[PM Messages](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/SettingsDocumentation.md#pm-messages)**
+* **[Editing the Settings](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/Documentation/SettingsDocumentation.md#editing-the-settings)**
+* **[Main Configuration](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/Documentation/SettingsDocumentation.md#main-configuration)**
+* **[Flair](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/Documentation/SettingsDocumentation.md#flair)**
+* **[Quality Comments](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/Documentation/SettingsDocumentation.md#quality-comments)**
+* **[Progression Tiers](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/Documentation/SettingsDocumentation.md#progression-tiers)**
+  * [Secondary Progression Tier Criteria](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/Documentation/SettingsDocumentation.md#secondary-progression-tier-criteria)
+* **[Subreddit Activity Tags](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/Documentation/SettingsDocumentation.md#subreddit-activity-tags)**
+  * [Secondary Activity Tag Criteria](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/Documentation/SettingsDocumentation.md#secondary-activity-tag-criteria)
+* **[Subreddit Groups](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/Documentation/SettingsDocumentation.md#subreddit-groups)**
+* **[PM Messages](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/Documentation/SettingsDocumentation.md#pm-messages)**
  
  ## Editing the Settings
  
