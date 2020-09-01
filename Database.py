@@ -1,5 +1,6 @@
 import logging
 import sqlite3
+import time
 from collections import Counter
 
 
@@ -294,6 +295,30 @@ class Database:
             if not table_name[0].endswith("_info") or table_name[0] == "accnt_info":
                 delete_str = delete_str_start + table_name[0] + delete_str_end
                 cur.execute(delete_str, (username,))
+
+    # Return a list of inactive users
+    def drop_inactive_users(self):
+        cur = self.conn.cursor()
+        cutoff_time = int(time.time()) - 15552000
+        # Get list of all tables
+        select_str = ("SELECT name FROM sqlite_master "
+                      "WHERE type='table';")
+        cur.execute(select_str)
+        tables = cur.fetchall()
+
+        # Delete user data in each table
+        delete_str_start = "DELETE FROM "
+        delete_str_end = " WHERE username IN (" \
+                            " SELECT " + self.KEY4_USERNAME + " FROM " + self.TABLE_ACCNT_INFO + \
+                            " WHERE " + self.KEY4_LAST_SCRAPED + " < ? " \
+                         ")"
+        for table_name in tables:
+            if not table_name[0] == "accnt_info":
+                delete_str = delete_str_start + table_name[0] + delete_str_end
+                cur.execute(delete_str, (cutoff_time,))
+
+        delete_str = "DELETE FROM " + self.TABLE_ACCNT_INFO + " WHERE " + self.KEY4_LAST_SCRAPED + " < ?"
+        cur.execute(delete_str, (cutoff_time,))
 
     # Fetch all data for user on specified Subreddit
     def load_user_data(self, username, subreddit):

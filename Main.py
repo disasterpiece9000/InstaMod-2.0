@@ -100,6 +100,7 @@ def check_backup():
             elif file_data[0] == "MONTHLY" and time_diff > 2592000:
                 old_path = backup_path + "MONTHLY-" + str(file_data[1])
                 new_path = backup_path + "MONTHLY-" + str(cur_time) + ".db.bak"
+                sub_list[0].db.drop_inactive_users()  # Clean-up db before archive
             
             if None not in [old_path, new_path, db_path]:
                 os.remove(old_path)  # Remove old file
@@ -163,9 +164,9 @@ def notify_permission_change():
                             "automatic flair until you apply a custom flair. In order to apply your desired " \
                             "flair, please click on [this pre-formatted link.](https://www.reddit.com/message/" \
                             "compose?to=InstaMod&subject=!" + str(target_sub.sub) + "%20!flair" \
-                                                                                    "&message=Flair%20Text:%0AFlair%20CSS:)" \
-                                                                                    "\n\n**Note:** This link will not work on mobile and can be used to change your flair" \
-                                                                                    " as many times as you want.\n\n"
+                            "&message=Flair%20Text:%0AFlair%20CSS:)" \
+                            "\n\n**Note:** This link will not work on mobile and can be used to change your flair" \
+                            " as many times as you want.\n\n"
             
             # Concatenate message body with custom text from subreddit settings
             body = auto_perm_msg + target_sub.pm_messages["custom flair body"] + message_footer
@@ -173,10 +174,9 @@ def notify_permission_change():
         
         elif new_perm == "css perm":
             auto_perm_msg = "Your contributions to /r/" + str(target_sub.sub) + " have granted you access to custom " \
-                                                                                "flair styling options. Your flair text will still be updated automatically. " \
-                                                                                "In order to apply your desired flair styling, please click on [this pre-formatted link.](" \
-                                                                                "https://www.reddit.com/message/compose?to=InstaMod&subject=!" + str(
-                target_sub.sub) + \
+                            "flair styling options. Your flair text will still be updated automatically. " \
+                            "In order to apply your desired flair styling, please click on [this pre-formatted link.]" \
+                            "(https://www.reddit.com/message/compose?to=InstaMod&subject=!" + str(target_sub.sub) + \
                             "%20!css&message=Flair%20CSS:)" \
                             "\n\n**Note:** This link will not work on mobile and can be used to change your flair" \
                             " styling as many times as you want.\n\n"
@@ -186,10 +186,9 @@ def notify_permission_change():
         
         elif new_perm == "text perm":
             auto_perm_msg = "Your contributions to /r/" + str(target_sub.sub) + " have granted you access to custom " \
-                                                                                "flair text. You will continue to receive automatic flair until you apply a custom flair. " \
-                                                                                "In order to apply your desired flair text, please click on [this pre-formatted link.](" \
-                                                                                "https://www.reddit.com/message/compose?to=InstaMod&subject=!" + str(
-                target_sub.sub) + \
+                            "flair text. You will continue to receive automatic flair until you apply a custom flair." \
+                            " In order to apply your desired flair text, please click on [this pre-formatted link.](" \
+                            "https://www.reddit.com/message/compose?to=InstaMod&subject=!" + str(target_sub.sub) + \
                             "%20!text&message=Flair%20Text:)" \
                             "\n\n**Note:** This link will not work on mobile and it can be used to change your flair" \
                             " text as many times as you want.\n\n"
@@ -217,20 +216,21 @@ def run_idle_tasks(last_check):
 
     # Re-read each subreddit's config file each hour
     current_time = int(time.time())
-    if current_time - last_check < 3600:
+    if current_time - last_check > 3600:
         for sub in sub_list:
             try:
                 sub.read_config()
             except sqlite3.OperationalError:
                 logging.warning("Unable to update subreddit's config, database is locked")
-        return current_time
+
+        last_check = current_time
+    return last_check
 
 
 # Get multisub so that all subreddits can be searched simultaneously
 all_subs = get_multisub()
-# Check if backups have already been created of if they need to be updated
-check_backup()
-read_pms()
+# Run idle tasks once before beginning main loop
+run_idle_tasks(last_config_check)
 
 # Create thread for processing comments
 process_thread = threading.Thread(target=ProcessComment.fetch_queue,
@@ -245,7 +245,7 @@ while True:
             # If no new comments are found after 3 checks do other stuff
             if comment is None:
                 logging.debug("No new comments found")
-                run_idle_tasks(last_config_check)
+                last_config_check = run_idle_tasks(last_config_check)
                 continue
 
             comment_queue.put(comment)
