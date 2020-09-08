@@ -100,7 +100,6 @@ def check_backup():
             elif file_data[0] == "MONTHLY" and time_diff > 2592000:
                 old_path = backup_path + "MONTHLY-" + str(file_data[1])
                 new_path = backup_path + "MONTHLY-" + str(cur_time) + ".db.bak"
-                sub_list[0].db.drop_inactive_users()  # Clean-up db before archive
             
             if None not in [old_path, new_path, db_path]:
                 os.remove(old_path)  # Remove old file
@@ -230,6 +229,7 @@ def run_idle_tasks(last_check):
 # Get multisub so that all subreddits can be searched simultaneously
 all_subs = get_multisub()
 # Run idle tasks once before beginning main loop
+sub_list[0].db.drop_inactive_users()  # Clean-up db
 run_idle_tasks(last_config_check)
 
 # Create thread for processing comments

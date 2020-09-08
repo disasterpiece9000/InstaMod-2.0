@@ -20,7 +20,6 @@ def load_data(user_in_accnt_info, user_in_sub_info, update_flair, author, target
     total_post_karma = author.link_karma
     total_comment_karma = author.comment_karma
     flair_txt = next(target_sub.sub.flair(username))["flair_text"]
-    last_scraped = datetime.fromtimestamp(target_sub.db.fetch_accnt_info(username, "last scraped"))
 
     # Skip comments and posts that are not at least 1 week old
     before_time = int((datetime.today() - timedelta(days=7)).timestamp())
@@ -67,9 +66,11 @@ def load_data(user_in_accnt_info, user_in_sub_info, update_flair, author, target
 
         else:
             # Get comments/posts that occurred after the last scrape
+            last_scraped = datetime.fromtimestamp(target_sub.db.fetch_accnt_info(username, "last scraped"))
             after_time = int((last_scraped - timedelta(days=7)).timestamp())
 
             # Update database entries
+            last_scraped = current_time
             target_sub.db.update_accnt_info(username, total_post_karma, total_comment_karma, last_scraped)
     else:
         # Get all available comments/posts

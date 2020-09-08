@@ -24,7 +24,7 @@ def process_pm(message, sub_list, flair_queue, perm_queue, r):
 
     # Return if the PM's subject does not contain the sub name and command
     if len(message_subj) != 2:
-        message.reply("This message's subject is not in the correct format and cannot be processed."
+        message.reply("This message's subject is not in the correct format and cannot be processed. "
                       "Each PM command's subject must contain these parameters:\n\n"
                       "     !SubredditName !Command" +
                       message_footer)
@@ -384,7 +384,7 @@ def remove_auto_flair(message, target_sub):
     in_db = user_in_db(target_username, target_sub, message)
     if not in_db:
         message.reply("This user cannot be modified because they have no entry in the database. "
-                      "To fix this, you can use the !updatethem PM command and then try again."
+                      "To fix this, you can use the !updatethem PM command and then try again. "
                       "Here is a [pre-formatted link](https://www.reddit.com/message/compose?to=InstaMod&subject="
                       "!" + target_sub.name + "%20!updatethem&message=) for that PM command\n\n"
                       + message_footer)
@@ -408,7 +408,7 @@ def give_flair_perm(message, target_sub, perm_queue):
     in_db = user_in_db(target_username, target_sub, message)
     if not in_db:
         message.reply("This user cannot be modified because they have no entry in the database. "
-                      "To fix this, you can use the !updatethem PM command and then try again."
+                      "To fix this, you can use the !updatethem PM command and then try again. "
                       "Here is a [pre-formatted link](https://www.reddit.com/message/compose?to=InstaMod&subject="
                       "!" + target_sub.name + "%20!updatethem&message=) for that PM command\n\n"
                       + message_footer)
