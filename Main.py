@@ -126,8 +126,7 @@ def flair_users():
             flair_css = next(target_sub.sub.flair(username))["flair_css_class"]
         
         target_sub.sub.flair.set(username, flair_txt, flair_css)
-    
-        
+
         logging.info("Flair results"
                      + "\n\tUser: " + str(username)
                      + "\n\tFlair: " + str(flair_txt)

@@ -108,6 +108,9 @@ def check_user(user, target_sub):
     elif user_in_accnt_info:
         # Check if user data has not been updated in the last 7 days
         last_scraped = target_sub.db.fetch_accnt_info(username, "last scraped")
+        logging.debug("last_scraped: " + str(last_scraped))
+        logging.debug("last_scraped type: " + str(type(last_scraped)))
+
         current_time = int(time.time())
         day_diff = int((current_time - last_scraped) / 86400)
         if day_diff > 7:
