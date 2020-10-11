@@ -86,6 +86,7 @@ The settings for InstaMod uses the .ini format and is read from a wiki page on t
 | flair expiration | The number of days until a user's flair is reevaluated | Any integer > 0 |
 | new account age | The number of months an account must be younger than to be considered new | Any integer >= 0 |
 | approved icons | A list of icons available to users with the "FLAIR CSS" permission |  A comma delimited list of icon ids |
+| no empty flair | Allow/Disallow empty flair text and CSS to be assigned to users |  True or False |
 
 ## Quality Comments
 
