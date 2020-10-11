@@ -144,6 +144,10 @@ def flair_users():
                          + "\n\t Flair: Null flair not applied due to no blank flair config")
             continue
 
+        # Remove all spaces in flair text if it's too long
+        if len(flair_txt) > 64:
+            flair_txt = flair_txt.replace(" ", "")
+
         target_sub.sub.flair.set(username, flair_txt, flair_css)
 
         logging.info("Flair results"
