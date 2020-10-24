@@ -80,7 +80,7 @@ class Database:
                     self.KEY1_USERNAME + " TEXT PRIMARY KEY, " + self.KEY1_RATELIMIT_START + " INTEGER, " +
                     self.KEY1_RATELIMIT_COUNT + " INTEGER, " + self.KEY1_FLAIR_TEXT + " TEXT, " +
                     self.KEY1_LAST_UPDATED + " INTEGER, " + self.KEY1_FLAIR_PERM + " INTEGER, " +
-                    self.KEY1_CSS_PERM + " INTEGER, " + self.KEY1_TEXT_PERM + "INTEGER, " +
+                    self.KEY1_CSS_PERM + " INTEGER, " + self.KEY1_TEXT_PERM + " INTEGER, " +
                     self.KEY1_CUSTOM_FLAIR_USED + " INTEGER, " + self.KEY1_CUSTOM_TEXT_USED + " INTEGER, " +
                     self.KEY1_CUSTOM_CSS_USED + " INTEGER, " + self.KEY1_NO_AUTO_FLAIR + " INTEGER)")
 
