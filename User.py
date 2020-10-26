@@ -68,5 +68,5 @@ class User:
 
         else:
             logging.critical("Could not find a match for key in the given table"
-                             "\nKey: " + key + "\tTable:" + table)
+                             "\nKey: " + key)
             return None
