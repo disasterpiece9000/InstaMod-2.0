@@ -1,15 +1,10 @@
 import logging
-import time
-from configparser import RawConfigParser
-from Database import Database
-
-import prawcore
 
 
 class User:
     def __init__(self, username, sub):
         self.db = sub.db
-        user_data = sub.db.load_user_data(username, sub.name)
+        user_data = sub.db.load_user_data(username)
         self.user_info = user_data[0]
 
         # Account & Subreddit Activity

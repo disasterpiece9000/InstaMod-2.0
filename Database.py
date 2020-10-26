@@ -321,7 +321,7 @@ class Database:
         cur.execute(delete_str, (cutoff_time,))
 
     # Fetch all data for user on specified Subreddit
-    def load_user_data(self, username, subreddit):
+    def load_user_data(self, username):
         cur = self.conn.cursor()
 
         select_info_keys = [self.TABLE_SUB_INFO + "." + key for key in self.SUB_INFO_KEY_LIST] \
