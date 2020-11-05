@@ -6,6 +6,7 @@ from praw import exceptions
 import DataCollector
 import FlairManager
 import ProcessComment
+import traceback
 
 message_footer = ("\n\n-----\n\nThis is an automated message. "
                   "Please contact /u/shimmyjimmy97 with any questions, comments, or issues that you have.")
@@ -169,8 +170,15 @@ def update_user(target_user, target_sub, r, flair_queue, perm_queue, sub_list):
     user_in_accnt_info = check_data[2]  # Does the user's data need to be updated or inserted
     user_in_sub_info = check_data[3]
 
+    update_successful = True
     # Collect new data
-    DataCollector.load_data(user_in_accnt_info, user_in_sub_info, update_flair, target_user, target_sub, sub_list, r)
+    try:
+        DataCollector.load_data(user_in_accnt_info, user_in_sub_info, update_flair,
+                                target_user, target_sub, sub_list, r)
+    except:
+        update_successful = False
+        logging.warning("PM: User " + str(target_user) + " was not able to have their data and flair updated"
+                        "\nStacktrace: " + str(traceback.print_exc()))
 
     # Update flair with new data
     prog_flair_enabled = target_sub.main_config.getboolean("progression tier")

@@ -185,9 +185,9 @@ def notify_permission_change():
                             "automatic flair until you apply a custom flair. In order to apply your desired " \
                             "flair, please click on [this pre-formatted link.](https://www.reddit.com/message/" \
                             "compose?to=InstaMod&subject=!" + str(target_sub.sub) + "%20!flair" \
-                                                                                    "&message=Flair%20Text:%0AFlair%20CSS:)" \
-                                                                                    "\n\n**Note:** This link will not work on mobile and can be used to change your flair" \
-                                                                                    " as many times as you want.\n\n"
+                            "&message=Flair%20Text:%0AFlair%20CSS:)" \
+                            "\n\n**Note:** This link will not work on mobile and can be used to change your flair" \
+                            " as many times as you want.\n\n"
 
             # Concatenate message body with custom text from subreddit settings
             body = auto_perm_msg + target_sub.pm_messages["custom flair body"] + message_footer
@@ -195,10 +195,9 @@ def notify_permission_change():
 
         elif new_perm == "css perm":
             auto_perm_msg = "Your contributions to /r/" + str(target_sub.sub) + " have granted you access to custom " \
-                                                                                "flair styling options. Your flair text will still be updated automatically. " \
-                                                                                "In order to apply your desired flair styling, please click on [this pre-formatted link.]" \
-                                                                                "(https://www.reddit.com/message/compose?to=InstaMod&subject=!" + str(
-                target_sub.sub) + \
+                            "flair styling options. Your flair text will still be updated automatically. " \
+                            "In order to apply your desired flair styling, please click on [this pre-formatted link.]" \
+                            "(https://www.reddit.com/message/compose?to=InstaMod&subject=!" + str(target_sub.sub) + \
                             "%20!css&message=Flair%20CSS:)" \
                             "\n\n**Note:** This link will not work on mobile and can be used to change your flair" \
                             " styling as many times as you want.\n\n"
@@ -208,10 +207,9 @@ def notify_permission_change():
 
         elif new_perm == "text perm":
             auto_perm_msg = "Your contributions to /r/" + str(target_sub.sub) + " have granted you access to custom " \
-                                                                                "flair text. You will continue to receive automatic flair until you apply a custom flair." \
-                                                                                " In order to apply your desired flair text, please click on [this pre-formatted link.](" \
-                                                                                "https://www.reddit.com/message/compose?to=InstaMod&subject=!" + str(
-                target_sub.sub) + \
+                            "flair text. You will continue to receive automatic flair until you apply a custom flair." \
+                            " In order to apply your desired flair text, please click on [this pre-formatted link.](" \
+                            "https://www.reddit.com/message/compose?to=InstaMod&subject=!" + str(target_sub.sub) + \
                             "%20!text&message=Flair%20Text:)" \
                             "\n\n**Note:** This link will not work on mobile and it can be used to change your flair" \
                             " text as many times as you want.\n\n"
@@ -223,6 +221,9 @@ def notify_permission_change():
 
         try:
             user.message(subject, body)
+        except prawcore.APIExcpetion:
+            logging.warning("PM Permissions Error: Skipping PM for user"
+                            "\nStacktrace: " + str(traceback.print_exc()))
         except (prawcore.ServerError, prawcore.RequestException, prawcore.ResponseException):
             logging.warning("PM Rate Limit Error: Stopping PM permission notifications and resuming scraping"
                             "\nStacktrace: " + str(traceback.print_exc()))
