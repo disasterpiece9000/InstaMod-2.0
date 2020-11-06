@@ -15,6 +15,7 @@ from praw.models import Message
 import MessageManager
 import ProcessComment
 from Subreddit import Subreddit
+from praw.exceptions import APIException
 
 r = praw.Reddit("InstaMod")  # PRAW Instance
 sub_list = []  # List of subreddits
@@ -221,7 +222,7 @@ def notify_permission_change():
 
         try:
             user.message(subject, body)
-        except prawcore.APIExcpetion:
+        except APIException:
             logging.warning("PM Permissions Error: Skipping PM for user"
                             "\nStacktrace: " + str(traceback.print_exc()))
         except (prawcore.ServerError, prawcore.RequestException, prawcore.ResponseException):
