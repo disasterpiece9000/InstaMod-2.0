@@ -5,6 +5,7 @@ import sqlite3
 import threading
 import time
 import traceback
+import configparser
 from os import path
 from queue import Queue
 
@@ -17,7 +18,17 @@ import ProcessComment
 from Subreddit import Subreddit
 from praw.exceptions import APIException
 
-r = praw.Reddit("InstaMod")  # PRAW Instance
+# PRAW Instance
+praw_config = configparser.ConfigParser()
+praw_config.read("praw.ini")
+r = praw.Reddit(
+    client_id=praw_config["InstaMod"]["client_id"],
+    client_secret=praw_config["InstaMod"]["client_secret"],
+    password=praw_config["InstaMod"]["password"],
+    username=praw_config["InstaMod"]["username"],
+    user_agent=praw_config["InstaMod"]["user_agent"]
+)
+
 sub_list = []  # List of subreddits
 comment_queue = Queue()  # Queue for users to be analyzed
 flair_queue = Queue()  # Queue for users to be flaired
@@ -139,7 +150,6 @@ def flair_users():
                 (flair_txt is None or flair_txt == '') \
                 and \
                 bool(target_sub.flair_config["no empty flair"]):
-
             logging.info("Flair results"
                          + "\n\tUser: " + str(username)
                          + "\n\t Flair: Null flair not applied due to no blank flair config")
@@ -168,8 +178,9 @@ def notify_permission_change():
         perm_queue.task_done()
 
         # Footer for automated PMs
-        message_footer = ("\n\n-----\n\nThis is an automated message. "
-                          "Please contact /u/shimmyjimmy97 with any questions, comments, or issues that you have.")
+        message_footer = ("\n\n-----\n\nThis is an automated message. Please contact "
+                          + praw_config["Bot Info"]["bot_owner"] +
+                          " with any questions, comments, or issues that you have.")
 
         username = perm_data[0]
         new_perm = perm_data[1]
@@ -185,7 +196,7 @@ def notify_permission_change():
                             " have granted you access to custom flair options. You will continue to receive " \
                             "automatic flair until you apply a custom flair. In order to apply your desired " \
                             "flair, please click on [this pre-formatted link.](https://www.reddit.com/message/" \
-                            "compose?to=InstaMod&subject=!" + str(target_sub.sub) + "%20!flair" \
+                            "compose?to=" + str(r.user.me) + "&subject=!" + str(target_sub.sub) + "%20!flair" \
                             "&message=Flair%20Text:%0AFlair%20CSS:)" \
                             "\n\n**Note:** This link will not work on mobile and can be used to change your flair" \
                             " as many times as you want.\n\n"
@@ -198,10 +209,11 @@ def notify_permission_change():
             auto_perm_msg = "Your contributions to /r/" + str(target_sub.sub) + " have granted you access to custom " \
                             "flair styling options. Your flair text will still be updated automatically. " \
                             "In order to apply your desired flair styling, please click on [this pre-formatted link.]" \
-                            "(https://www.reddit.com/message/compose?to=InstaMod&subject=!" + str(target_sub.sub) + \
-                            "%20!css&message=Flair%20CSS:)" \
-                            "\n\n**Note:** This link will not work on mobile and can be used to change your flair" \
-                            " styling as many times as you want.\n\n"
+                            "(https://www.reddit.com/message/compose?to=" + str(
+                r.user.me) + "&subject=!" + \
+                            str(target_sub.sub) + "%20!css&message=Flair%20CSS:)" \
+                          "\n\n**Note:** This link will not work on mobile and can be used to change your flair" \
+                          " styling as many times as you want.\n\n"
 
             body = auto_perm_msg + target_sub.pm_messages["custom css body"] + message_footer
             subject = target_sub.pm_messages["custom css subj"]
@@ -210,10 +222,11 @@ def notify_permission_change():
             auto_perm_msg = "Your contributions to /r/" + str(target_sub.sub) + " have granted you access to custom " \
                             "flair text. You will continue to receive automatic flair until you apply a custom flair." \
                             " In order to apply your desired flair text, please click on [this pre-formatted link.](" \
-                            "https://www.reddit.com/message/compose?to=InstaMod&subject=!" + str(target_sub.sub) + \
-                            "%20!text&message=Flair%20Text:)" \
-                            "\n\n**Note:** This link will not work on mobile and it can be used to change your flair" \
-                            " text as many times as you want.\n\n"
+                            "https://www.reddit.com/message/compose?to=" + str(
+                r.user.me) + "&subject=!" + \
+                            str(target_sub.sub) + "%20!text&message=Flair%20Text:)" \
+                                                  "\n\n**Note:** This link will not work on mobile and it can be used to change your flair" \
+                                                  " text as many times as you want.\n\n"
 
             body = auto_perm_msg + target_sub.pm_messages["custom text body"] + message_footer
             subject = target_sub.pm_messages["custom text subj"]
@@ -279,6 +292,11 @@ while True:
             if comment is None:
                 logging.debug("No new comments found")
                 last_config_check = run_idle_tasks(last_config_check)
+                continue
+
+            # Assign all flair if 100 or more are pending
+            if flair_queue.qsize() >= 100:
+                flair_users()
                 continue
 
             comment_queue.put(comment)

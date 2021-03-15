@@ -1,4 +1,6 @@
 import logging
+import traceback
+import configparser
 
 import prawcore
 from praw import exceptions
@@ -6,10 +8,11 @@ from praw import exceptions
 import DataCollector
 import FlairManager
 import ProcessComment
-import traceback
 
-message_footer = ("\n\n-----\n\nThis is an automated message. "
-                  "Please contact /u/shimmyjimmy97 with any questions, comments, or issues that you have.")
+praw_config = configparser.ConfigParser()
+praw_config.read("praw.ini")
+message_footer = ("\n\n-----\n\nThis is an automated message. Please contact /u/" + praw_config["Bot Info"]["bot_owner"]
+                  + "  with any questions, comments, or issues that you have.")
 
 
 # Main method for responding to PM commands

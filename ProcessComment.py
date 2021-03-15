@@ -1,3 +1,4 @@
+import configparser
 import logging
 import time
 import traceback
@@ -87,7 +88,9 @@ def fetch_queue(comment_queue, flair_queue, perm_queue, sub_list):
         except:
             tb = traceback.format_exc()
             logging.warning("Error while processing comment: " + tb)
-            r.redditor("shimmyjimmy97").message("InstaMod Error", "Stacktrace: \n\n" + tb)
+            praw_config = configparser.ConfigParser()
+            praw_config.read("praw.ini")
+            r.redditor(praw_config["Bot Info"]["bot_owner"]).message("InstaMod Error", "Stacktrace: \n\n" + tb)
             continue
 
 
