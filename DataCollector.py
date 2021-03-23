@@ -50,12 +50,8 @@ def load_data(user_in_accnt_info, user_in_sub_info, update_flair, author, target
             # Get all available comments/posts (up to 1,000 each)
             after_time = int(datetime(2000, 1, 1).timestamp())
 
-            # Drop all user activity info to prepare for re-insert
+            # Drop all user activity data to prepare for re-insert
             target_sub.db.partial_drop_user(username)
-
-            # Re-insert accnt info
-            last_scraped = current_time
-            target_sub.db.insert_accnt_info(username, created, total_post_karma, total_comment_karma, last_scraped)
 
             # Re-insert sub info for subs that do not have user
             user_in_sub_info = True

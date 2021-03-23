@@ -209,11 +209,10 @@ def notify_permission_change():
             auto_perm_msg = "Your contributions to /r/" + str(target_sub.sub) + " have granted you access to custom " \
                             "flair styling options. Your flair text will still be updated automatically. " \
                             "In order to apply your desired flair styling, please click on [this pre-formatted link.]" \
-                            "(https://www.reddit.com/message/compose?to=" + str(
-                r.user.me) + "&subject=!" + \
+                            "(https://www.reddit.com/message/compose?to=" + str(r.user.me) + "&subject=!" + \
                             str(target_sub.sub) + "%20!css&message=Flair%20CSS:)" \
-                          "\n\n**Note:** This link will not work on mobile and can be used to change your flair" \
-                          " styling as many times as you want.\n\n"
+                            "\n\n**Note:** This link will not work on mobile and can be used to change your flair" \
+                            " styling as many times as you want.\n\n"
 
             body = auto_perm_msg + target_sub.pm_messages["custom css body"] + message_footer
             subject = target_sub.pm_messages["custom css subj"]
@@ -222,11 +221,10 @@ def notify_permission_change():
             auto_perm_msg = "Your contributions to /r/" + str(target_sub.sub) + " have granted you access to custom " \
                             "flair text. You will continue to receive automatic flair until you apply a custom flair." \
                             " In order to apply your desired flair text, please click on [this pre-formatted link.](" \
-                            "https://www.reddit.com/message/compose?to=" + str(
-                r.user.me) + "&subject=!" + \
+                            "https://www.reddit.com/message/compose?to=" + str(r.user.me) + "&subject=!" + \
                             str(target_sub.sub) + "%20!text&message=Flair%20Text:)" \
-                                                  "\n\n**Note:** This link will not work on mobile and it can be used to change your flair" \
-                                                  " text as many times as you want.\n\n"
+                            "\n\n**Note:** This link will not work on mobile and it can be used to change your flair" \
+                            " text as many times as you want.\n\n"
 
             body = auto_perm_msg + target_sub.pm_messages["custom text body"] + message_footer
             subject = target_sub.pm_messages["custom text subj"]
