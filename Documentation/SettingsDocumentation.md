@@ -7,21 +7,21 @@
  This document details the options and requirements for the settings wiki page.
  
  If you are just getting started, here are some resources that may help:
- * [Completed settings page from /r/CryptoCurrency](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/ExampleSettings)
- * [Blank settings template](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/SettingsTemplate.ini)
+ * [Completed settings page from /r/CryptoCurrency](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/Documentation/ExampleSettings.ini)
+ * [Blank settings template](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/Documentation/SettingsTemplate.ini)
  
  ### Index
  
-* **[Editing the Settings](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/SettingsDocumentation.md#editing-the-settings)**
-* **[Main Configuration](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/SettingsDocumentation.md#main-configuration)**
-* **[Flair](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/SettingsDocumentation.md#flair)**
-* **[Quality Comments](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/SettingsDocumentation.md#quality-comments)**
-* **[Progression Tiers](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/SettingsDocumentation.md#progression-tiers)**
-  * [Secondary Progression Tier Criteria](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/SettingsDocumentation.md#secondary-progression-tier-criteria)
-* **[Subreddit Activity Tags](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/SettingsDocumentation.md#subreddit-activity-tags)**
-  * [Secondary Activity Tag Criteria](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/SettingsDocumentation.md#secondary-activity-tag-criteria)
-* **[Subreddit Groups](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/SettingsDocumentation.md#subreddit-groups)**
-* **[PM Messages](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/SettingsDocumentation.md#pm-messages)**
+* **[Editing the Settings](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/Documentation/SettingsDocumentation.md#editing-the-settings)**
+* **[Main Configuration](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/Documentation/SettingsDocumentation.md#main-configuration)**
+* **[Flair](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/Documentation/SettingsDocumentation.md#flair)**
+* **[Quality Comments](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/Documentation/SettingsDocumentation.md#quality-comments)**
+* **[Progression Tiers](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/Documentation/SettingsDocumentation.md#progression-tiers)**
+  * [Secondary Progression Tier Criteria](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/Documentation/SettingsDocumentation.md#secondary-progression-tier-criteria)
+* **[Subreddit Activity Tags](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/Documentation/SettingsDocumentation.md#subreddit-activity-tags)**
+  * [Secondary Activity Tag Criteria](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/Documentation/SettingsDocumentation.md#secondary-activity-tag-criteria)
+* **[Subreddit Groups](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/Documentation/SettingsDocumentation.md#subreddit-groups)**
+* **[PM Messages](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/Documentation/SettingsDocumentation.md#pm-messages)**
  
  ## Editing the Settings
  
@@ -86,6 +86,9 @@ The settings for InstaMod uses the .ini format and is read from a wiki page on t
 | flair expiration | The number of days until a user's flair is reevaluated | Any integer > 0 |
 | new account age | The number of months an account must be younger than to be considered new | Any integer >= 0 |
 | approved icons | A list of icons available to users with the "FLAIR CSS" permission |  A comma delimited list of icon ids |
+| user whitelist | A list of users to be skipped by the bot | Comma delimited list of usernames |
+| css whitelist | Skip users that have a specified flair CSS class | Comma delimited list of usernames |
+| no empty flair | Allow/Disallow empty flair text and CSS to be assigned to users |  True or False |
 
 ## Quality Comments
 

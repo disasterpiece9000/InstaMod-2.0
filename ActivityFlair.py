@@ -1,9 +1,11 @@
 import logging
+import time
 from collections import defaultdict
 
 
 # Activity flair main method
-def make_activity_flair(username, sub):
+def make_activity_flair(user_data, sub):
+    username = user_data.username
     activity_settings = sub.sub_activity
     full_flair_text = []
     flair_perm = False
@@ -111,14 +113,14 @@ def make_activity_flair(username, sub):
                     abbrev = data[0]
                     combined_sub_list = data[1]
 
-                    main_data = check_activity(username, sub, combined_sub_list, main_setting)
+                    main_data = check_activity(user_data, sub, combined_sub_list, main_setting)
                     main_result = main_data[0]
                     main_value = main_data[1]
 
                     # If main result is False check OR only
                     if not main_result:
                         if setting_name_or in activity_settings:
-                            or_result = check_sub_setting(activity_settings, setting_name_or, sub, username)
+                            or_result = check_sub_setting(activity_settings, setting_name_or, sub, user_data)
                             if or_result:
                                 final_result = True
                             else:
@@ -128,7 +130,7 @@ def make_activity_flair(username, sub):
 
                     # If main result is True check AND
                     elif setting_name_and in activity_settings:
-                        and_result = check_sub_setting(activity_settings, setting_name_and, sub, username)
+                        and_result = check_sub_setting(activity_settings, setting_name_and, sub, user_data)
                         if and_result:
                             final_result = True
                         else:
@@ -240,10 +242,10 @@ def process_flair_data(setting, flair_data):
 
 
 # Check result of secondary criteria
-def check_sub_setting(activity_settings, setting_name, parent_sub, username):
+def check_sub_setting(activity_settings, setting_name, parent_sub, user_data):
     setting = activity_settings[setting_name]
-    sub_list = make_sub_list(setting, parent_sub, username)
-    data = check_activity(username, parent_sub, sub_list, setting)
+    sub_list = make_sub_list(setting, parent_sub, user_data.username)
+    data = check_activity(user_data, parent_sub, sub_list, setting)
     return data[0]
 
 
@@ -283,7 +285,9 @@ def make_sub_list(setting, sub, username):
 
 
 # Get user value from a specific sub (and subs that share the same abbreviation)
-def check_activity(username, sub, sub_list, setting):
+def check_activity(user_data, sub, sub_list, setting):
+    username = user_data.username
+    start = time.time()
     metric = setting["metric"].lower()
     comparison = setting["comparison"]
 
@@ -301,7 +305,7 @@ def check_activity(username, sub, sub_list, setting):
         user_value = get_user_perc(metric, sub_list, username, sub)
         target_value = int(target_value.split()[0])
     else:
-        user_value = get_user_value(metric, sub_list, username, sub)
+        user_value = get_user_value(metric, sub_list, user_data, sub)
         target_value = int(target_value)
 
     activity_result = check_value(user_value, comparison, target_value)
@@ -316,23 +320,23 @@ def get_user_perc(metric, sub_list, username, sub):
 
 
 # Fetch the user_value from the database
-def get_user_value(metric, sub_list, username, sub):
+def get_user_value(metric, sub_list, user_data, sub):
     user_value = 0
 
     # Get data from accnt_info table
-    if metric in ("total comment karma", "total post karma"):
-        user_value = sub.db.fetch_accnt_info(username, metric)
-    elif metric == "total karma":
-        user_value = sub.db.fetch_accnt_info(username, "total post karma") + \
-                     sub.db.fetch_accnt_info(username, "total comment karma")
+    if metric in (sub.db.KEY4_POST_KARMA, sub.db.KEY4_COMMENT_KARMA):
+        user_value = user_data.user_info[metric]
 
-    # Get data from accnt_history table
-    elif metric in ("comment karma", "post karma", "positive comments", "negative comments",
-                    "positive posts", "negative posts", "positive qc", "negative qc"):
-        user_value = sub.db.fetch_sub_activity(username, sub_list, metric)
+    elif metric == "total karma":
+        user_value = user_data.total_post_karma + user_data.total_comment_karma
+
+    # Get data from activity tables
+    elif metric in (sub.db.SUB_ACTIVITY_KEY_LIST + sub.db.ACCNT_ACTIVITY_KEY_LIST):
+        user_value = user_data.fetch_sub_activity(sub_list, metric)
+
     elif metric == "net qc":
-        user_value = sub.db.fetch_sub_activity(username, sub_list, "positive qc") - \
-                     sub.db.fetch_sub_activity(username, sub_list, "negative qc")
+        user_value = user_data.fetch_sub_activity(sub_list, sub.db.KEY2_POSITIVE_QC) - \
+                     user_data.fetch_sub_activity(sub_list, sub.db.KEY2_NEGATIVE_QC)
 
     return user_value
 

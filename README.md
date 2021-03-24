@@ -2,11 +2,10 @@
 
 InstaMod is a toolbox of features that moderators can implement and tailor fit to their needs. With a robust feature set and unlimited combinations of settings, InstaMod gives moderators the ability to customize and moderate their community in ways that AutoModerator can't. 
 
-To get a better idea of the customization options available, please check out the [settings documentation](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/SettingsDocumentation.md) or one of the subreddits currently using InstaMod
+To get a better idea of the customization options available, please check out the [settings documentation](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/Documentation/SettingsDocumentation.md) or one of the subreddits currently using InstaMod
 * [/r/CryptoCurrency](https://www.reddit.com/r/CryptoCurrency)
 * [/r/CryptoTechnology](https://www.reddit.com/r/CryptoTechnology)
 * [/r/CryptoMarkets](https://www.reddit.com/r/CryptoMarkets)
-* [/r/HomeworkHelp](https://www.reddit.com/r/HomeworkHelp/)
 
 ## Features - Flair Management
 
@@ -36,7 +35,7 @@ _____
 
 ## How to run
 
-Unlike most bots, InstaMod is designed to simultaneously support multiple subreddits. This means that adding it to your subreddit doesn't require any technical knowledge or hosting capability! If you are interested in incorporating it into your subreddit all you need to do is create a wiki page called "InstaModSettings", fill it with the information specified in the [settings documentation](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/SettingsDocumentation.md), and [contact me](https://www.reddit.com/message/compose?to=shimmyjimmy97&subject=InstaMod&message=) so that I can import your subreddit.
+Unlike most bots, InstaMod is designed to simultaneously support multiple subreddits. This means that adding it to your subreddit doesn't require any technical knowledge or hosting capability! If you are interested in incorporating it into your subreddit all you need to do is create a wiki page called "InstaModSettings", fill it with the information specified in the [settings documentation](https://github.com/disasterpiece9000/InstaMod-2.0/blob/master/Documentation/SettingsDocumentation.md), and [contact me](https://www.reddit.com/message/compose?to=shimmyjimmy97&subject=InstaMod&message=) so that I can import your subreddit.
 
 If you would like to run your own version of InstaMod, here are the required components:
 * Python 3.7.4 or higher

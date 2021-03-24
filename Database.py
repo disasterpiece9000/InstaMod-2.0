@@ -1,5 +1,6 @@
 import logging
 import sqlite3
+import time
 from collections import Counter
 
 
@@ -18,6 +19,9 @@ class Database:
     KEY1_CUSTOM_TEXT_USED = "custom_text_used"
     KEY1_CUSTOM_CSS_USED = "custom_css_used"
     KEY1_NO_AUTO_FLAIR = "no_auto_flair"
+    SUB_INFO_KEY_LIST = [KEY1_USERNAME, KEY1_RATELIMIT_START, KEY1_RATELIMIT_COUNT, KEY1_FLAIR_TEXT, KEY1_LAST_UPDATED,
+                         KEY1_FLAIR_PERM, KEY1_CSS_PERM, KEY1_CUSTOM_FLAIR_USED, KEY1_NO_AUTO_FLAIR, KEY1_TEXT_PERM,
+                         KEY1_CUSTOM_TEXT_USED, KEY1_CUSTOM_CSS_USED]
 
     # Subreddit Activity Table
     TABLE_SUB_ACTIVITY = ""
@@ -25,6 +29,7 @@ class Database:
     KEY2_SUB_NAME = "sub_name"
     KEY2_POSITIVE_QC = "positive_qc"
     KEY2_NEGATIVE_QC = "negative_qc"
+    SUB_ACTIVITY_KEY_LIST = [KEY2_USERNAME, KEY2_SUB_NAME, KEY2_POSITIVE_QC, KEY2_NEGATIVE_QC]
 
     # Account Activity Table
     TABLE_ACCNT_ACTIVITY = "accnt_activity"
@@ -36,6 +41,8 @@ class Database:
     KEY3_NEGATIVE_COMMENTS = "negative_comments"
     KEY3_POST_KARMA = "post_karma"
     KEY3_COMMENT_KARMA = "comment_karma"
+    ACCNT_ACTIVITY_KEY_LIST = [KEY3_USERNAME, KEY3_SUB_NAME, KEY3_POSITIVE_POSTS, KEY3_NEGATIVE_POSTS,
+                               KEY3_POSITIVE_COMMENTS, KEY3_NEGATIVE_COMMENTS, KEY3_POST_KARMA, KEY3_COMMENT_KARMA]
     CREATE_SUB_ACTIVITY = ("CREATE TABLE IF NOT EXISTS " + TABLE_ACCNT_ACTIVITY + " (" +
                            KEY3_USERNAME + " TEXT, " + KEY3_SUB_NAME + " TEXT, " +
                            KEY3_POSITIVE_POSTS + " INTEGER, " + KEY3_NEGATIVE_POSTS + " INTEGER, " +
@@ -50,6 +57,7 @@ class Database:
     KEY4_POST_KARMA = "total_post_karma"
     KEY4_COMMENT_KARMA = "total_comment_karma"
     KEY4_LAST_SCRAPED = "last_scraped"
+    ACCNT_INFO_KEY_LIST = [KEY4_USERNAME, KEY4_DATE_CREATED, KEY4_POST_KARMA, KEY4_COMMENT_KARMA, KEY4_LAST_SCRAPED]
     CREATE_ACCNT_INFO = ("CREATE TABLE IF NOT EXISTS " + TABLE_ACCNT_INFO + " (" +
                          KEY4_USERNAME + " TEXT PRIMARY KEY, " + KEY4_DATE_CREATED + " INTEGER, " +
                          KEY4_POST_KARMA + " INTEGER, " + KEY4_COMMENT_KARMA + " INTEGER, " +
@@ -72,7 +80,7 @@ class Database:
                     self.KEY1_USERNAME + " TEXT PRIMARY KEY, " + self.KEY1_RATELIMIT_START + " INTEGER, " +
                     self.KEY1_RATELIMIT_COUNT + " INTEGER, " + self.KEY1_FLAIR_TEXT + " TEXT, " +
                     self.KEY1_LAST_UPDATED + " INTEGER, " + self.KEY1_FLAIR_PERM + " INTEGER, " +
-                    self.KEY1_CSS_PERM + " INTEGER, " + self.KEY1_TEXT_PERM + "INTEGER, " +
+                    self.KEY1_CSS_PERM + " INTEGER, " + self.KEY1_TEXT_PERM + " INTEGER, " +
                     self.KEY1_CUSTOM_FLAIR_USED + " INTEGER, " + self.KEY1_CUSTOM_TEXT_USED + " INTEGER, " +
                     self.KEY1_CUSTOM_CSS_USED + " INTEGER, " + self.KEY1_NO_AUTO_FLAIR + " INTEGER)")
 
@@ -184,9 +192,8 @@ class Database:
 
     def update_sub_activity(self, username, all_pos_qc, all_neg_qc):
         cur = self.conn.cursor()
-        update_str = ("UPDATE ? SET "
-                      + self.KEY2_POSITIVE_QC + " = " + self.KEY2_POSITIVE_QC + "+ ?, "
-                      + self.KEY2_NEGATIVE_QC + " = " + self.KEY2_NEGATIVE_QC + "+ ? "
+        temp_update_str = (self.KEY2_POSITIVE_QC + " = " + self.KEY2_POSITIVE_QC + " + ?, "
+                      + self.KEY2_NEGATIVE_QC + " = " + self.KEY2_NEGATIVE_QC + " + ? "
                       + "WHERE " + self.KEY3_USERNAME + " = ? "
                       + "AND " + self.KEY3_SUB_NAME + " = ?")
 
@@ -195,6 +202,7 @@ class Database:
             target_sub_pos = all_pos_qc[target_sub]
             target_sub_neg = all_neg_qc[target_sub]
             target_sub_table = target_sub + "_activity"
+            update_str = "UPDATE " + target_sub_table + " SET " + temp_update_str
 
             # Union of all keys in both dictionaries
             all_subs = target_sub_pos.keys() | target_sub_neg.keys()
@@ -202,8 +210,7 @@ class Database:
             # Loop through all subreddits with new QC values
             for sub in all_subs:
                 # Attempt to update row
-                row_updated = cur.execute(update_str, (target_sub_table, target_sub_pos[sub],
-                                                       target_sub_neg[sub], username, sub)
+                row_updated = cur.execute(update_str, (target_sub_pos[sub], target_sub_neg[sub], username, sub)
                                           ).rowcount == 1
 
                 # Insert row if update failed
@@ -289,6 +296,65 @@ class Database:
                 delete_str = delete_str_start + table_name[0] + delete_str_end
                 cur.execute(delete_str, (username,))
 
+    # Return a list of inactive users
+    def drop_inactive_users(self):
+        cur = self.conn.cursor()
+        cutoff_time = int(time.time()) - 15552000
+        # Get list of all tables
+        select_str = ("SELECT name FROM sqlite_master "
+                      "WHERE type='table';")
+        cur.execute(select_str)
+        tables = cur.fetchall()
+
+        # Delete user data in each table
+        delete_str_start = "DELETE FROM "
+        delete_str_end = " WHERE username IN (" \
+                            " SELECT " + self.KEY4_USERNAME + " FROM " + self.TABLE_ACCNT_INFO + \
+                            " WHERE " + self.KEY4_LAST_SCRAPED + " < ? " \
+                         ")"
+        for table_name in tables:
+            if not table_name[0] == "accnt_info":
+                delete_str = delete_str_start + table_name[0] + delete_str_end
+                cur.execute(delete_str, (cutoff_time,))
+
+        delete_str = "DELETE FROM " + self.TABLE_ACCNT_INFO + " WHERE " + self.KEY4_LAST_SCRAPED + " < ?"
+        cur.execute(delete_str, (cutoff_time,))
+
+    # Fetch all data for user on specified Subreddit
+    def load_user_data(self, username):
+        cur = self.conn.cursor()
+
+        select_info_keys = [self.TABLE_SUB_INFO + "." + key for key in self.SUB_INFO_KEY_LIST] \
+                           + \
+                           [self.TABLE_ACCNT_INFO + "." + key for key in self.ACCNT_INFO_KEY_LIST]
+
+        select_info_str = ("SELECT " + ",".join(select_info_keys) +
+                           " FROM " + self.TABLE_SUB_INFO + " INNER JOIN " + self.TABLE_ACCNT_INFO +
+                                " ON " + self.TABLE_SUB_INFO + ".username = " + self.TABLE_ACCNT_INFO + ".username "
+                            "WHERE " + self.TABLE_SUB_INFO + ".username = ?")
+
+        cur.execute(select_info_str, (username,))
+        select_info_data = dict(zip(self.SUB_INFO_KEY_LIST + self.ACCNT_INFO_KEY_LIST, cur.fetchone()))
+
+        select_activity_keys = [self.TABLE_SUB_ACTIVITY + "." + key for key in self.SUB_ACTIVITY_KEY_LIST] \
+                                + \
+                                [self.TABLE_ACCNT_ACTIVITY + "." + key for key in self.ACCNT_ACTIVITY_KEY_LIST]
+
+        select_activity_str = ("SELECT " + ",".join(select_activity_keys) + " FROM " +
+                               self.TABLE_SUB_ACTIVITY + " INNER JOIN " + self.TABLE_ACCNT_ACTIVITY +
+                                    " ON " + self.TABLE_SUB_ACTIVITY + ".username = " + self.TABLE_ACCNT_ACTIVITY + ".username "
+                                    "AND " + self.TABLE_SUB_ACTIVITY + ".sub_name = " + self.TABLE_ACCNT_ACTIVITY + ".sub_name "
+                               "WHERE " + self.TABLE_SUB_ACTIVITY + ".username = ?")
+
+        cur.execute(select_activity_str, (username,))
+        select_activity_data = cur.fetchall()
+        select_activity_dict = {}
+        for data in select_activity_data:
+            sub_activity_data = dict(zip(self.SUB_ACTIVITY_KEY_LIST + self.ACCNT_ACTIVITY_KEY_LIST, data))
+            select_activity_dict[sub_activity_data.pop(self.KEY2_SUB_NAME)] = sub_activity_data
+
+        return [select_info_data, select_activity_dict]
+
     # Generic getter method for Account Info table
     def fetch_sub_info(self, username, key):
         select_key = self.find_key(key, self.TABLE_SUB_INFO)
@@ -306,7 +372,6 @@ class Database:
     def fetch_sub_activity(self, username, sub_list, key):
         key = key.lower()
         cur = self.conn.cursor()
-        sub_list_str = "'" + "', '".join(sub_list) + "'"
 
         if "qc" in key:
             select_key = self.find_key(key, self.TABLE_SUB_ACTIVITY)
@@ -322,11 +387,11 @@ class Database:
         # Sum only the specified rows (subreddits)
         select_str = ("SELECT SUM(" + select_key + ") FROM " + from_table
                       + " WHERE " + where_key1 + " = ? AND "
-                      + where_key2 + " IN (" + sub_list_str + ")")
+                      + where_key2 + " IN ('" + "', '".join(sub_list) + "')")
 
         cur.execute(select_str, (username,))
         data = cur.fetchone()
-        if data is not None:
+        if data[0] is not None:
             return data[0]
         else:
             return 0
@@ -412,12 +477,6 @@ class Database:
         update_str = ("UPDATE " + self.TABLE_SUB_INFO + " SET " + update_key + " = ? "
                       + " WHERE " + self.KEY1_USERNAME + " = ?")
         cur.execute(update_str, (value, username))
-        cur.close()
-
-    def wipe_sub_info(self):
-        cur = self.conn.cursor()
-        delete_str = "DELETE FROM " + self.TABLE_SUB_INFO
-        cur.execute(delete_str)
         cur.close()
 
     # Turn string from INI file into a key
