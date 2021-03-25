@@ -8,12 +8,9 @@ from datetime import timedelta
 from psaw import PushshiftAPI
 
 
-def load_data(user_in_accnt_info, user_in_sub_info, update_flair, author, target_sub, sub_list, r):
+def load_data(user_in_accnt_info, user_in_sub_info, update_flair, author, target_sub, sub_list, ps):
     load_start = time.time()
     current_time = int(time.time())
-
-    # PushShift Instance
-    ps = PushshiftAPI(r)
 
     # General info
     username = str(author).lower()

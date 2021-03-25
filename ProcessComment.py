@@ -6,6 +6,7 @@ import traceback
 
 import praw
 import prawcore
+from psaw import PushshiftAPI
 
 import DataCollector
 import FlairManager
@@ -20,6 +21,9 @@ r = praw.Reddit(
     username=praw_config["InstaMod"]["username"],
     user_agent=praw_config["InstaMod"]["user_agent"]
 )
+
+# PushShift Instance
+ps = PushshiftAPI(r)
 
 
 # Get new comments as they are added to the queue by the producer thread
@@ -77,7 +81,7 @@ def fetch_queue(comment_queue, flair_queue, perm_queue, sub_list):
             logging.info("Collecting data...")
             try:
                 DataCollector.load_data(user_in_accnt_info, user_in_sub_info, update_flair,
-                                        user, target_sub, sub_list, r)
+                                        user, target_sub, sub_list, ps)
             except:
                 logging.warning(f"\nError in DataCollector for: {str(user)}\n" + str(sys.exc_info()[0]) + "\n")
                 tb = traceback.format_exc()

@@ -252,6 +252,7 @@ def notify_permission_change():
 
 
 def run_idle_tasks(last_check):
+    logging.info("Running idle tasks...")
     flair_users()  # Process flair_queue
     notify_permission_change()  # Process perm_queue
     read_pms()  # Check for PM commands
@@ -267,6 +268,7 @@ def run_idle_tasks(last_check):
                 logging.warning("Unable to update subreddit's config, database is locked")
 
         last_check = current_time
+    logging.info("Completed idle tasks")
     return last_check
 
 
