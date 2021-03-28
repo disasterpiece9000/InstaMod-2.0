@@ -4,6 +4,7 @@ import configparser
 
 import prawcore
 from praw import exceptions
+from psaw import PushshiftAPI
 
 import DataCollector
 import FlairManager
@@ -180,8 +181,10 @@ def update_user(target_user, target_sub, r, flair_queue, perm_queue, sub_list):
 
     # Collect new data
     try:
+        # PushShift Instance
+        ps = PushshiftAPI(r)
         DataCollector.load_data(user_in_accnt_info, user_in_sub_info, update_flair,
-                                target_user, target_sub, sub_list, r)
+                                target_user, target_sub, sub_list, ps)
     except:
         logging.warning("PM: User " + str(target_user) + " was not able to have their data and flair updated"
                         "\nStacktrace: " + str(traceback.print_exc()))
