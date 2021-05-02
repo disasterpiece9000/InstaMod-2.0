@@ -211,7 +211,7 @@ def text_pm(message, target_sub, r):
         message.reply("This user cannot be modified because there is no record of their account. "
                       "To fix this, you can use the !updateme PM command and then try again."
                       "Here is a [pre-formatted link](https://www.reddit.com/message/compose?to=" +
-                      str(r.user.me) + "&subject=!" + target_sub.name + "%20!updateme&message=) for that PM command\n\n"
+                      str(r.user.me().name) + "&subject=!" + target_sub.name + "%20!updateme&message=) for that PM command\n\n"
                       + message_footer)
         message.mark_read()
         logging.info("PM Error: User " + username + " tried to update flair but doesn't exist in database")
@@ -221,7 +221,7 @@ def text_pm(message, target_sub, r):
     text_perm = target_sub.db.fetch_sub_info(username, "text perm") == 1
     if not text_perm:
         message.reply("You have not met the requirements for custom flair text. You will be notified via a PM "
-                      "from /u/" + str(r.user.me) + " once your account is eligible." + message_footer)
+                      "from /u/" + str(r.user.me().name) + " once your account is eligible." + message_footer)
         message.mark_read()
         logging.info("PM Privileges Error: User " + username + " tried to update flair "
                      "but doesn't have custom flair permissions")
