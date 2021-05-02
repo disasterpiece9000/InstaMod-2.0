@@ -211,7 +211,7 @@ def text_pm(message, target_sub, r):
         message.reply("This user cannot be modified because there is no record of their account. "
                       "To fix this, you can use the !updateme PM command and then try again."
                       "Here is a [pre-formatted link](https://www.reddit.com/message/compose?to=" +
-                      str(r.user.me) + "&subject=!" + target_sub.name + "%20!updateme&message=) for that PM command\n\n"
+                      str(r.user.me().name) + "&subject=!" + target_sub.name + "%20!updateme&message=) for that PM command\n\n"
                       + message_footer)
         message.mark_read()
         logging.info("PM Error: User " + username + " tried to update flair but doesn't exist in database")
@@ -221,7 +221,7 @@ def text_pm(message, target_sub, r):
     text_perm = target_sub.db.fetch_sub_info(username, "text perm") == 1
     if not text_perm:
         message.reply("You have not met the requirements for custom flair text. You will be notified via a PM "
-                      "from /u/" + str(r.user.me) + " once your account is eligible." + message_footer)
+                      "from /u/" + str(r.user.me().name) + " once your account is eligible." + message_footer)
         message.mark_read()
         logging.info("PM Privileges Error: User " + username + " tried to update flair "
                      "but doesn't have custom flair permissions")
@@ -230,7 +230,7 @@ def text_pm(message, target_sub, r):
     if not message_lines[0].lower().startswith("flair text:"):
         message.reply(
             "This PM is not in the correct format for flair assignment. Try using [this pre-formatted link]"
-            "(https://www.reddit.com/message/compose?to=" + str(r.user.me) + "&subject=!" + target_sub.name +
+            "(https://www.reddit.com/message/compose?to=" + str(r.user.me().name) + "&subject=!" + target_sub.name +
             "%20!flair&message=Flair%20Text:)."
             + message_footer)
         message.mark_read()
@@ -274,7 +274,7 @@ def css_pm(message, target_sub, r):
         message.reply("This user cannot be modified because there is no record of their account. "
                       "To fix this, you can use the !updateme PM command and then try again."
                       "Here is a [pre-formatted link](https://www.reddit.com/message/compose?to=" +
-                      str(r.user.me) + "&subject=!" + target_sub.name + "%20!updateme&message=) for that PM command\n\n"
+                      str(r.user.me().name) + "&subject=!" + target_sub.name + "%20!updateme&message=) for that PM command\n\n"
                       + message_footer)
         message.mark_read()
         logging.info("PM Error: User " + username + " tried to update flair but doesn't exist in database")
@@ -284,7 +284,7 @@ def css_pm(message, target_sub, r):
     text_perm = target_sub.db.fetch_sub_info(username, "text perm") == 1
     if not text_perm:
         message.reply("You have not met the requirements for custom flair styling. You will be notified via a PM "
-                      "from /u/" + str(r.user.me) + " once your account is eligible." + message_footer)
+                      "from /u/" + str(r.user.me().name) + " once your account is eligible." + message_footer)
         message.mark_read()
         logging.info("PM Privileges Error: User " + username + " tried to update flair "
                      "but doesn't have custom flair permissions")
@@ -293,7 +293,7 @@ def css_pm(message, target_sub, r):
     if not message_lines[0].lower().startswith("flair css:"):
         message.reply(
             "This PM is not in the correct format for flair assignment. Try using [this pre-formatted link]"
-            "(https://www.reddit.com/message/compose?to=" + str(r.user.me) + "&subject=!" + target_sub.name +
+            "(https://www.reddit.com/message/compose?to=" + str(r.user.me().name) + "&subject=!" + target_sub.name +
             "%20!flair&message=Flair%20CSS:)."
             + message_footer)
         message.mark_read()
@@ -338,7 +338,7 @@ def flair_pm(message, target_sub, r):
         message.reply("This user cannot be modified because they have no entry in the database. "
                       "To fix this, you can use the !updateme PM command and then try again."
                       "Here is a [pre-formatted link](https://www.reddit.com/message/compose?to=" +
-                      str(r.user.me) + "&subject=!" + target_sub.name + "%20!updateme&message=) for that PM command\n\n"
+                      str(r.user.me().name) + "&subject=!" + target_sub.name + "%20!updateme&message=) for that PM command\n\n"
                       + message_footer)
         message.mark_read()
         logging.info("PM Error: User " + username + " tried to update flair but doesn't exist in database")
@@ -348,7 +348,7 @@ def flair_pm(message, target_sub, r):
     flair_perm = target_sub.db.fetch_sub_info(username, "flair perm") == 1
     if not flair_perm:
         message.reply("You have not met the requirements for custom flair. You will be notified via a PM "
-                      "from /u/" + str(r.user.me) + " once your account is eligible." + message_footer)
+                      "from /u/" + str(r.user.me().name) + " once your account is eligible." + message_footer)
         message.mark_read()
         logging.info("PM Privileges Error: User " + username + " tried to update flair "
                                                                "but doesn't have custom flair permissions")
@@ -356,7 +356,7 @@ def flair_pm(message, target_sub, r):
 
     if not message_lines[0].lower().startswith("flair text:"):
         message.reply("This PM is not in the correct format for flair assignment. Try using [this pre-formatted link]"
-                      "(https://www.reddit.com/message/compose?to=" + str(r.user.me) + "&subject=!" + target_sub.name +
+                      "(https://www.reddit.com/message/compose?to=" + str(r.user.me().name) + "&subject=!" + target_sub.name +
                       "%20!flair&message=Flair%20Text:%0AFlair%20CSS:)."
                       + message_footer)
         message.mark_read()
@@ -402,7 +402,7 @@ def remove_auto_flair(message, target_sub, r):
     if not in_db:
         message.reply("This user cannot be modified because they have no entry in the database. "
                       "To fix this, you can use the !updatethem PM command and then try again. "
-                      "Here is a [pre-formatted link](https://www.reddit.com/message/compose?to=" + str(r.user.me) +
+                      "Here is a [pre-formatted link](https://www.reddit.com/message/compose?to=" + str(r.user.me().name) +
                       "&subject=!" + target_sub.name + "%20!updatethem&message=) for that PM command\n\n"
                       + message_footer)
         message.mark_read()
@@ -426,7 +426,7 @@ def give_flair_perm(message, target_sub, perm_queue, r):
     if not in_db:
         message.reply("This user cannot be modified because they have no entry in the database. "
                       "To fix this, you can use the !updatethem PM command and then try again. "
-                      "Here is a [pre-formatted link](https://www.reddit.com/message/compose?to=" + str(r.user.me) +
+                      "Here is a [pre-formatted link](https://www.reddit.com/message/compose?to=" + str(r.user.me().name) +
                       "&subject=!" + target_sub.name + "%20!updatethem&message=) for that PM command\n\n"
                       + message_footer)
         message.mark_read()
